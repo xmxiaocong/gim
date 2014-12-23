@@ -76,6 +76,7 @@ int RedisCli::connect(const string &addr, int port, const string &passWd)
 {
 	struct timeval timeout = { 1, 500000 };
 	int ret = 0;
+	stringstream os;
 
 	m_addr = addr;
 	m_port = port;
@@ -154,7 +155,7 @@ int64 RedisCli::_doExeCmdNoReconnect(Replyer &rpler, const string &cmd)
 		if (tmpReply == NULL || m_c->err) {
 			ss << "    failed";
 		} else if (tmpReply->type == REDIS_REPLY_ERROR) {
-			ss << "    failed, reason:" << tmpreply->str;
+			ss << "    failed, reason:" << tmpReply->str;
 		} else {
 			ss << "    success";
 		}
@@ -173,7 +174,7 @@ int64 RedisCli::_doExeCmdNoReconnect(Replyer &rpler, const string &cmd)
 		freeReplyObject(tmpReply);
 		return -4;
 	}
-	rpler.setReply(tmpreply);
+	rpler.setReply(tmpReply);
 	return rpler.reply()->integer;
 
 }
@@ -192,7 +193,8 @@ int64 RedisCli::_doExeCmd(Replyer &rpler, const string &cmd)
 
 int RedisCli::_exeCmdWithNoOutput(const string &cmd)
 {
-	return _exeCmd(Replyer(), cmd);
+	Replyer rpler;
+	return _exeCmd(rpler, cmd);
 }
 
 template <typename T>
@@ -275,12 +277,12 @@ int RedisCli::hashExists(const string &key, const string &field)
 
 int RedisCli::hashGet(const string &key, const string &field, string &value)
 {
-	return _exeCmdWithOutput("HGET " + key + " " + field, value)
+	return _exeCmdWithOutput("HGET " + key + " " + field, value);
 }
 
 int RedisCli::hashGetAll(const string &key, map<string, string> &mfv)
 {
-	return _exeCmdWithOutput("HGETALL " + key, mfv)
+	return _exeCmdWithOutput("HGETALL " + key, mfv);
 }
 
 int RedisCli::hashMSet(const string &key, const map<string, string> &mfv)
@@ -318,7 +320,7 @@ int RedisCli::setIsMember(const string &key, const string &member, int& ismember
 
 int RedisCli::setMembers(const string &key, vector<string> &members)
 {
-	return _exeCmdWithOutput("SMEMBERS " + " " + key, members);
+	return _exeCmdWithOutput("SMEMBERS " + key, members);
 }
 
 int RedisCli::setRem(const string &key, const vector<string> &members)
@@ -440,7 +442,7 @@ int RedisCli::connAuth(const string &password)
 	stringstream ss;
 	Replyer rpler;
 	ss << "AUTH " << password;
-	return _doexecmd_no_reconnect(rpler, ss.str());
+	return _doExeCmdNoReconnect(rpler, ss.str());
 }
 
 int RedisCli::connPing()
@@ -602,7 +604,7 @@ int RedisCli::strBitCount(const string &key, int start, int end)
 int RedisCli::strBitOp(const string &op, const string &destKey, const vector<string> &keys)
 {
 	stringstream ss;
-	ss << "BITOP " << op << " " << destkey << " ";
+	ss << "BITOP " << op << " " << destKey << " ";
 	vector<string>::const_iterator it;
 	for (it = keys.begin(); it != keys.end(); it++) {
 		ss << *it << " ";
@@ -833,7 +835,7 @@ int RedisCli::listLPush(const string &key, const vector<string> &elmts)
 	for (it = elmts.begin(); it != elmts.end(); it++) {
 		ss << *it << " ";
 	}
-	return _exeCmdWithOutput(ss.str(), elmts);
+	return _exeCmdWithNoOutput(ss.str());
 }
 
 int RedisCli::listLPushx(const string &key, const string &elmt)
@@ -850,7 +852,9 @@ int RedisCli::listRange(const string &key, int start, int stop, vector<string> &
 
 int RedisCli::listRem(const string &key, int count, const string &value)
 {
-	return _exeCmdWithNoOutput("LREM " + key + " " + count + " " + value);
+	stringstream ss;
+	ss << "LREM " << key << " " << count << " " << value;
+	return _exeCmdWithNoOutput(ss.str());
 }
 
 int RedisCli::listRPop(const string &key, string &tail)
@@ -949,7 +953,7 @@ int RedisCli::setMove(const string &srcKey, const string &destKey, const string 
 
 int RedisCli::setPop(const string &key, string &member)
 {
-	return _exeCmdWithOutput("SPOP " + " " + key, member);
+	return _exeCmdWithOutput("SPOP " + key, member);
 }
 
 int RedisCli::setRandMember(const string &key, int count, vector<string> &members)
@@ -973,12 +977,12 @@ int RedisCli::setUnion(const vector<string> &keys, vector<string> &members)
 int RedisCli::setUnionStore(const string &destKey, const vector<string> &keys)
 {
 	stringstream ss;
-	ss << "SUNIONSTORE " << destkey << " ";
+	ss << "SUNIONSTORE " << destKey << " ";
 	vector<string>::const_iterator it;
 	for (it = keys.begin(); it != keys.end(); it++) {
 		ss << *it << " ";
 	}
-	return _exeCmdWithOutput(ss.str(), keys);
+	return _exeCmdWithNoOutput(ss.str());
 }
 
 int RedisCli::ssetIncrBy(const string &key, double increment, 

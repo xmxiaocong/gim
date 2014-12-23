@@ -63,7 +63,7 @@ public:
 	int strGetSet(const string &key, const string &value, string &oldValue);
 	int strIncr(const string &key, int64 &afterIncr);
 	int strIncrBy(const string &key, int increment, int64 &afterIncr);
-	int strSet(const string &key, const string &value, const string &options);
+	int strSet(const string &key, const string &value, const string &options = "");
 
 	int hashDel(const string &key, const string &field);
 	int hashExists(const string &key, const string &field);
@@ -230,7 +230,7 @@ private:
 	int     m_port;
 	string m_passWd;
 	redisContext *m_c;
-	cmdlogcb m_cmdLog;
+	cmdLogCb m_cmdLog;
 	int m_retry;
 };
 
