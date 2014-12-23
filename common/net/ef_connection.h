@@ -93,9 +93,9 @@ namespace ef{
 
 		int32  m_id;
 
-		loop_buf m_buf;
+		LoopBuf m_buf;
 		std::list<Timer> m_timers;
-		loop_buf m_send_buf;
+		LoopBuf m_send_buf;
 
 		int32 m_flag;
 		EventLoop* m_evlp;

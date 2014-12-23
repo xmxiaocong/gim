@@ -51,6 +51,8 @@ int sockSetBlocking(SOCKET socket, int blocking);
 
 int setSocketNonblocking(int fd);
 
+int getLocalhostIps(in_addr_t addrs[], int asize);
+
 struct in_addr sockGetHostip (const char * host);
 
 /* get the peer ip address from the socket FD */

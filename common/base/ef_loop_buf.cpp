@@ -44,27 +44,27 @@ namespace	ef{
 		return ret;
 	}
 
-	int32	loop_buf::firstFrameLen() const{
+	int32	LoopBuf::firstFrameLen() const{
 		assert(m_head);
 		return m_head->m_size;
 	}
 
-	const uint8* loop_buf::firstFrameData() const{
+	const uint8* LoopBuf::firstFrameData() const{
 		assert(m_head);
 		return m_head->m_buf + m_head->m_start;
 	}
 
-	int32	loop_buf::freeFrameLen() const{
+	int32	LoopBuf::freeFrameLen() const{
 		assert(m_w_pos);
 		return m_w_pos->m_cap - m_w_pos->m_size - m_w_pos->m_start;	
 	}
 
-	uint8*	loop_buf::freeFrameBuf(){
+	uint8*	LoopBuf::freeFrameBuf(){
 		assert(m_w_pos);
 		return m_w_pos->m_buf + m_w_pos->m_start + m_w_pos->m_size; 
 	}
 
-	int32	loop_buf::write(const uint8 *buf, int32 len){
+	int32	LoopBuf::write(const uint8 *buf, int32 len){
 		int32 wlen = 0;
 		int32 ret = 0;
 		frame*	f = m_w_pos;
@@ -78,7 +78,7 @@ namespace	ef{
 		return wlen;
 	}
 
-	int32	loop_buf::autoResizeWrite(const uint8 *buf, int32 len){
+	int32	LoopBuf::autoResizeWrite(const uint8 *buf, int32 len){
 		int32 ret = write(buf, len);
 		if(len > ret){
 			extend(len - ret);
@@ -87,7 +87,7 @@ namespace	ef{
 		return len;
 	}
 
-	int32	loop_buf::peek(uint8 *buf, int32 len) const{
+	int32	LoopBuf::peek(uint8 *buf, int32 len) const{
 		int32 rlen = 0;
 		int32 ret = 0;
 		frame*  f = m_head;
@@ -100,7 +100,7 @@ namespace	ef{
 		return rlen;
 	}
 
-	int32	loop_buf::read(uint8 *buf, int32 len){
+	int32	LoopBuf::read(uint8 *buf, int32 len){
 		int32 rlen = 0;
 		int32 ret = 0;
 		frame*  f = m_head;
@@ -122,7 +122,7 @@ namespace	ef{
 
 	}
 
-	loop_buf::loop_buf(){
+	LoopBuf::LoopBuf(){
 		frame* f = allocFrame(1024); 
 		m_head = f;
 		m_w_pos = f;
@@ -130,7 +130,7 @@ namespace	ef{
 		m_size = 0;
 	}
 
-	frame*	loop_buf::constructFrame(uint8* buf, int32 len){
+	frame*	LoopBuf::constructFrame(uint8* buf, int32 len){
 		frame* f = (frame*)buf;
 		f->m_size = 0;
 		f->m_start = 0;
@@ -141,11 +141,11 @@ namespace	ef{
 	}
 
 
-	int32	loop_buf::alignSize(int32 l){
+	int32	LoopBuf::alignSize(int32 l){
 		return l + DEFAUTLT_ALIGN_SIZE - l % DEFAUTLT_ALIGN_SIZE;
 	}
 
-	frame*	loop_buf::allocFrame(int32 l){
+	frame*	LoopBuf::allocFrame(int32 l){
 		int32 len = alignSize(l);
 		uint8* buf = new uint8[len];
 		frame* f = constructFrame(buf, len);
@@ -153,7 +153,7 @@ namespace	ef{
 	}	
 
 
-	int32	loop_buf::extend(int32 sz){
+	int32	LoopBuf::extend(int32 sz){
 		frame* f = allocFrame(sz);
 		m_tail->m_next = f;
 		m_tail = f;
@@ -162,7 +162,7 @@ namespace	ef{
 		return f->m_cap;
 	}	
 
-	int32	loop_buf::clear(){
+	int32	LoopBuf::clear(){
 		frame* f = m_head;
 		for(; f; f = f->m_next)	
 			f->clear();
@@ -171,7 +171,7 @@ namespace	ef{
 		return ret;
 	}
 
-	loop_buf::~loop_buf(){
+	LoopBuf::~LoopBuf(){
 		frame* f = m_head;
 		frame* n = f->m_next;
 		for(; f; f = n){

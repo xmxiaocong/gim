@@ -145,7 +145,7 @@ namespace ef{
 
 		MUTEX m_opcs;
 
-		loop_buf m_ops;
+		LoopBuf m_ops;
 		int32 m_cur_id;
 
 		int32 m_id;

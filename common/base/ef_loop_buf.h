@@ -17,15 +17,15 @@ struct frame{
 	int32   clear();
 };
 
-class	loop_buf{
+class	LoopBuf{
 	public:
 
 		enum{
 			DEFAUTLT_ALIGN_SIZE = 2048,
 		};
 
-		loop_buf();
-		~loop_buf();
+		LoopBuf();
+		~LoopBuf();
 
 		int32	capacity() const;
 		int32	extend(int32 sz);

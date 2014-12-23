@@ -3,10 +3,53 @@
 #include <errno.h>
 #include <cassert>
 #include <string.h>
+#include <net/if.h>
 
 namespace ef{
 
 #define LINUX_EPOLL
+
+int getLocalhostIps ( in_addr_t addrs[], int asize )
+{
+	int MAXINTERFACES=16;
+	int i = 0;
+	long ip;
+	int fd, intrface, retn = 0;
+	struct ifreq buf[MAXINTERFACES]; ///if.h
+	struct ifconf ifc; ///if.h
+	in_addr_t loopback;
+	if ((fd = socket (AF_INET, SOCK_DGRAM, 0)) < 0) //socket.h
+		return -1;
+	ifc.ifc_len = sizeof buf;
+	ifc.ifc_buf = (caddr_t) buf;
+	if (ioctl (fd, SIOCGIFCONF, (char *) &ifc) < 0) //ioctl.h
+		return -1;
+	intrface = ifc.ifc_len / sizeof (struct ifreq); 
+	
+	loopback = inet_addr("127.0.0.1");
+	for (int j = 0; j < intrface && i < asize; ++j)
+	{
+		if (ioctl (fd, SIOCGIFADDR, (char *) &buf[j]) < 0)
+		{
+			continue;
+		}
+
+		struct sockaddr addr = buf[j].ifr_addr;
+			
+
+		if (loopback == 
+			((sockaddr_in*)&addr)->sin_addr.s_addr)
+		{
+			continue;
+		}	
+
+		addrs[i] = ((sockaddr_in*)&addr)->sin_addr.s_addr;//types
+		++i;
+
+	}
+	close (fd);
+	return i;
+}
 
 int tcpConnectWithTimeout ( const char* ip, unsigned short int port,
 			 unsigned int timeout_ms )
