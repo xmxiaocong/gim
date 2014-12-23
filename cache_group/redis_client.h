@@ -5,13 +5,12 @@
 #include <vector>
 #include <map>
 #include "hiredis/hiredis.h"
-#include "base/ef_btype.h"
-#include <float.h>
 
 namespace gim{
 
 using namespace std;
-using namespace ef;
+
+typedef long long int64;
 
 enum{
 	CONNECT_CACHE_FAILED = -100000,
@@ -24,7 +23,7 @@ typedef void (*cmdLogCb)(const string &cmd);
 class RedisCli
 {
 
-class Replyer 
+class Replyer
 {
 public:
 	Replyer(redisReply *reply = NULL):m_reply(reply){};
