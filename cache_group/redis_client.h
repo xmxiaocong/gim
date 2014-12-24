@@ -5,12 +5,13 @@
 #include <vector>
 #include <map>
 #include "hiredis/hiredis.h"
+#include "base/ef_btype.h"
+#include <float.h>
 
 namespace gim{
 
 using namespace std;
-
-typedef long long int64;
+using namespace ef;
 
 enum{
 	CONNECT_CACHE_FAILED = -100000,
@@ -23,7 +24,7 @@ typedef void (*cmdLogCb)(const string &cmd);
 class RedisCli
 {
 
-class Replyer
+class Replyer 
 {
 public:
 	Replyer(redisReply *reply = NULL):m_reply(reply){};
@@ -60,8 +61,8 @@ public:
 
 	int strGet(const string &key, string &value);
 	int strGetSet(const string &key, const string &value, string &oldValue);
-	int64 strIncr(const string &key, int64 &afterIncr);
-	int64 strIncrBy(const string &key, int64 increment, int64 &afterIncr);
+	int strIncr(const string &key, int64 &afterIncr);
+	int strIncrBy(const string &key, int increment, int64 &afterIncr);
 	int strSet(const string &key, const string &value, const string &options = "");
 
 	int hashDel(const string &key, const string &field);
@@ -110,7 +111,7 @@ public:
   	int keyPersist(const string &key);
   	int keyPExpire(const string &key, int64 milliSeconds);
   	int keyPExpireAt(const string &key, int64 milliTimeStamp);
-  	int64 keyPTTL(const string &key, int64 &milliTTL);
+  	int keyPTTL(const string &key, int64 &milliTTL);
   	int keyRandomKey(string &key);
   	int keyRename(const string &key, const string &newKey);
   	int keyRenameNx(const string &key, const string &newKey);
@@ -139,8 +140,8 @@ public:
 
 	/* hashtable related */
   	int hashMdel(const string &key, const vector<string> &fields);
-  	int64 hashIncrBy(const string &key, const string &field, 
-		int64 increment, int64 &afterIncr);
+  	int hashIncrBy(const string &key, const string &field, 
+		int increment, int &afterIncr);
   	int hashIncrByFloat(const string &key, const string &field, 
 		float increment, float &afterIncr);
   	int hashKeys(const string &key, vector<string> &fields);
@@ -222,8 +223,8 @@ private:
 	int64 _exeCmd(Replyer &rpler, const string &cmd);
 	int64 _doExeCmd(Replyer &rpler, const string &cmd);
 	int64 _doExeCmdNoReconnect(Replyer &rpler, const string &cmd);
-	int64 _exeCmdWithNoOutput(const string &cmd);
-	template <typename T> int64 _exeCmdWithOutput(const string &cmd, T &output);
+	int _exeCmdWithNoOutput(const string &cmd);
+	template <typename T> int _exeCmdWithOutput(const string &cmd, T &output);
 	int disconnect();
 	string	m_addr;
 	int     m_port;
