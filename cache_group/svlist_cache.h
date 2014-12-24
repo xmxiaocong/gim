@@ -16,8 +16,9 @@ struct Serv{
 	}
 };
 
-class SvlstCache{
+class SvLstCache{
 public:
+	virtual ~SvLstCache(){};
 	virtual int getEnableList(int type, vector<Serv> &servlist) = 0;
 	virtual int getDisableSvIDList(int type, vector<int> &servlist) = 0;
 	virtual int getAllList(int type, vector<Serv> &servlist) = 0;
@@ -28,18 +29,25 @@ public:
 	virtual int disableServ(int type, int id) = 0;
 };
 
-class DefSvlstCache{
+class DefSvLstCache{
 public:
-	virtual int getEnableList(int type, vector<Serv> &servlist) = 0;
-	virtual int getDisableSvIDList(int type, vector<int> &servlist) = 0;
-	virtual int getAllList(int type, vector<Serv> &servlist) = 0;
-	virtual int addServ(int type, const Serv &serv) = 0;
-	virtual int updateServ(int type, const Serv &serv) = 0;
-	virtual int deleteServ(int type, int id) = 0;
-	virtual int enableServ(int type, int id) = 0;
-	virtual int disableServ(int type, int id) = 0;
+	virtual ~DefSvLstCache();
+	virtual int getEnableList(int type, vector<Serv> &servlist);
+	virtual int getDisableSvIDList(int type, vector<int> &servlist);
+	virtual int getAllList(int type, vector<Serv> &servlist);
+	virtual int addServ(int type, const Serv &serv);
+	virtual int updateServ(int type, const Serv &serv);
+	virtual int deleteServ(int type, int id);
+	virtual int enableServ(int type, int id);
+	virtual int disableServ(int type, int id);
 private:
 };
+
+class SvLstChFactory{
+public:
+	virtual SvLstCache* getSvLstCache(const Json::Value& config);
+};
+
 
 };
 
