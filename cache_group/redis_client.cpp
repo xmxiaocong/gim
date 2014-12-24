@@ -370,7 +370,8 @@ int RedisCli::ssetRange(const string &key, int start, int stop, vector<string> &
 	return _exeCmdWithOutput(ss.str(), members);
 }
 
-int RedisCli::ssetRangeWithScore(const string &key, int start, int stop, vector<pair<string, string> > &members)
+int RedisCli::ssetRangeWithScore(const string &key, int start, int stop, 
+		vector<pair<string, string> > &members)
 {
 	stringstream ss;
 	ss << "ZRANGE " << key << " " << start << " " << stop << " WITHSCORES";
@@ -800,10 +801,11 @@ int RedisCli::listIndex(const string &key, int index, string &elmt)
 	return _exeCmdWithOutput(ss.str(), elmt);
 }
 
-int RedisCli::listInsert(const string &key, const string &position, const string &pivot, 
-					const string &value)
+int RedisCli::listInsert(const string &key, const string &position, 
+			const string &pivot, const string &value)
 {
-	return _exeCmdWithNoOutput("LINSERT " + key + " " + position + " " + pivot + " " + value);
+	return _exeCmdWithNoOutput("LINSERT " + key + " " + 
+		position + " " + pivot + " " + value);
 }
 
 int RedisCli::listLen(const string &key)
@@ -935,9 +937,11 @@ int RedisCli::setInterStore(const string &destKey, const vector<string> &keys)
 	return _exeCmdWithNoOutput(ss.str());
 }
 
-int RedisCli::setMove(const string &srcKey, const string &destKey, const string &member)
+int RedisCli::setMove(const string &srcKey, const string &destKey, 
+			const string &member)
 {
-	return _exeCmdWithNoOutput("SMOVE " + srcKey + " " + destKey + " " + member);
+	return _exeCmdWithNoOutput("SMOVE " + srcKey + 
+		" " + destKey + " " + member);
 }
 
 int RedisCli::setPop(const string &key, string &member)
@@ -986,7 +990,8 @@ int RedisCli::ssetRangeByScore(const string &key, double minScore, double maxSco
   		const string &options, vector<string> &members)
 {
 	stringstream ss;
-	ss << "ZRANGEBYSCORE " << key << " " << minScore << " " << maxScore << " " << options;
+	ss << "ZRANGEBYSCORE " << key << " " << minScore << " " << 
+			maxScore << " " << options;
 	return _exeCmdWithOutput(ss.str(), members);
 }
 
@@ -1007,7 +1012,8 @@ int RedisCli::ssetRem(const string &key, const vector<string> &members)
 	return _exeCmdWithNoOutput(ss.str());
 }
 
-int RedisCli::ssetRevRangeWithScore(const string &key, int start, int stop, vector<pair<string, string> > &members)
+int RedisCli::ssetRevRangeWithScore(const string &key, int start, int stop, 
+		vector<pair<string, string> > &members)
 {
 	stringstream ss;
 	ss << "ZREVRANGE " << key << " " << start << " " << stop << " WITHSCORES";
@@ -1018,15 +1024,17 @@ int RedisCli::ssetRevRangeByScore(const string &key, double maxScore, double min
   		const string &options, vector<string> &members)
 {
 	stringstream ss;
-	ss << "ZREVRANGEBYSCORE " << key << " " << maxScore << " " << minScore << " " << options;
+	ss << "ZREVRANGEBYSCORE " << key << " " << maxScore << " " << 
+		minScore << " " << options;
 	return _exeCmdWithOutput(ss.str(), members);
 }
 
 int RedisCli::ssetRevRangeByScoreWithScore(const string &key, double maxScore, 
-		double minScore, const string &options, vector<pair<string, string> > &members)
+	double minScore, const string &options, vector<pair<string, string> > &members)
 {
 	stringstream ss;
-	ss << "ZREVRANGEBYSCORE " << key << " " << maxScore << " " << minScore << " WITHSCORES " << options;
+	ss << "ZREVRANGEBYSCORE " << key << " " << maxScore << " " << 
+		minScore << " WITHSCORES " << options;
 	return _exeCmdWithOutput(ss.str(), members);
 }
 
