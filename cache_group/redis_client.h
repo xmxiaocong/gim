@@ -83,7 +83,7 @@ public:
 	int ssetRangeWithScore(const string &key, int start, int stop, 
 		vector<pair<string, string> > &members);
 	int ssetRangeByScoreWithScore(const string &key, double minScore, double maxScore, 
-		const string &options, vector<pair<string, string> > &members);
+		vector<pair<string, string> > &members, const string &options = "");
 	int ssetRemRangeByRank(const string &key, int start, int stop);
 	int ssetRemRangeByScore(const string &key, double minScore, double maxScore);
 	int ssetRevRange(const string &key, int start, int stop, vector<string> &members);
@@ -104,7 +104,7 @@ public:
 	int keyExpireAt(const string &key, int64 timeStamp);
 	int keyKeys(const string &pattern, vector<string> &keys);
   	int keyMigrate(const string &host, int port, const string &key, 
-  		int destDB, int timeout, const string &options);
+  		int destDB, int timeout, const string &options = "");
   	int keyMove(const string &key, int destDB);
   	int keyObject(const string &subCmd, const string &key, vector<string> &result);
   	int keyPersist(const string &key);
@@ -114,7 +114,7 @@ public:
   	int keyRandomKey(string &key);
   	int keyRename(const string &key, const string &newKey);
   	int keyRenameNx(const string &key, const string &newKey);
-  	int keyRestore(const string &key, int ttl, const string &value, const string &option);
+  	int keyRestore(const string &key, int ttl, const string &value, const string &option = "");
   	int keyTTL(const string &key, int &ttl);
   	int keyType(const string &key, string &type);
 
@@ -187,15 +187,15 @@ public:
   	int ssetIncrBy(const string &key, double increment, 
 		const string &member, string &afterIncr);
   	int ssetRangeByScore(const string &key, double minScore, double maxScore, 
-  		const string &options, vector<string> &members);
+  		vector<string> &members, const string &options = "");
   	int ssetRank(const string &key, const string &member);
   	int ssetRem(const string &key, const vector<string> &members);
   	int ssetRevRangeWithScore(const string &key, int start, int stop, 
 		vector<pair<string, string> > &members);
   	int ssetRevRangeByScore(const string &key, double maxScore, double minScore, 
-  		const string &options, vector<string> &members);
+  		vector<string> &members, const string &options = "");
   	int ssetRevRangeByScoreWithScore(const string &key, double maxScore, 
-		double minScore, const string &options, vector<pair<string, string> > &members);
+		double minScore, vector<pair<string, string> > &members, const string &options = "");
   	int ssetRevRank(const string &key, const string &member);
   	int ssetScore(const string &key, const string &member, string &score);
 
