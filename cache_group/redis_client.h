@@ -6,12 +6,9 @@
 #include <map>
 #include "hiredis/hiredis.h"
 #include "base/ef_btype.h"
-#include <float.h>
-
 namespace gim{
 
 using namespace std;
-using namespace ef;
 
 enum{
 	CONNECT_CACHE_FAILED = -100000,
@@ -24,7 +21,7 @@ typedef void (*cmdLogCb)(const string &cmd);
 class RedisCli
 {
 
-class Replyer 
+class Replyer
 {
 public:
 	Replyer(redisReply *reply = NULL):m_reply(reply){};
@@ -62,7 +59,7 @@ public:
 	int strGet(const string &key, string &value);
 	int strGetSet(const string &key, const string &value, string &oldValue);
 	int strIncr(const string &key, int64 &afterIncr);
-	int strIncrBy(const string &key, int increment, int64 &afterIncr);
+	int strIncrBy(const string &key, int64 increment, int64 &afterIncr);
 	int strSet(const string &key, const string &value, const string &options = "");
 
 	int hashDel(const string &key, const string &field);
@@ -141,7 +138,7 @@ public:
 	/* hashtable related */
   	int hashMdel(const string &key, const vector<string> &fields);
   	int hashIncrBy(const string &key, const string &field, 
-		int increment, int &afterIncr);
+		int64 increment, int64 &afterIncr);
   	int hashIncrByFloat(const string &key, const string &field, 
 		float increment, float &afterIncr);
   	int hashKeys(const string &key, vector<string> &fields);

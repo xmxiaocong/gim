@@ -1,8 +1,8 @@
 #include <sstream>
 #include <string>
 #include <stdlib.h>
+#include <float.h>
 #include "redis_client.h"
-
 
 namespace gim {
 
@@ -42,6 +42,13 @@ static int _getResultFromReply(redisReply *reply, vector<pair<string, string> > 
 		string s(reply->element[i]->str, reply->element[i]->len);
 		result.push_back(pair<string, string>(f, s));
 	}
+	return 0;
+}
+
+static int _getResultFromReply(redisReply *reply, int64 &result)
+{
+	if (reply->type != REDIS_REPLY_INTEGER) return CACHE_NOT_EXIST;
+	result = reply->integer;
 	return 0;
 }
 
@@ -137,7 +144,7 @@ int RedisCli::disconnect()
 
 int64 RedisCli::_exeCmd(Replyer &rpler, const string &cmd){
 	int l = m_retry;
-	int ret = 0;
+	int64 ret = 0;
 	while(l-- > 0){
 		ret = _doExeCmd(rpler, cmd);
 		if(ret >= 0 || ret == -4)
@@ -181,7 +188,7 @@ int64 RedisCli::_doExeCmdNoReconnect(Replyer &rpler, const string &cmd)
 
 int64 RedisCli::_doExeCmd(Replyer &rpler, const string &cmd)
 {
-	int ret = 0;
+	int64 ret = 0;
 	if(!m_c){
 		ret = reconnect();
 	}	
@@ -193,20 +200,26 @@ int64 RedisCli::_doExeCmd(Replyer &rpler, const string &cmd)
 
 int RedisCli::_exeCmdWithNoOutput(const string &cmd)
 {
+	int64 ret;
 	Replyer rpler;
-	return _exeCmd(rpler, cmd);
+
+	ret = _exeCmd(rpler, cmd);
+	if (ret < 0) {
+		return -1;
+	}
+	return 0;
 }
 
 template <typename T>
 int RedisCli::_exeCmdWithOutput(const string &cmd, T &output)
 {
-	int ret = 0;
+	int64 ret = 0;
 	Replyer rpler;
 
 	if ((ret = _exeCmd(rpler, cmd)) < 0) 
 		return -1;
-	ret = getResultFromReply(rpler.reply(), output);
-	return ret;
+	getResultFromReply(rpler.reply(), output);
+	return 0;
 }
 
 int RedisCli::keyDel(const string &key)
@@ -236,28 +249,16 @@ int RedisCli::strGetSet(const string &key, const string &value, string &oldvalue
 	return _exeCmdWithOutput("GETSET " + key + " " + value, oldvalue);
 }
 
-int RedisCli::strIncr(const string &key, int64 &afterincr)
+int RedisCli::strIncr(const string &key, int64 &afterIncr)
 {
-	int ret = 0;
-	Replyer rpler;
-	ret = _exeCmd(rpler, "INCR " + key);
-	if (rpler.reply() == NULL) 
-		return -1;
-	afterincr = ret;
-	return 0;
+	return _exeCmdWithOutput("INCR " + key, afterIncr);
 }
 
-int RedisCli::strIncrBy(const string &key, int increment, int64 &afterincr)
+int RedisCli::strIncrBy(const string &key, int64 increment, int64 &afterIncr)
 {
-	int ret = 0;
 	stringstream ss;
-	Replyer rpler;
 	ss << "INCRBY " << key << " " << increment;
-	ret = _exeCmd(rpler, ss.str());
-	if (rpler.reply() == NULL) 
-		return -1;
-	afterincr = ret;
-	return 0;
+	return _exeCmdWithOutput(ss.str(), afterIncr);
 }
 
 int RedisCli::strSet(const string &key, const string &value, const string &options)
@@ -313,7 +314,7 @@ int RedisCli::setAdd(const string &key, const vector<string> &members)
 	return _exeCmdWithNoOutput(ss.str());
 }
 
-int RedisCli::setIsMember(const string &key, const string &member, int& ismember)
+int RedisCli::setIsMember(const string &key, const string &member, int &ismember)
 {
 	return _exeCmdWithOutput("SISMEMBER " + key + " " + member, ismember);
 }	
@@ -548,13 +549,7 @@ int RedisCli::keyPExpireAt(const string &key, int64 milliTimeStamp)
 
 int RedisCli::keyPTTL(const string &key, int64 &milliTTL)
 {
-	int64 ret = 0;
-	Replyer rpler;
-	ret = _exeCmd(rpler, "PTTL " + key);
-	if (rpler.reply() == NULL) 
-		return -1;
-	milliTTL = ret;
-	return 0;
+	return _exeCmdWithOutput("PTTL " + key, milliTTL);
 }
 
 int RedisCli::keyRandomKey(string &key)
@@ -726,7 +721,7 @@ int RedisCli::hashMdel(const string &key, const vector<string> &fields)
 }
 
 int RedisCli::hashIncrBy(const string &key, const string &field, 
-		int increment, int &afterIncr)
+		int64 increment, int64 &afterIncr)
 {
 	stringstream ss;
 	ss << "HINCRBY " << key << " " << field << " " << increment;
