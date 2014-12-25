@@ -142,9 +142,9 @@ int RedisCli::disconnect()
 	return	0;
 }
 
-int64 RedisCli::_exeCmd(Replyer &rpler, const string &cmd){
+int RedisCli::_exeCmd(Replyer &rpler, const string &cmd){
 	int l = m_retry;
-	int64 ret = 0;
+	int ret = 0;
 	while(l-- > 0){
 		ret = _doExeCmd(rpler, cmd);
 		if(ret >= 0 || ret == -4)
@@ -153,7 +153,7 @@ int64 RedisCli::_exeCmd(Replyer &rpler, const string &cmd){
 	return ret;
 }
 
-int64 RedisCli::_doExeCmdNoReconnect(Replyer &rpler, const string &cmd)
+int RedisCli::_doExeCmdNoReconnect(Replyer &rpler, const string &cmd)
 {
 	redisReply *tmpReply = (redisReply *)redisCommand(m_c, cmd.data());
 	if (m_cmdLog) {
@@ -182,13 +182,13 @@ int64 RedisCli::_doExeCmdNoReconnect(Replyer &rpler, const string &cmd)
 		return -4;
 	}
 	rpler.setReply(tmpReply);
-	return rpler.reply()->integer;
+	return 0;
 
 }
 
-int64 RedisCli::_doExeCmd(Replyer &rpler, const string &cmd)
+int RedisCli::_doExeCmd(Replyer &rpler, const string &cmd)
 {
-	int64 ret = 0;
+	int ret = 0;
 	if(!m_c){
 		ret = reconnect();
 	}	
@@ -200,7 +200,7 @@ int64 RedisCli::_doExeCmd(Replyer &rpler, const string &cmd)
 
 int RedisCli::_exeCmdWithNoOutput(const string &cmd)
 {
-	int64 ret;
+	int ret;
 	Replyer rpler;
 
 	ret = _exeCmd(rpler, cmd);
@@ -213,13 +213,12 @@ int RedisCli::_exeCmdWithNoOutput(const string &cmd)
 template <typename T>
 int RedisCli::_exeCmdWithOutput(const string &cmd, T &output)
 {
-	int64 ret = 0;
+	int ret = 0;
 	Replyer rpler;
 
 	if ((ret = _exeCmd(rpler, cmd)) < 0) 
 		return -1;
-	getResultFromReply(rpler.reply(), output);
-	return 0;
+	return getResultFromReply(rpler.reply(), output);
 }
 
 int RedisCli::keyDel(const string &key)
@@ -607,12 +606,12 @@ int RedisCli::strBitOp(const string &op, const string &destKey, const vector<str
 	return _exeCmdWithNoOutput(ss.str());
 }
 
-int RedisCli::strDecr(const string &key, int &afterDecr)
+int RedisCli::strDecr(const string &key, int64 &afterDecr)
 {
 	return _exeCmdWithOutput("DECR " + key, afterDecr);
 }
 
-int RedisCli::strDecrBy(const string &key, int decrement, int &afterDecr)
+int RedisCli::strDecrBy(const string &key, int64 decrement, int64 &afterDecr)
 {
 	stringstream ss;
 	ss << "DECRBY " << key << " " << decrement;

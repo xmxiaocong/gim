@@ -6,9 +6,11 @@
 #include <map>
 #include "hiredis/hiredis.h"
 #include "base/ef_btype.h"
+
 namespace gim{
 
 using namespace std;
+using namespace ef;
 
 enum{
 	CONNECT_CACHE_FAILED = -100000,
@@ -120,8 +122,8 @@ public:
   	int strAppend(const string &key, const string &value);
   	int strBitCount(const string &key, int start, int end);
   	int strBitOp(const string &op, const string &destKey, const vector<string> &keys);
-  	int strDecr(const string &key, int &afterDecr);
-  	int strDecrBy(const string &key, int decrement, int &afterDecr);
+  	int strDecr(const string &key, int64 &afterDecr);
+  	int strDecrBy(const string &key, int64 decrement, int64 &afterDecr);
   	int strGetBit(const string &key, int &bit);
   	int strGetRange(const string &key, int start, int end, string &result);
   	int strIncrByFloat(const string &key, float increment, float &afterIncr);
@@ -217,9 +219,9 @@ public:
 #endif
 
 private:
-	int64 _exeCmd(Replyer &rpler, const string &cmd);
-	int64 _doExeCmd(Replyer &rpler, const string &cmd);
-	int64 _doExeCmdNoReconnect(Replyer &rpler, const string &cmd);
+	int _exeCmd(Replyer &rpler, const string &cmd);
+	int _doExeCmd(Replyer &rpler, const string &cmd);
+	int _doExeCmdNoReconnect(Replyer &rpler, const string &cmd);
 	int _exeCmdWithNoOutput(const string &cmd);
 	template <typename T> int _exeCmdWithOutput(const string &cmd, T &output);
 	int disconnect();
