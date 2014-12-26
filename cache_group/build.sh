@@ -1,4 +1,8 @@
 #!/bin/bash
-
+mkdir -p lib
+rm -fr CMakeCache.txt
+rm -fr CMakeFiles
 cmake .
-gmake clean;gmake
+make clean;make
+rm -fr CMakeCache.txt
+rm -fr CMakeFiles
