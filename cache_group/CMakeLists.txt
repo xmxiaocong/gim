@@ -1,10 +1,12 @@
+cmake_minimum_required(VERSION 2.6)
 project(cachegroup)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 add_definitions("-Wall -g")
-include_directories(${PROJECT_SOURCE_DIR}/../common)
-link_directories(../../common/lib /usr/lib/hiredis)
-set(LIBRARY_OUTPUT_PATH lib)
-link_libraries( pthread hiredis config)
-AUX_SOURCE_DIRECTORY(. SRC_LIST)
+set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+
+include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/../common
+${PROJECT_SOURCE_DIR}/include)
+AUX_SOURCE_DIRECTORY(src SRC_LIST)
 add_library(cachegroup STATIC ${SRC_LIST})
-SET_TARGET_PROPERTIES(cachegroup PROPERTIES LINKER_LANGUAGE C)
+#file(GLOB_RECURSE EF_LIST *.cpp)
+#add_library(cachegroup STATIC ${EF_LIST})
