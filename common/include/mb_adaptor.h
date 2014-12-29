@@ -12,9 +12,6 @@ namespace gim {
 using namespace std;
 using namespace ef;
 
-#define DEFAULT_MB_SIZE 100
-#define DEFAULT_MSG_EXPIRY_TIME  60 * 60 * 24 * 7 /* a week */
-
 class MbAdaptor {
 public:
 	virtual ~MbAdaptor(){};
