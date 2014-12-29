@@ -24,24 +24,41 @@ static int parse_url(const string& url, DBServ &serv)
 	return 0;
 }
 
+RedisCG::RedisCG(const Json::Value &config, LogCb cb)
+{
+	init(config);
+	setCmdLog(cb);
+}
+
 RedisCG::~RedisCG(){
 	clear();
 }
 
-int RedisCG::init(const vector<string> &servList)
+void RedisCG::setCmdLog(LogCb cb)
 {
-	if (servList.size() <= 0) return -1;
+	m_cmdLog = cb;
+}
 
-	vector<string>::const_iterator it;
-	for (it = servList.begin(); it != servList.end(); it++) {
+int RedisCG::init(const Json::Value &config)
+{
+	Json::Reader reader;
+        Json::Value value;
+
+        if (!reader.parse(config.toStyledString(), value)) {
+		return -1;
+        }
+	Json::Value urlArray = value["UrlList"];
+	int cnt = 0;
+	for (size_t i = 0; i < urlArray.size(); i++) {
 		struct DBServ serv;
-		if (parse_url(*it, serv) < 0) {
+		if (parse_url(urlArray[i].asString(), serv) < 0) {
 			continue;
 		}
-		m_servList.push_back(serv);
+		m_cfg.servList.push_back(serv);
+		cnt++;
 	}
 	m_dbs.clear();
-	m_dbs.resize(m_servList.size());
+	m_dbs.resize(cnt);
 	for(size_t i = 0; i < m_dbs.size(); ++i){
 		m_dbs[i] = NULL;
 	}
@@ -61,24 +78,32 @@ int RedisCG::clear()
 
 DBHandle RedisCG::getHndl(const string &key)
 {
-	uint64 idx = getIdx(m_dbs.size(), key);
+	ef::uint8 md5[16];
+        ef::MD5_CTX c;
+
+        ef::MD5Init(&c);
+        ef::MD5Update(&c, (ef::uint8 *)key.data(), key.size());
+        ef::MD5Final(md5, &c);
+        //count the md5
+        ef::uint64 i = *(ef::uint64*)md5;
+        ef::uint64 idx = i % m_dbs.size();
 	
 	if(!m_dbs[idx]){
-		m_dbs[idx] = connectCache(m_servList[idx].ipaddr, m_servList[idx].port, 
-				m_servList[idx].passwd);
+		m_dbs[idx] = connectCache(m_cfg.servList[idx].ipaddr, m_cfg.servList[idx].port, 
+				m_cfg.servList[idx].passwd);
 		if (!m_dbs[idx]) {
 			if (m_cmdLog) {
 				stringstream ss;
-                                ss << "connect " << m_servList[idx].ipaddr << ":" << 
-				m_servList[idx].port << ":" << m_servList[idx].passwd << " failed";
+                                ss << "connect " << m_cfg.servList[idx].ipaddr << ":" << 
+				m_cfg.servList[idx].port << ":" << m_cfg.servList[idx].passwd << " failed";
                                 m_cmdLog(ss.str());
                         }
 			return NULL;
 		}
 		if (m_cmdLog) {
 			stringstream ss;
-			ss << "connect " << m_servList[idx].ipaddr << ":" << 
-				m_servList[idx].port << ":" << m_servList[idx].passwd << " success";
+			ss << "connect " << m_cfg.servList[idx].ipaddr << ":" << 
+				m_cfg.servList[idx].port << ":" << m_cfg.servList[idx].passwd << " success";
 				m_cmdLog(ss.str());
 			m_dbs[idx]->setCmdLog(m_cmdLog);
 		}

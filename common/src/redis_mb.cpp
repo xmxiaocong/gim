@@ -7,10 +7,33 @@
 
 namespace gim {
 
-int RedisMb::rebindCG(const CacheGroup *cg)
+RedisMb::RedisMb(const Json::Value &config)
+{
+	m_cg = NULL;
+	m_expiry = DEFAULT_MSG_EXPIRY_TIME;
+	m_capability = DEFAULT_MB_CAPABILITY;
+	
+	Json::Reader reader;	
+	Json::Value value;
+
+	if (reader.parse(config.toStyledString(), value)) {
+		Json::Value etValue = value["ExpiryTime"];
+		if (etValue.type() == Json::intValue || 
+			etValue.type() == Json::uintValue) {
+			m_expiry = etValue.asInt();
+		}
+		Json::Value cpValue = value["Capability"];
+		if (cpValue.type() == Json::intValue || 
+			cpValue.type() == Json::uintValue) {
+			m_capability = etValue.asInt();
+		}
+	}
+}
+		
+int RedisMb::bindCG(RedisCG *cg)
 {
         if (m_cg == NULL) {
-                m_cg = (RedisCG *)cg;
+                m_cg = cg;
         }
         return 0;
 }
@@ -35,6 +58,8 @@ int RedisMb::sizeFrom(const string &mbName, int64 bMsgId)
 
 int RedisMb::getMsgs(const string &mbName, int64 bMsgId, int length, vector<Message> &vMsg)
 {
+	if (length == 0) return -1;
+
 	DBHandle hndl = m_cg->getHndl(mbName);
 	if (hndl == NULL) return CONNECT_CACHE_FAILED;
 	int cnt = 0;
@@ -59,8 +84,10 @@ int RedisMb::getMsgs(const string &mbName, int64 bMsgId, int length, vector<Mess
 	return cnt;
 }
 
-int RedisMb::getMsgsBackward(const string &mbName, int64 bMsgId, int length, vector<Message> &vMsg)
+int RedisMb::getMsgsForward(const string &mbName, int64 bMsgId, int length, vector<Message> &vMsg)
 {
+	if (length == 0) return -1;
+
 	DBHandle hndl = m_cg->getHndl(mbName);
 	if (hndl == NULL) return CONNECT_CACHE_FAILED;
 	int ret = 0;
@@ -122,9 +149,11 @@ int RedisMb::addMsg(const string &mbName, Message &message)
                 /* if message box is full, clear */
                 hndl->ssetRemRangeByScore(mbName, DBL_MIN, message.id() - m_capability);
         }
-        /* if the msgbox is not exist before, set the expire time */
-        hndl->keyExpire(mbName, m_expiry);
-
+        /* update the expire time */
+        if (m_expiry > 0) {
+		hndl->keyExpire(mbName, m_expiry);
+	}
+	
         return ret;
 }
 
@@ -134,27 +163,53 @@ int RedisMb::delMsg(const string &mbName, int64 msgId)
         if (hndl == NULL) return CONNECT_CACHE_FAILED;
 
         int ret = hndl->ssetRemRangeByScore(mbName, msgId, msgId);
-        if (ret >= 0) hndl->keyExpire(mbName, m_expiry);
+        if (ret >= 0 && m_expiry > 0) {
+		hndl->keyExpire(mbName, m_expiry);
+	}
+	
         return ret;
 }
 
-int RedisMb::delMsgs(const string &mbName, int64 bMsgId)
+int RedisMb::delMsgsBackward(const string &mbName, int64 bMsgId, int length)
 {
+	if (length == 0) return -1;
+
         DBHandle hndl = m_cg->getHndl(mbName);
         if (hndl == NULL) return CONNECT_CACHE_FAILED;
 
-        int ret = hndl->ssetRemRangeByScore(mbName, bMsgId + 1, DBL_MAX);
-        if(ret >= 0) hndl->keyExpire(mbName, m_expiry);
+	double endId;
+	if (length == -1) {
+		endId = DBL_MAX;
+	} else {
+		endId = bMsgId + length - 1;
+	}
+        int ret = hndl->ssetRemRangeByScore(mbName, bMsgId, endId);
+        if(ret >= 0 && m_expiry > 0) {
+		hndl->keyExpire(mbName, m_expiry);
+	}
+
         return ret;
 }
 
-int RedisMb::delMsgsBackward(const string &mbName, int64 bMsgId)
+int RedisMb::delMsgs(const string &mbName, int64 bMsgId, int length)
 {
+	if (length == 0) return -1;
+	
         DBHandle hndl = m_cg->getHndl(mbName);
         if (hndl == NULL) return CONNECT_CACHE_FAILED;
 
-        int ret = hndl->ssetRemRangeByScore(mbName, DBL_MIN, bMsgId - 1);
-        if(ret >= 0) hndl->keyExpire(mbName, m_expiry);
+	double minId;
+	if (length == -1) {
+		minId = DBL_MIN;
+	} else {
+		minId = bMsgId - length + 1;
+	}
+	
+        int ret = hndl->ssetRemRangeByScore(mbName, minId, bMsgId);
+        if(ret >= 0 && m_expiry > 0) {
+		hndl->keyExpire(mbName, m_expiry);
+	}
+	
         return ret;
 }
 
@@ -188,7 +243,9 @@ int RedisMb::clear(const string &mbName)
         if (hndl == NULL) return CONNECT_CACHE_FAILED;
 
         int ret = hndl->ssetRemRangeByRank(mbName, 0, -1);
-        if (ret >= 0) hndl->keyExpire(mbName, m_expiry);
+        if (ret >= 0 && m_expiry > 0) {
+		hndl->keyExpire(mbName, m_expiry);
+	}
 
         return ret;
 }

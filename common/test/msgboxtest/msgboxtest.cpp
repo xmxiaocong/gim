@@ -12,37 +12,34 @@ void print(const string &data)
 
 int main(void)
 {
-	Json::Value value;
-	RdsCGFactory rfc;
-	RedisCG *cg = (RedisCG*)rfc.createNewCG(value);
-	RedisMb mb;
-	vector<string> vstr;
+	Json::Value cgcfg, mbcfg;
+	cgcfg["UrlList"].append("127.0.0.1:7381");
+	RedisCG cg(cgcfg, print);
+	RdsMbFactory rdsfac;
+	mbcfg["ExpiryTime"] = 200;
+	mbcfg["Capability"] = 10;
+	RedisMb *mb = (RedisMb *)rdsfac.createNewMbAdpt(mbcfg);
+	mb->bindCG(&cg);
 	string key("key");
 
-	vstr.push_back("127.0.0.1:7381");
-	std::cout << 11111 << std::endl;
-	cg->setCmdLog(print);
-	cg->init(vstr);
-	mb.rebindCG(cg);
 	Message msg;
 	msg.set_to("234242145");
 	int64 newid;
-	mb.incrId(key, newid);
+	mb->incrId(key, newid);
 	msg.set_id(newid);
 	msg.set_from("8987945734");
 	msg.set_type(0);
 	msg.set_sn("dalijlid9da3w40j09u");
 	msg.set_data("hello");
-	mb.addMsg("mb_" + key, msg);
+	mb->addMsg("mb_" + key, msg);
 	vector<Message> vmsg;
-	mb.getMsgs("mb_" + key, 0, 100, vmsg);
-	std::cout << vmsg.size() << std::endl;
+	mb->getMsgs("mb_" + key, 0, 100, vmsg);
 	vector<Message>::iterator it;
 	for (it = vmsg.begin(); it != vmsg.end(); it++) {
 		cout << it->id() << endl;
 	}
-	mb.clear("mb_" + key);
-	delete cg;
+	mb->clear("mb_" + key);
+	delete mb;
 	return 0;	
 }
 	
