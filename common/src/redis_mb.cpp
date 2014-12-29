@@ -1,5 +1,4 @@
 #include "redis_mb.h"
-#include "redis_client.h"
 #include <float.h>
 #include <sstream>
 #include "base/ef_base64.h"
