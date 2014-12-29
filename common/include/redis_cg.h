@@ -6,19 +6,9 @@
 
 namespace gim {
 
-struct DBServ {
-        string ipaddr;
-        int port;
-        string passwd;
-};
-
-struct RedisCGCfg {
-	vector <DBServ> servList;
-};
-
 class RedisCG {
 public:
-	RedisCG(const Json::Value &config, LogCb cb = NULL);
+	RedisCG(const Json::Value &config);
 	~RedisCG();
 	int clear();
 	DBHandle getHndl(const string &key);
@@ -27,7 +17,7 @@ private:
 	int init(const Json::Value &config);
 
 	vector <DBHandle> m_dbs;
-	RedisCGCfg m_cfg;
+	Json::Value m_cfg;
 	LogCb m_cmdLog;
 };
 

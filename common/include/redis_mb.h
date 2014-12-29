@@ -49,6 +49,8 @@ private:
 
 	RedisCG *m_cg;
 
+	Json::Value m_cfg;
+
 	int m_expiry;
 
 	int m_capability;

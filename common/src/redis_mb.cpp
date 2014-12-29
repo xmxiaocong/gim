@@ -10,23 +10,19 @@ namespace gim {
 RedisMb::RedisMb(const Json::Value &config)
 {
 	m_cg = NULL;
+	m_cfg = config;
 	m_expiry = DEFAULT_MSG_EXPIRY_TIME;
 	m_capability = DEFAULT_MB_CAPABILITY;
 	
-	Json::Reader reader;	
-	Json::Value value;
-
-	if (reader.parse(config.toStyledString(), value)) {
-		Json::Value etValue = value["ExpiryTime"];
-		if (etValue.type() == Json::intValue || 
-			etValue.type() == Json::uintValue) {
-			m_expiry = etValue.asInt();
-		}
-		Json::Value cpValue = value["Capability"];
-		if (cpValue.type() == Json::intValue || 
-			cpValue.type() == Json::uintValue) {
-			m_capability = etValue.asInt();
-		}
+	Json::Value etValue = m_cfg["ExpiryTime"];
+	if (etValue.type() == Json::intValue || 
+		etValue.type() == Json::uintValue) {
+		m_expiry = etValue.asInt();
+	}
+	Json::Value cpValue = m_cfg["Capability"];
+	if (cpValue.type() == Json::intValue || 
+		cpValue.type() == Json::uintValue) {
+		m_capability = cpValue.asInt();
 	}
 }
 		

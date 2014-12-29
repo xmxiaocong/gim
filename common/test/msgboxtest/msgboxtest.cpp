@@ -12,15 +12,26 @@ void print(const string &data)
 
 int main(void)
 {
-	Json::Value cgcfg, mbcfg;
-	cgcfg["UrlList"].append("127.0.0.1:7381");
-	RedisCG cg(cgcfg, print);
+	Json::Value cfg;
+
+	Json::Value ipcfg;
+	ipcfg["ipaddr"] = "127.0.0.1";
+	ipcfg["port"] = 7381;
+	cfg["RedisCGCfg"]["UrlList"].append(ipcfg);
+	ipcfg["port"] = 7382;
+	cfg["RedisCGCfg"]["UrlList"].append(ipcfg);
+	ipcfg["port"] = 7383;
+	cfg["RedisCGCfg"]["UrlList"].append(ipcfg);
+	cfg["RedisMbCfg"]["ExpiryTime"] = 200;
+	cfg["RedisMbCfg"]["Capability"] = 10;
+
+	RedisCG cg(cfg["RedisCGCfg"]);
+	cg.setCmdLog(print);
+	
 	RdsMbFactory rdsfac;
-	mbcfg["ExpiryTime"] = 200;
-	mbcfg["Capability"] = 10;
-	RedisMb *mb = (RedisMb *)rdsfac.createNewMbAdpt(mbcfg);
+	RedisMb *mb = (RedisMb *)rdsfac.createNewMbAdpt(cfg["RedisMbCfg"]);
 	mb->bindCG(&cg);
-	string key("key");
+	string key("keysd");
 
 	Message msg;
 	msg.set_to("234242145");
