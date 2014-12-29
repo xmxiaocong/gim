@@ -29,16 +29,9 @@ public:
 	virtual int delSession(const Sess &s) = 0;
 };
 
-class DefSessCache{
-public:
-	virtual int getSession(const string &key, vector<Sess> &m);
-	virtual int setSession(const Sess &s);
-	virtual int delSession(const Sess &s);
-private:
-};
-
 class SsChFactory{
 public:
+	virtual ~SsChFactory(){};
 	virtual SessCache* getSessCache(const Json::Value& config);
 };
 

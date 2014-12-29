@@ -1,40 +1,28 @@
 #include "svlist_cache.h"
+#include "def_svlist_cache.h"
 
 namespace gim{
 
-int DefSvLstCache::getEnableList(int type, vector<Serv> &servlist){
-	return 0;
-}
-
-int DefSvLstCache::getDisableSvIDList(int type, vector<int> &servlist){
-	return 0;
-}
-
-int DefSvLstCache::getAllList(int type, vector<Serv> &servlist){
-	return 0;
-}
-
-int DefSvLstCache::addServ(int type, const Serv &serv){
-	return 0;
-}
-
-int DefSvLstCache::updateServ(int type, const Serv &serv){
-	return 0;
-}
-
-int DefSvLstCache::deleteServ(int type, int id){
-	return 0;
-}
-
-int DefSvLstCache::enableServ(int type, int id){
-	return 0;
-}
-
-int DefSvLstCache::disableServ(int type, int id){
-	return 0;
-}
-
 SvLstCache* SvLstChFactory::getSvLstCache(const Json::Value& config){
+
+	const Json::Value& type = config["Type"];
+	
+	if(!type.isString()){
+		return NULL;
+	}
+	
+	const Json::Value& conf = config["Config"];
+
+	if(type.asString() == "DefaultType"){
+		DefSvLstCache* c = new DefSvLstCache();
+
+		if(c->init(conf) >= 0){
+			return c;
+		}
+		
+		delete c;	
+	}
+
 	return NULL;
 } 
 

@@ -29,22 +29,9 @@ public:
 	virtual int disableServ(int type, int id) = 0;
 };
 
-class DefSvLstCache{
-public:
-	virtual ~DefSvLstCache();
-	virtual int getEnableList(int type, vector<Serv> &servlist);
-	virtual int getDisableSvIDList(int type, vector<int> &servlist);
-	virtual int getAllList(int type, vector<Serv> &servlist);
-	virtual int addServ(int type, const Serv &serv);
-	virtual int updateServ(int type, const Serv &serv);
-	virtual int deleteServ(int type, int id);
-	virtual int enableServ(int type, int id);
-	virtual int disableServ(int type, int id);
-private:
-};
-
 class SvLstChFactory{
 public:
+	virtual ~SvLstChFactory(){};
 	virtual SvLstCache* getSvLstCache(const Json::Value& config);
 };
 
