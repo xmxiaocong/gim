@@ -1,8 +1,8 @@
 #ifndef __REDIS_CG_H__
 #define __REDIS_CG_H__
 
-#include "cache_group.h"
 #include "redis_client.h"
+#include "json/json.h"
 
 namespace gim {
 
@@ -12,24 +12,23 @@ struct DBServ {
         string passwd;
 };
 
-class RedisCG : public CacheGroup {
-public:
-	~RedisCG();
-	int init(const vector<string> &servList);
-	int clear();
-	DBHandle getHndl(const string &key);
-private:
-	vector <DBHandle> m_dbs;
-	vector <DBServ> m_servList;
+struct RedisCGCfg {
+	vector <DBServ> servList;
 };
 
-class RdsCGFactory : public CacheGroupFactory {
+class RedisCG {
 public:
-	CacheGroup *createNewCG(const Json::Value &config)
-	{
-		CacheGroup *c = new RedisCG();
-		return c;
-	}
+	RedisCG(const Json::Value &config, LogCb cb = NULL);
+	~RedisCG();
+	int clear();
+	DBHandle getHndl(const string &key);
+	void setCmdLog(LogCb cb);
+private:
+	int init(const Json::Value &config);
+
+	vector <DBHandle> m_dbs;
+	RedisCGCfg m_cfg;
+	LogCb m_cmdLog;
 };
 
 };
