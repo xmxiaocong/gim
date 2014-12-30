@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include "session.pb.h"
 #include "json/json.h"
 #include "base/ef_btype.h"
 
@@ -11,15 +12,6 @@ namespace gim{
 using namespace std;
 using namespace ef;
 
-struct Sess{
-	string	cid;
-	int64	lasttime;//last act time
-	string	sessid;
-	int	svid;//connect server id
-	Sess()
-		:lasttime(0){
-	}
-};
 
 class SessCache{
 public:
