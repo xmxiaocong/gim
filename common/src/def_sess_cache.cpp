@@ -10,7 +10,20 @@ DefSessCache::~DefSessCache(){
 }
 
 int DefSessCache::init(const Json::Value& config){
-	m_dbg = new RedisCG(config);
+	const Json::Value& dbconf = config["DBGroup"];
+
+	if(!dbconf.isObject()){
+		return -2001;
+	}
+
+	m_dbg = new RedisCG(dbconf);
+
+	const Json::Value& exp = config["Expire"];
+
+	if(exp.isInt()){
+		m_expire = exp.asInt();
+	}
+
 	return 0;
 }
 
@@ -70,7 +83,8 @@ int DefSessCache::setSession(const Sess &s){
 
 	s.SerializeToString(&str);	
 
-	int ret = h-> hashSet(sessKey(s.cid()), s.sessid(), base64Encode(str));
+	int ret = h->hashSet(sessKey(s.cid()), s.sessid(), base64Encode(str));
+	h->keyExpire(sessKey(s.cid()), m_expire);
 
 	return ret;
 }
@@ -83,7 +97,7 @@ int DefSessCache::delSession(const Sess &s){
 		return -1002;
 	}
 
-	int ret = h-> hashDel(sessKey(s.cid()), s.sessid());
+	int ret = h->hashDel(sessKey(s.cid()), s.sessid());
 
 	return ret;
 }

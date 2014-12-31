@@ -8,7 +8,12 @@ namespace gim{
 
 class DefSessCache: public SessCache{
 public:
-	DefSessCache():m_dbg(NULL){};
+	enum{
+		SESSION_DEFAULT_EXPIRE_SECOND = 500,
+	};
+
+	DefSessCache():m_dbg(NULL), 
+		m_expire(SESSION_DEFAULT_EXPIRE_SECOND){};
 	virtual ~DefSessCache();
 	int init(const Json::Value& config);
 	virtual int getSession(const string &key, vector<Sess> &m);
@@ -19,6 +24,7 @@ private:
 	DBHandle getHandle(const string &key);
 
 	RedisCG* m_dbg;
+	int m_expire;
 };
 
 
