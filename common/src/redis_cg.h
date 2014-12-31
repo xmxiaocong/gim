@@ -10,11 +10,11 @@ class RedisCG {
 public:
 	RedisCG(const Json::Value &config);
 	~RedisCG();
-	int clear();
 	DBHandle getHndl(const string &key);
 	void setCmdLog(LogCb cb);
 private:
 	int init(const Json::Value &config);
+	int clear();
 
 	vector <DBHandle> m_dbs;
 	Json::Value m_cfg;
