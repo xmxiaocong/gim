@@ -28,7 +28,7 @@ int RedisCG::init(const Json::Value &config)
 {
 	m_cfg = config;
 	
-	Json::Value urlArray = m_cfg["UrlList"];
+	Json::Value urlArray = m_cfg["NodeCfgs"];
 	m_dbs.clear();
 	m_dbs.resize(urlArray.size());
 	for(size_t i = 0; i < m_dbs.size(); ++i){
@@ -61,7 +61,7 @@ DBHandle RedisCG::getHndl(const string &key)
         ef::uint64 idx = i % m_dbs.size();
 	
 	if(!m_dbs[idx]) {
-		Json::Value url = m_cfg["UrlList"][idx];
+		Json::Value url = m_cfg["NodeCfgs"][idx];
 		m_dbs[idx] = connectCache(url["ipaddr"].asString(), 
 			url["port"].asInt(), url["passwd"].asString());
 		if (!m_dbs[idx]) {
