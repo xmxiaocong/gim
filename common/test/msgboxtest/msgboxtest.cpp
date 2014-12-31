@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "redis_mb.h"
 #include "redis_cg.h"
 
@@ -10,20 +11,28 @@ void print(const string &data)
 	cout << data << endl;
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
+	if (argc < 2) {
+		std::cout << "usage:" << argv[0] << " <cfgfile>" << std::endl;
+		return -1;
+	}
+	
 	Json::Value cfg;
+	Json::Reader reader;
 
-	Json::Value ipcfg;
-	ipcfg["ipaddr"] = "127.0.0.1";
-	ipcfg["port"] = 7381;
-	cfg["RedisCGCfg"]["UrlList"].append(ipcfg);
-	ipcfg["port"] = 7382;
-	cfg["RedisCGCfg"]["UrlList"].append(ipcfg);
-	ipcfg["port"] = 7383;
-	cfg["RedisCGCfg"]["UrlList"].append(ipcfg);
-	cfg["RedisMbCfg"]["ExpiryTime"] = 200;
-	cfg["RedisMbCfg"]["Capability"] = 10;
+	ifstream is(argv[1]);
+	string strcfg;
+	while (is) {
+		string tmp;
+		getline(is, tmp);
+		strcfg += tmp;
+	}
+	
+	if (!reader.parse(strcfg, cfg)) {
+		std::cout << "parse config file fail" << std::endl;
+		return -1;
+	}
 
 	RedisCG cg(cfg["RedisCGCfg"]);
 	cg.setCmdLog(print);
