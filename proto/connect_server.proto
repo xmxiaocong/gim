@@ -6,7 +6,7 @@ message LoginRequest{
 	required string cid = 1;//cid of client
 	required int64 time = 2; //client timestamp
 	optional string version = 3;//client version
-	optional int32 type = 4;//0: raw data, 1:enc
+	optional int32 enc = 4;//0: raw data, 1:AES
 	optional string token = 5; //use for check
 	repeated Pair kvs = 6;
 }
