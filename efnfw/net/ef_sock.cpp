@@ -3,18 +3,53 @@
 #include <errno.h>
 #include <cassert>
 #include <string.h>
+#include <sstream>
 #include <net/if.h>
+
 
 namespace ef{
 
 #define LINUX_EPOLL
 
-int getLocalhostIps ( in_addr_t addrs[], int asize )
+std::string ipStr(in_addr_t addr){
+	std::stringstream os;
+	uint8* p = (uint8*)&addr;
+	int fr1 = p[0];
+	int fr2 = p[1];
+	int fr3 = p[2];
+	int fr4 = p[3];
+	
+	os << fr1 << "." << fr2 << "." << fr3 << "."
+		<< fr4;
+
+	return os.str();
+}
+
+bool isLocalIP(in_addr_t addr)
+{
+	uint8* p = (uint8*)&addr;
+	int fr1 = p[0];
+	int fr2 = p[1];
+	//int fr3 = p[2];
+	//int fr4 = p[3];
+	
+	switch(fr1){
+	case 10:
+		return true;
+	case 172:
+		return (fr2 >= 16 && fr2 <= 31);
+	case 192:
+		return fr2 == 168;
+	}
+
+	return false;
+}
+
+int getIPs ( in_addr_t addrs[], int asize )
 {
 	int MAXINTERFACES=16;
 	int i = 0;
-	long ip;
-	int fd, intrface, retn = 0;
+	int fd, intrface = 0;
 	struct ifreq buf[MAXINTERFACES]; ///if.h
 	struct ifconf ifc; ///if.h
 	in_addr_t loopback;
@@ -49,6 +84,60 @@ int getLocalhostIps ( in_addr_t addrs[], int asize )
 	}
 	close (fd);
 	return i;
+}
+
+int getIPs (std::vector<std::string>& ips)
+{
+
+	const int MAX_IP_COUNT = 64;
+	in_addr_t addrs[MAX_IP_COUNT];
+
+	int ret = getIPs (addrs, MAX_IP_COUNT);
+
+	for(int i = 0; i < ret; ++i){
+		ips.push_back(ipStr(addrs[i]));
+	}
+
+	return ret;
+}
+
+int getLocalIPs (std::vector<std::string>& ips)
+{
+	const int MAX_IP_COUNT = 64;
+	in_addr_t addrs[MAX_IP_COUNT];
+
+	int ret = getIPs (addrs, MAX_IP_COUNT);
+	int j = 0;
+
+	for(int i = 0; i < ret; ++i){
+		if (isLocalIP(addrs[i]))
+		{
+			++j;
+			ips.push_back(ipStr(addrs[i]));
+		}
+	}
+
+	return j;
+}
+
+int getPublicIPs (std::vector<std::string>& ips)
+{
+	const int MAX_IP_COUNT = 64;
+	in_addr_t addrs[MAX_IP_COUNT];
+
+	int ret = getIPs (addrs, MAX_IP_COUNT);
+	int j = 0;
+
+	for(int i = 0; i < ret; ++i){
+		if (!isLocalIP(addrs[i]))
+		{
+			++j;
+			ips.push_back(ipStr(addrs[i]));
+		}
+	}
+
+	return j;
+
 }
 
 int tcpConnectWithTimeout ( const char* ip, unsigned short int port,

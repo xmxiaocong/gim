@@ -1,6 +1,8 @@
 #ifndef __EF_SOCK_H__
 #define __EF_SOCK_H__
 
+#include <vector>
+#include <string>
 #include <unistd.h>
 #include <fcntl.h>
 #include <netdb.h>
@@ -11,7 +13,6 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-
 #include "base/ef_btype.h"
 
 namespace ef{
@@ -51,7 +52,14 @@ int sockSetBlocking(SOCKET socket, int blocking);
 
 int setSocketNonblocking(int fd);
 
-int getLocalhostIps(in_addr_t addrs[], int asize);
+bool isLocalIP(in_addr_t addr);
+std::string ipStr(in_addr_t addr);
+int getIPs(in_addr_t addrs[], int asize);
+int getIPs(std::vector<std::string>& ips);
+int getLocalIPs(in_addr_t addrs[], int asize);
+int getLocalIPs(std::vector<std::string>& ips);
+int getPublicIPs(in_addr_t addrs[], int asize);
+int getPublicIPs(std::vector<std::string>& ips);
 
 struct in_addr sockGetHostip (const char * host);
 
