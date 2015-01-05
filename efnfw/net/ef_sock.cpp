@@ -101,6 +101,25 @@ int getIPs (std::vector<std::string>& ips)
 	return ret;
 }
 
+int getLocalIPs ( in_addr_t addrs[], int asize )
+{
+	const int MAX_IP_COUNT = 64;
+	in_addr_t a[MAX_IP_COUNT];
+
+	int ret = getIPs (a, MAX_IP_COUNT);
+	int j = 0;
+
+	for(int i = 0; i < ret && j < asize; ++i){
+		if (isLocalIP(a[i]))
+		{
+			addrs[j] = a[i];
+			++j;
+		}
+	}
+
+	return j;
+}
+
 int getLocalIPs (std::vector<std::string>& ips)
 {
 	const int MAX_IP_COUNT = 64;
@@ -112,8 +131,27 @@ int getLocalIPs (std::vector<std::string>& ips)
 	for(int i = 0; i < ret; ++i){
 		if (isLocalIP(addrs[i]))
 		{
-			++j;
 			ips.push_back(ipStr(addrs[i]));
+			++j;
+		}
+	}
+
+	return j;
+}
+
+int getPublicIPs ( in_addr_t addrs[], int asize )
+{
+	const int MAX_IP_COUNT = 64;
+	in_addr_t a[MAX_IP_COUNT];
+
+	int ret = getIPs (a, MAX_IP_COUNT);
+	int j = 0;
+
+	for(int i = 0; i < ret && j < asize; ++i){
+		if (!isLocalIP(a[i]))
+		{
+			addrs[j] = a[i];
+			++j;
 		}
 	}
 
@@ -131,8 +169,8 @@ int getPublicIPs (std::vector<std::string>& ips)
 	for(int i = 0; i < ret; ++i){
 		if (!isLocalIP(addrs[i]))
 		{
-			++j;
 			ips.push_back(ipStr(addrs[i]));
+			++j;
 		}
 	}
 

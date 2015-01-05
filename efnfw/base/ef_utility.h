@@ -11,8 +11,7 @@ namespace ef{
 
 	int64 gettime_ms();
 
-	int tv_cmp(struct timeval t1, struct timeval t2);
-
+	int32 tv_cmp(struct timeval t1, struct timeval t2);
 	struct timeval tv_diff(struct timeval t1, struct timeval t2);
 
 	int64 htonll(int64 l);

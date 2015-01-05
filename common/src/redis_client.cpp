@@ -270,6 +270,17 @@ int RedisCli::hashDel(const string &key, const string &field)
 	return _exeCmdWithNoOutput("HDEL " + key + " " + field);
 }
 
+int RedisCli::hashMDel(const string &key, const vector<string> &fields)
+{
+	stringstream ss;
+	ss << "HDEL " << key << " ";
+	vector<string>::const_iterator it;
+	for (it = fields.begin(); it != fields.end(); it++) {
+		ss << *it << " ";
+	}
+	return _exeCmdWithNoOutput(ss.str());
+}
+
 int RedisCli::hashExists(const string &key, const string &field)
 {
 	return _exeCmdWithNoOutput("HEXISTS " + key + " " + field);
@@ -706,17 +717,6 @@ int RedisCli::strSetRange(const string &key, int offset, const string &value)
 int RedisCli::strLen(const string &key, int &len)
 {
 	return _exeCmdWithOutput("STRLEN " + key, len);
-}
-
-int RedisCli::hashMdel(const string &key, const vector<string> &fields)
-{
-	stringstream ss;
-	ss << "HDEL " << key << " ";
-	vector<string>::const_iterator it;
-	for (it = fields.begin(); it != fields.end(); it++) {
-		ss << *it << " ";
-	}
-	return _exeCmdWithNoOutput(ss.str());
 }
 
 int RedisCli::hashIncrBy(const string &key, const string &field, 

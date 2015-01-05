@@ -37,7 +37,7 @@ namespace ef{
 		delAllConnections();
 		sock_close(m_ctlfd);
 		sock_close(m_ctlfd1);
-		mutex_destroy(&m_opcs);
+		mutexDestroy(&m_opcs);
 		if(m_clean)
 			m_clean(m_obj);
 	}

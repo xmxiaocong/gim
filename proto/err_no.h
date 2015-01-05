@@ -2,13 +2,15 @@
 #define __ERR_NO_H__
 
 
-namespace lr_com{
+namespace gim{
 
 
 enum{
 	STATUS_OK = 0,
 	INPUT_FORMAT_ERROR = -1,
 	CREATE_SESSION_FAIL = -10,
+	GET_USER_KEY_FAIL = -11,
+	CHECK_TOKEN_FAIL = -12,
 	INVLID_SESSION_ID = -20,
 	SESSION_TIMEOUT = -21, 
 	NO_SERVICE = -30,
@@ -17,6 +19,7 @@ enum{
 	SERVICE_TOO_BUSY = -33,
 	INVALID_SN = -40,
 	SN_TIMEOUT = -41,
+	DECRYPT_FAIL = -50,
 	INNER_ERROR = -100,
 };
 
@@ -28,6 +31,10 @@ inline const char* getErrStr(int e){
 		return "INPUT_FORMAT_ERROR";
 	case CREATE_SESSION_FAIL:
 		return "CREATE_SESSION_FAIL";
+	case GET_USER_KEY_FAIL:
+		return "GET_USER_KEY_FAIL";
+	case CHECK_TOKEN_FAIL:
+		return "CHECK_TOKEN_FAIL";
 	case INVLID_SESSION_ID:
 		return "INVLID_SESSION_ID";
 	case NO_SERVICE:
@@ -44,6 +51,8 @@ inline const char* getErrStr(int e){
 		return "INVALID_SN";
 	case SN_TIMEOUT:
 		return "SN_TIMEOUT";
+	case DECRYPT_FAIL:
+		return "DECRYPT_FAIL";
 	case INNER_ERROR:
 		return "INNER_ERROR";
 	}

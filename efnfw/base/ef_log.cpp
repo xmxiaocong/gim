@@ -144,7 +144,7 @@ namespace ef{
 		for(; itor != m_appends.end(); ++itor){
 			delete itor->second;
 		}
-		//mutex_destroy(&m_cs);
+		//mutexDestroy(&m_cs);
 	}
 
 	int32 log::addAppender(const std::string& name, const std::string& path, 
@@ -281,7 +281,7 @@ namespace ef{
 
 	FileAppender::~FileAppender(){
 		std::cout << "FileAppender::~FileAppender\n";
-		mutex_destroy(&m_cs); 
+		mutexDestroy(&m_cs); 
 		flush_cache(m_caches + m_cache_idx % 2);
 		flush_cache(m_caches + (1 + m_cache_idx) % 2);
 		if(m_file)

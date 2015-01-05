@@ -80,7 +80,7 @@ namespace ef{
 		return ret;
 	}
 
-	int32 mutex_destroy(MUTEX*   mtx)
+	int32 mutexDestroy(MUTEX*   mtx)
 	{
 		int32  ret = 0;
 #ifdef _WIN32

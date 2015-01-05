@@ -65,6 +65,7 @@ public:
 	int strSet(const string &key, const string &value, const string &options = "");
 
 	int hashDel(const string &key, const string &field);
+  	int hashMDel(const string &key, const vector<string> &fields);
 	int hashExists(const string &key, const string &field);
 	int hashGet(const string &key, const string &field, string &value);
 	int hashGetAll(const string &key, map<string, string> &mfv);
@@ -138,7 +139,6 @@ public:
   	int strLen(const string &key, int &len);
 
 	/* hashtable related */
-  	int hashMdel(const string &key, const vector<string> &fields);
   	int hashIncrBy(const string &key, const string &field, 
 		int64 increment, int64 &afterIncr);
   	int hashIncrByFloat(const string &key, const string &field, 

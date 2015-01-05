@@ -50,17 +50,27 @@ int DefSessCache::getSession(const string &key, vector<Sess> &m){
 		return -1002;
 	}
 
+	time_t n = time(NULL);
 	map<string, string> sm;
 
 	int ret = h->hashGetAll(sessKey(key), sm);
-	
-	map<string, string>::iterator it = sm.begin();
-	
+	vector<string> oldsessids;
+	map<string, string>::iterator it = sm.begin();	
+
 	for(; it != sm.end(); ++it){
 		Sess s;
 		string str = base64Decode(it->second);
 		s.ParseFromString(str);
-		m.push_back(s);
+
+		if(s.lasttime() + m_expire < n){
+			oldsessids.push_back(s.sessid());
+		}else{	
+			m.push_back(s);
+		}
+	}
+
+	if(oldsessids.size()){
+		h->hashMDel(sessKey(key), oldsessids);
 	}
 
 	if(ret == CACHE_NOT_EXIST){
@@ -80,7 +90,7 @@ int DefSessCache::setSession(const Sess &s){
 	}
 
 	string str;	
-
+	const_cast<Sess&>(s).set_lasttime(time(NULL));
 	s.SerializeToString(&str);	
 
 	int ret = h->hashSet(sessKey(s.cid()), s.sessid(), base64Encode(str));

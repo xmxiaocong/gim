@@ -16,6 +16,7 @@
  */
 
 #include "ef_md5.h"
+#include "ef_hex.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -259,6 +260,13 @@ void MD5(uint8 digest[16], uint8 const *buf, uint32 len){
 	MD5Init(&ctx);
 	MD5Update(&ctx, (uint8 const *)buf, (uint32)len);
 	MD5Final((uint8 *)digest, &ctx);
+}
+
+void MD5Hex(std::string& hex, uint8 const *buf, uint32 len){
+	uint8 digest[16];
+	MD5(digest, buf, len);
+	hex.resize(32);
+	bytesToHexs((const char*)digest, 16, (char*)hex.data(), 32);
 }
 
 int32 fileMD5 (char const * fname, uint8 * md5val)

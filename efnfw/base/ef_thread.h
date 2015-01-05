@@ -60,7 +60,7 @@ namespace ef{
 	int32 mutexInit (MUTEX* mtx);
 	int32 mutexTake (MUTEX* mtx);
 	int32 mutexGive (MUTEX* mtx);
-	int32 mutex_destroy(MUTEX* mtx);
+	int32 mutexDestroy(MUTEX* mtx);
 	int32 semInit (SEMAPHORE* sem, int32 initcnt, int32 maxcnt);
 	int32 semTake (SEMAPHORE* sem, bool couldbreak = false);
 	int32 semTryTake (SEMAPHORE* sem);
