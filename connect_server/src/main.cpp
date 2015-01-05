@@ -45,10 +45,6 @@ static int output_statistic(const std::string& l){
 }
 
 
-static void output_zookeeper(const std::string& l){
-	logError("ConnectZookeeper") << l;
-}
-
 int main(int argc, const char** argv){
 	
 	if(argc < 2){

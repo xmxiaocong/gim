@@ -100,6 +100,7 @@ void Settings::print(){
 	std::cout << "MaxCliCount:" << MaxCliCount << std::endl;
 	std::cout << "MaxReqFrequency:" << MaxReqFrequency << std::endl;
 	std::cout << "MaxAcceptSpeed:" << MaxAcceptSpeed << std::endl;
+	std::cout << "MaxTimeDif:" << MaxTimeDif << std::endl;
 
 	std::cout << "SvLstCacheConfig:" << SvLstCacheConfig.toStyledString() 
 		<< std::endl;
