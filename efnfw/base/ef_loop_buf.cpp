@@ -70,8 +70,10 @@ namespace	ef{
 		frame*	f = m_w_pos;
 		while(len > wlen && f){
 			ret = f->write(buf + wlen, len - wlen);
-			if(ret <= 0)
-				break;
+			if(ret <= 0){
+				f = f->m_next;
+				m_w_pos = f;
+			}
 			wlen += ret;
 		}
 		m_size += wlen;
@@ -91,8 +93,9 @@ namespace	ef{
 		int32 rlen = 0;
 		int32 ret = 0;
 		frame*  f = m_head;
-		frame*	n = f->m_next;
+		frame*	n = NULL;
 		while(len > rlen && f && f != m_w_pos->m_next){
+			n = f->m_next;
 			ret = f->peek(buf + rlen, len - rlen);	
 			rlen += ret;
 			f = n;
@@ -104,13 +107,13 @@ namespace	ef{
 		int32 rlen = 0;
 		int32 ret = 0;
 		frame*  f = m_head;
-		frame*  n = f->m_next;
+		frame*  n = NULL;
 		while(len > rlen && f && f != m_w_pos->m_next){
 			n = f->m_next;
 			ret = f->read(buf + rlen, len - rlen);	
 			rlen += ret;
-			if(!f->m_size){
-				m_head = f->m_next;
+			if(!f->m_size && m_tail != f){
+				m_head = n;
 				m_tail->m_next = f;
 				m_tail = f;
 				f->m_next = NULL;
@@ -136,7 +139,7 @@ namespace	ef{
 		f->m_start = 0;
 		f->m_next = NULL;	
 		f->m_cap = len - sizeof(frame);
-		f->m_buf = buf += sizeof(frame);
+		f->m_buf = buf + sizeof(frame);
 		return f;	
 	}
 
@@ -173,10 +176,10 @@ namespace	ef{
 
 	LoopBuf::~LoopBuf(){
 		frame* f = m_head;
-		frame* n = f->m_next;
+		frame* n = NULL;
 		for(; f; f = n){
 			n = f->m_next;	
-			delete (uint8*)f;	
+			delete [] (uint8*)f;	
 		}	
 		m_head = NULL;
 		m_tail = NULL;

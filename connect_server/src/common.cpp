@@ -57,7 +57,7 @@ namespace gim{
 	int32 getDecorationInfo(const std::string& dn, int32& svid,
 		int32& conid, std::string& n){
 
-		std::string b64buf = dn.substr(0, 11);
+		std::string b64buf = dn.substr(0, 12);
 
 		std::string buf = base64Decode(b64buf); 
 
@@ -65,7 +65,7 @@ namespace gim{
 		svid = *(int32*)p;
 		conid = *(int32*)(p + sizeof(int32));
 
-		n = dn.substr(11);		
+		n = dn.substr(12);		
 
 		return 0;
 	}	

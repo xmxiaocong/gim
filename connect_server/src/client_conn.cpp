@@ -26,7 +26,7 @@ int32 CDispatcher::dispatchConnection(EventLoop*l, Connection* c){
 	}
 		
 	EventLoop& lp = m_s->getEventLoop(idx);
-	id = (idx * EVENT_LOOP_ID_MASK) + (id / EVENT_LOOP_ID_MASK);
+	id = getConnectionId(idx, id);
 	c->setId(id);
 	lp.asynAddConnection(id, c);
 	return 0;		
@@ -121,11 +121,13 @@ int32 CliCon::checkToken(const std::string& token){
 
 	map<string, string> pro;
 
-	int32 ret = udb->getUserInfo(m_sess.cid(), m_key, pro);	
+	int32 ret = udb->getUserInfo(m_sess.cid(),  pro);	
 
 	if(ret < 0){
 		return GET_USER_KEY_FAIL;
 	}
+
+	m_key = pro[USER_KEY_FIELD_NAME];
 
 	std::string tk;
 	std::string s = m_sess.cid() + m_key + m_version + 
@@ -167,10 +169,10 @@ int32 CliCon::handleLoginRequest(const head& h, const std::string& req,
 	m_sess.set_svid(pSettings->Id);
 	m_version = lgreq.version();
 	m_enc = lgreq.enc();
-	
+	m_client_login_time = lgreq.time();
+
 	if(lgreq.enc()){
 
-		m_client_login_time = lgreq.time();
 		ret = checkTime(pSettings->MaxTimeDif);
 		if(ret < 0){
 			return setClientTime();
@@ -180,12 +182,21 @@ int32 CliCon::handleLoginRequest(const head& h, const std::string& req,
 			ret = CHECK_TOKEN_FAIL;
 			goto exit;
 		}
+
 		tk = lgreq.token();
 		//check token
 		ret = checkToken(tk);
+
 		if(ret < 0){
 			goto exit;
 		}
+	}else{
+		
+		if(!pSettings->NoEncSupport){
+			ret = CHECK_TOKEN_FAIL;
+			goto exit; 
+		}
+
 	}
 
 	decorationName(pSettings->Id, getId(), lgreq.cid(), sessid);
@@ -205,9 +216,7 @@ exit:
 		lgresp.set_status(0);
 	}
 
-#ifdef SESS_DEBUG
 	lgresp.set_sessid(m_sess.sessid());
-#endif
 
 	lgresp.SerializeToString(&resp);
 	ALogError("ConnectServer") << "<action:client_login> <cid:" 
@@ -383,20 +392,18 @@ int32 CliCon::handleServiceRequest(const head& h, const std::string& req,
 		goto exit;
 	}
 
-	sresp.set_sessid(sreq.sessid());
+
 	sresp.set_svtype(sreq.svtype());
 	sresp.set_sn(sreq.sn());
 	sresp.set_status(0);
 
-#ifdef SESS_DEBUG
 
 	if(sreq.sessid() != sessId()){
 		ret = INVLID_SESSION_ID;	
 		goto exit;
 	}
 
-#endif
-
+	sresp.set_sessid(sreq.sessid());
 	constructPacket(h, req_dec, treq);
 	ret1 = getServMan().dispatchRequest(sreq.svtype(), 
 		treq, getEventLoop(), l, conid);
@@ -417,7 +424,7 @@ exit:
 		<< m_sess.cid() << "> <version:" << m_version  
 		<< "> <sessid:" << m_sess.sessid() << "> <svtype:"
 		<< sresp.svtype() << "> <sn:" << sresp.sn()
-		<< "> <event_loop:" << l << "> <conid:" << conid 
+		<< "> <conid:" << conid 
 		<< "> <status:" << sresp.status() << "> <errstr:"
 		<< getErrStr(sresp.status()) << ">";
 	return ret;
@@ -585,8 +592,7 @@ int32 CliCon::checkPackLen(){
 	if(ret <= 0 && bufLen() > 0){
 		ALogError("ConnectServer") << "<action:client_check_pack> <cid:" 
 			<< m_sess.cid() << "> <sessid:" << m_sess.sessid() 
-			<< "> <event_loop:" << getEventLoop() << "> <conid:" 
-			<< getId() << "> <buflen:" << bufLen() 
+			<< "> <conid:" << getId() << "> <buflen:" << bufLen() 
 			<< "> <status:packet_not_full>";
 
 	}

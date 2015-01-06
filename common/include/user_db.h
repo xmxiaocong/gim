@@ -15,7 +15,8 @@ using namespace ef;
 class UserDB{
 public:
 	virtual ~UserDB(){}
-	virtual int getUserInfo(const string &cid, string& key, map<string, string>& pro) = 0;
+	virtual int getUserInfo(const string &cid, map<string, string>& pro) = 0;
+	virtual int setUserInfo(const string &cid, const map<string, string>& pro) = 0;
 };
 
 class UserDBFactory{

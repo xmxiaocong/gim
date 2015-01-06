@@ -55,6 +55,8 @@ bool Settings::load(const char *filename)
 	MaxAcceptSpeed = root["MaxAcceptSpeed"].asInt();
 	MaxTimeDif = root["MaxTimeDif"].asInt();
 
+	NoEncSupport = root["NoEncSupport"].asInt();
+
 	NLogLevel = root["NLogLevel"].asString();
 	NLogPath = root["NLogPath"].asString();
 	LogConfig = root["LogConfig"].asString();
@@ -101,6 +103,7 @@ void Settings::print(){
 	std::cout << "MaxReqFrequency:" << MaxReqFrequency << std::endl;
 	std::cout << "MaxAcceptSpeed:" << MaxAcceptSpeed << std::endl;
 	std::cout << "MaxTimeDif:" << MaxTimeDif << std::endl;
+	std::cout << "NoEncSupport:" << NoEncSupport << std::endl;
 
 	std::cout << "SvLstCacheConfig:" << SvLstCacheConfig.toStyledString() 
 		<< std::endl;

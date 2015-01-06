@@ -142,42 +142,23 @@ int RedisCli::disconnect()
 	return	0;
 }
 
-int RedisCli::_exeCmd(Replyer &rpler, const char *fmt, va_list ap)
-{
+int RedisCli::_exeCmd(Replyer &rpler, const string &cmd){
 	int l = m_retry;
 	int ret = 0;
 	while(l-- > 0){
-		if (!m_c) {
-			ret = reconnect();
-		}
-		if (ret < 0) continue;
-		ret = _doExeCmdNoReconnect(rpler, fmt, ap);
+		ret = _doExeCmd(rpler, cmd);
 		if(ret >= 0 || ret == -4)
 			return ret;
 	}
-	
 	return ret;
 }
 
-int RedisCli::_doExeCmdNoReconnect(Replyer &rpler, const char *fmt, va_list ap)
+int RedisCli::_doExeCmdNoReconnect(Replyer &rpler, const string &cmd)
 {
-	redisReply *tmpReply = NULL;
-	
-	if (ap == NULL) {
-		tmpReply = (redisReply *)redisCommand(m_c, fmt);
-	} else {
-		tmpReply = (redisReply *)redisvCommand(m_c, fmt, ap);
-	}
-	
+	redisReply *tmpReply = (redisReply *)redisCommand(m_c, cmd.data());
 	if (m_cmdLog) {
 		stringstream ss;
-		if (ap == NULL) {
-			ss << m_addr << ":" << m_port << "    " << fmt;
-		} else {
-			char buf[1024] = {0};
-			vsnprintf(buf, 1024, fmt, ap);
-			ss << m_addr << ":" << m_port << "    " << buf;
-		}
+		ss << m_addr << ":" << m_port << "    " << cmd;
 		if (tmpReply == NULL || m_c->err) {
 			ss << "    failed";
 		} else if (tmpReply->type == REDIS_REPLY_ERROR) {
@@ -205,27 +186,24 @@ int RedisCli::_doExeCmdNoReconnect(Replyer &rpler, const char *fmt, va_list ap)
 
 }
 
-int RedisCli::_exeCmdWithNoOutput(const char *fmt, ...)
+int RedisCli::_doExeCmd(Replyer &rpler, const string &cmd)
 {
-	int ret;
-	Replyer rpler;
-	va_list ap;
-
-	va_start(ap, fmt);
-	ret = _exeCmd(rpler, fmt, ap);
-	va_end(ap);
-	if (ret < 0) {
-		return -1;
+	int ret = 0;
+	if(!m_c){
+		ret = reconnect();
+	}	
+	if(ret < 0){
+		return  ret; 
 	}
-	return 0;
+	return _doExeCmdNoReconnect(rpler, cmd);	
 }
 
 int RedisCli::_exeCmdWithNoOutput(const string &cmd)
 {
 	int ret;
 	Replyer rpler;
-	
-	ret = _exeCmd(rpler, cmd.data(), NULL);
+
+	ret = _exeCmd(rpler, cmd);
 	if (ret < 0) {
 		return -1;
 	}
@@ -233,32 +211,14 @@ int RedisCli::_exeCmdWithNoOutput(const string &cmd)
 }
 
 template <typename T>
-int RedisCli::_exeCmdWithOutput(T &output, const char *fmt, ...)
+int RedisCli::_exeCmdWithOutput(const string &cmd, T &output)
 {
 	int ret = 0;
 	Replyer rpler;
-	va_list ap;
 
-	va_start(ap, fmt);
-	ret = _exeCmd(rpler, fmt, ap);
-	va_end(ap);
-	if (ret < 0) {
+	if ((ret = _exeCmd(rpler, cmd)) < 0) 
 		return -1;
-	}
 	return getResultFromReply(rpler.reply(), output);
-}
-
-template <typename T>
-int RedisCli::_exeCmdWithOutput(T &output, const string &cmd)
-{
-        int ret = 0;
-        Replyer rpler;
-
-        ret = _exeCmd(rpler, cmd.data(), NULL);
-        if (ret < 0) {
-                return -1;
-        }
-        return getResultFromReply(rpler.reply(), output);
 }
 
 int RedisCli::keyDel(const string &key)
@@ -280,24 +240,24 @@ int RedisCli::keyExpire(const string &key, int seconds)
 
 int RedisCli::strGet(const string &key, string &value)
 {
-	return _exeCmdWithOutput(value, "GET " + key);
+	return _exeCmdWithOutput("GET " + key, value);
 }
 
 int RedisCli::strGetSet(const string &key, const string &value, string &oldvalue)
 {
-	return _exeCmdWithOutput(oldvalue, "GETSET " + key + " " + value);
+	return _exeCmdWithOutput("GETSET " + key + " " + value, oldvalue);
 }
 
 int RedisCli::strIncr(const string &key, int64 &afterIncr)
 {
-	return _exeCmdWithOutput(afterIncr, "INCR " + key);
+	return _exeCmdWithOutput("INCR " + key, afterIncr);
 }
 
 int RedisCli::strIncrBy(const string &key, int64 increment, int64 &afterIncr)
 {
 	stringstream ss;
 	ss << "INCRBY " << key << " " << increment;
-	return _exeCmdWithOutput(afterIncr, ss.str());
+	return _exeCmdWithOutput(ss.str(), afterIncr);
 }
 
 int RedisCli::strSet(const string &key, const string &value, const string &options)
@@ -310,7 +270,7 @@ int RedisCli::hashDel(const string &key, const string &field)
 	return _exeCmdWithNoOutput("HDEL " + key + " " + field);
 }
 
-int RedisCli::hashMdel(const string &key, const vector<string> &fields)
+int RedisCli::hashMDel(const string &key, const vector<string> &fields)
 {
 	stringstream ss;
 	ss << "HDEL " << key << " ";
@@ -328,12 +288,12 @@ int RedisCli::hashExists(const string &key, const string &field)
 
 int RedisCli::hashGet(const string &key, const string &field, string &value)
 {
-	return _exeCmdWithOutput(value, "HGET " + key + " " + field);
+	return _exeCmdWithOutput("HGET " + key + " " + field, value);
 }
 
 int RedisCli::hashGetAll(const string &key, map<string, string> &mfv)
 {
-	return _exeCmdWithOutput(mfv, "HGETALL " + key);
+	return _exeCmdWithOutput("HGETALL " + key, mfv);
 }
 
 int RedisCli::hashMSet(const string &key, const map<string, string> &mfv)
@@ -366,12 +326,12 @@ int RedisCli::setAdd(const string &key, const vector<string> &members)
 
 int RedisCli::setIsMember(const string &key, const string &member, int &ismember)
 {
-	return _exeCmdWithOutput(ismember, "SISMEMBER " + key + " " + member);
+	return _exeCmdWithOutput("SISMEMBER " + key + " " + member, ismember);
 }	
 
 int RedisCli::setMembers(const string &key, vector<string> &members)
 {
-	return _exeCmdWithOutput(members, "SMEMBERS " + key);
+	return _exeCmdWithOutput("SMEMBERS " + key, members);
 }
 
 int RedisCli::setRem(const string &key, const vector<string> &members)
@@ -399,7 +359,7 @@ int RedisCli::ssetAdd(const string &key, const map<string, string> &members)
 
 int RedisCli::ssetCard(const string &key, int64 &card)
 {
-	return _exeCmdWithOutput(card, "ZCARD " + key);
+	return _exeCmdWithOutput("ZCARD " + key, card);
 }
 
 int RedisCli::ssetCount(const string &key, double minscore, double maxscore, int64 &count)
@@ -416,21 +376,21 @@ int RedisCli::ssetCount(const string &key, double minscore, double maxscore, int
 	} else {
 		ss << maxscore;
 	}
-	return _exeCmdWithOutput(count, ss.str());
+	return _exeCmdWithOutput(ss.str(), count);
 }
 
 int RedisCli::ssetRange(const string &key, int start, int stop, vector<string> &members)
 {
 	stringstream ss;
 	ss << "ZRANGE " << key << " " << start << " " << stop;
-	return _exeCmdWithOutput(members, ss.str());
+	return _exeCmdWithOutput(ss.str(), members);
 }
 
 int RedisCli::ssetRangeWithScore(const string &key, int start, int stop, vector<pair<string, string> > &members)
 {
 	stringstream ss;
 	ss << "ZRANGE " << key << " " << start << " " << stop << " WITHSCORES";
-	return _exeCmdWithOutput(members, ss.str());
+	return _exeCmdWithOutput(ss.str(), members);
 }
 
 int RedisCli::ssetRangeByScoreWithScore(const string &key, double minscore, double maxscore, 
@@ -452,7 +412,7 @@ int RedisCli::ssetRangeByScoreWithScore(const string &key, double minscore, doub
 	}
 	
 	ss << "WITHSCORES " << options;
-	return _exeCmdWithOutput(members, ss.str());
+	return _exeCmdWithOutput(ss.str(), members);
 }
 
 int RedisCli::ssetRemRangeByRank(const string &key, int start, int stop)
@@ -484,7 +444,7 @@ int RedisCli::ssetRevRange(const string &key, int start, int stop, vector<string
 {
 	stringstream ss;
 	ss << "ZREVRANGE " << key << " " << start << " " << stop;
-	return _exeCmdWithOutput(members, ss.str());
+	return _exeCmdWithOutput(ss.str(), members);
 }
 
 /* connection related */
@@ -493,7 +453,7 @@ int RedisCli::connAuth(const string &password)
 	stringstream ss;
 	Replyer rpler;
 	ss << "AUTH " << password;
-	return _doExeCmdNoReconnect(rpler, ss.str().data(), NULL);
+	return _doExeCmdNoReconnect(rpler, ss.str());
 }
 
 int RedisCli::connPing()
@@ -513,7 +473,7 @@ int RedisCli::servBGSave()
 
 int RedisCli::servCfgGet(const string &parameter, vector<string> &results)
 {
-	return _exeCmdWithOutput(results, "CONFIG GET " + parameter);
+	return _exeCmdWithOutput("CONFIG GET " + parameter, results);
 }
 
 int RedisCli::servCfgSet(const string &parameter, const string &value)
@@ -542,7 +502,7 @@ int RedisCli::servSlaveOfNoOne()
 
 int RedisCli::keyDump(const string &key, string &value)
 {
-	return _exeCmdWithOutput(value, "DUMP " + key);
+	return _exeCmdWithOutput("DUMP " + key, value);
 }
 
 int RedisCli::keyExpireAt(const string &key, int64 timeStamp)
@@ -554,7 +514,7 @@ int RedisCli::keyExpireAt(const string &key, int64 timeStamp)
 
 int RedisCli::keyKeys(const string &pattern, vector<string> &keys)
 {
-	return _exeCmdWithOutput(keys, "KEYS " + pattern);
+	return _exeCmdWithOutput("KEYS " + pattern, keys);
 }
 
 int RedisCli::keyMigrate(const string &host, int port, const string &key, 
@@ -575,7 +535,7 @@ int RedisCli::keyMove(const string &key, int destDB)
 
 int RedisCli::keyObject(const string &subCmd, const string &key, vector<string> &result)
 {
-	return _exeCmdWithOutput(result, "OBJECT " + subCmd + " " + key);
+	return _exeCmdWithOutput("OBJECT " + subCmd + " " + key, result);
 }
 
 int RedisCli::keyPersist(const string &key)
@@ -599,12 +559,12 @@ int RedisCli::keyPExpireAt(const string &key, int64 milliTimeStamp)
 
 int RedisCli::keyPTTL(const string &key, int64 &milliTTL)
 {
-	return _exeCmdWithOutput(milliTTL, "PTTL " + key);
+	return _exeCmdWithOutput("PTTL " + key, milliTTL);
 }
 
 int RedisCli::keyRandomKey(string &key)
 {
-	return _exeCmdWithOutput(key, "RANDOMKEY");
+	return _exeCmdWithOutput("RANDOMKEY", key);
 }
 
 int RedisCli::keyRename(const string &key, const string &newKey)
@@ -626,12 +586,12 @@ int RedisCli::keyRestore(const string &key, int ttl, const string &value, const 
 
 int RedisCli::keyTTL(const string &key, int &ttl)
 {
-	return _exeCmdWithOutput(ttl, "TTL " + key);
+	return _exeCmdWithOutput("TTL " + key, ttl);
 }
 
 int RedisCli::keyType(const string &key, string &type)
 {
-	return _exeCmdWithOutput(type, "TYPE " + key);
+	return _exeCmdWithOutput("TYPE " + key, type);
 }
 
 int RedisCli::strAppend(const string &key, const string &value)
@@ -659,33 +619,33 @@ int RedisCli::strBitOp(const string &op, const string &destKey, const vector<str
 
 int RedisCli::strDecr(const string &key, int64 &afterDecr)
 {
-	return _exeCmdWithOutput(afterDecr, "DECR " + key);
+	return _exeCmdWithOutput("DECR " + key, afterDecr);
 }
 
 int RedisCli::strDecrBy(const string &key, int64 decrement, int64 &afterDecr)
 {
 	stringstream ss;
 	ss << "DECRBY " << key << " " << decrement;
-	return _exeCmdWithOutput(afterDecr, ss.str());
+	return _exeCmdWithOutput(ss.str(), afterDecr);
 }
 
 int RedisCli::strGetBit(const string &key, int &bit)
 {
-	return _exeCmdWithOutput(bit, "GETBIT " + key);
+	return _exeCmdWithOutput("GETBIT " + key, bit);
 }
 
 int RedisCli::strGetRange(const string &key, int start, int end, string &result)
 {
 	stringstream ss;
 	ss << "GETRANGE " << key << " " << start << " " << end;
-	return _exeCmdWithOutput(result, ss.str());
+	return _exeCmdWithOutput(ss.str(), result);
 }
 
 int RedisCli::strIncrByFloat(const string &key, float increment, float &afterIncr)
 {
 	stringstream ss;
 	ss << "INCRBYFLOAT " << key << " " << increment;
-	return _exeCmdWithOutput(afterIncr, ss.str());
+	return _exeCmdWithOutput(ss.str(), afterIncr);
 }
 
 int RedisCli::strMGet(const vector<string> &keys, vector<string> &values)
@@ -696,7 +656,7 @@ int RedisCli::strMGet(const vector<string> &keys, vector<string> &values)
 	for (it = keys.begin(); it != keys.end(); it++) {
 		ss << *it << " ";
 	}
-	return _exeCmdWithOutput(values, ss.str());
+	return _exeCmdWithOutput(ss.str(), values);
 }
 
 int RedisCli::strMSet(const map<string, string> &kvs)
@@ -756,7 +716,7 @@ int RedisCli::strSetRange(const string &key, int offset, const string &value)
 
 int RedisCli::strLen(const string &key, int &len)
 {
-	return _exeCmdWithOutput(len, "STRLEN " + key);
+	return _exeCmdWithOutput("STRLEN " + key, len);
 }
 
 int RedisCli::hashIncrBy(const string &key, const string &field, 
@@ -764,7 +724,7 @@ int RedisCli::hashIncrBy(const string &key, const string &field,
 {
 	stringstream ss;
 	ss << "HINCRBY " << key << " " << field << " " << increment;
-	return _exeCmdWithOutput(afterIncr, ss.str());
+	return _exeCmdWithOutput(ss.str(), afterIncr);
 }
 
 int RedisCli::hashIncrByFloat(const string &key, const string &field, 
@@ -772,17 +732,17 @@ int RedisCli::hashIncrByFloat(const string &key, const string &field,
 {
 	stringstream ss;
 	ss << "HINCRBYFLOAT " << key << " " << field << " " << increment;
-	return _exeCmdWithOutput(afterIncr, ss.str());
+	return _exeCmdWithOutput(ss.str(), afterIncr);
 }
 
 int RedisCli::hashKeys(const string &key, vector<string> &fields)
 {
-	return _exeCmdWithOutput(fields, "HKEYS " + key);
+	return _exeCmdWithOutput("HKEYS " + key, fields);
 }
 
 int RedisCli::hashLen(const string &key, int &len)
 {
-	return _exeCmdWithOutput(len, "HLEN " + key);
+	return _exeCmdWithOutput("HLEN " + key, len);
 }
 
 int RedisCli::hashMGet(const string &key, const vector<string> &fields, vector<string> &values)
@@ -793,7 +753,7 @@ int RedisCli::hashMGet(const string &key, const vector<string> &fields, vector<s
 	for (it = fields.begin(); it != fields.end(); it++) {
 		ss << *it << " ";
 	}
-	return _exeCmdWithOutput(values, ss.str());
+	return _exeCmdWithOutput(ss.str(), values);
 }
 
 int RedisCli::hashSetNx(const string &key, const string &field, const string &value)
@@ -803,7 +763,7 @@ int RedisCli::hashSetNx(const string &key, const string &field, const string &va
 
 int RedisCli::hashVals(const string &key, vector<string> &values)
 {
-	return _exeCmdWithOutput(values, "HVALS " + key);
+	return _exeCmdWithOutput("HVALS " + key, values);
 }
 
 int RedisCli::listBLPop(const vector<string> &keys, int timeout, map<string, string> &mlv)
@@ -815,7 +775,7 @@ int RedisCli::listBLPop(const vector<string> &keys, int timeout, map<string, str
 		ss << *it << " ";
 	}
 	ss << timeout;
-	return _exeCmdWithOutput(mlv, ss.str());
+	return _exeCmdWithOutput(ss.str(), mlv);
 }
 
 int RedisCli::listBRPop(const vector<string> &keys, int timeout, map<string, string> &mlv)
@@ -827,7 +787,7 @@ int RedisCli::listBRPop(const vector<string> &keys, int timeout, map<string, str
 		ss << *it << " ";
 	}
 	ss << timeout;
-	return _exeCmdWithOutput(mlv, ss.str());
+	return _exeCmdWithOutput(ss.str(), mlv);
 }
 
 int RedisCli::listBRPopLPush(const string &srcList, const string &destList, 
@@ -835,14 +795,14 @@ int RedisCli::listBRPopLPush(const string &srcList, const string &destList,
 {
 	stringstream ss;
 	ss << "BRPOPLPUSH " << srcList << " " << destList << " " << timeout;
-	return _exeCmdWithOutput(result, ss.str());
+	return _exeCmdWithOutput(ss.str(), result);
 }
 
 int RedisCli::listIndex(const string &key, int index, string &elmt)
 {
 	stringstream ss;
 	ss << "LINDEX " << key << " " << index;
-	return _exeCmdWithOutput(elmt, ss.str());
+	return _exeCmdWithOutput(ss.str(), elmt);
 }
 
 int RedisCli::listInsert(const string &key, const string &position, const string &pivot, 
@@ -858,7 +818,7 @@ int RedisCli::listLen(const string &key)
 
 int RedisCli::listLPop(const string &key, string &head)
 {
-	return _exeCmdWithOutput(head, "LPOP " + key);
+	return _exeCmdWithOutput("LPOP " + key, head);
 }
 
 int RedisCli::listLPush(const string &key, const vector<string> &elmts)
@@ -881,7 +841,7 @@ int RedisCli::listRange(const string &key, int start, int stop, vector<string> &
 {
 	stringstream ss;
 	ss << "LRANGE " << key << " " << start << " " << stop;
-	return _exeCmdWithOutput(elmts, ss.str());
+	return _exeCmdWithOutput(ss.str(), elmts);
 }
 
 int RedisCli::listRem(const string &key, int count, const string &value)
@@ -893,12 +853,12 @@ int RedisCli::listRem(const string &key, int count, const string &value)
 
 int RedisCli::listRPop(const string &key, string &tail)
 {
-	return _exeCmdWithOutput(tail, "RPOP " + key);
+	return _exeCmdWithOutput("RPOP " + key, tail);
 }
 
 int RedisCli::listRPopLPush(const string &srcList, const string &destList, string &value)
 {
-	return _exeCmdWithOutput(value, "RPOPLPUSH " + srcList + " " + destList);
+	return _exeCmdWithOutput("RPOPLPUSH " + srcList + " " + destList, value);
 }
 
 int RedisCli::listRPush(const string &key, const vector<string> &elmts)
@@ -933,7 +893,7 @@ int RedisCli::listTrim(const string &key, int start, int stop)
 
 int RedisCli::setCard(const string &key, int64 &card)
 {
-	return _exeCmdWithOutput(card, "SCARD " + key);
+	return _exeCmdWithOutput("SCARD " + key, card);
 }
 
 int RedisCli::setDiff(const vector<string> &keys, vector<string> &members)
@@ -944,7 +904,7 @@ int RedisCli::setDiff(const vector<string> &keys, vector<string> &members)
 	for (it = keys.begin(); it != keys.end(); it++) {
 		ss << *it << " ";
 	}
-	return _exeCmdWithOutput(members, ss.str());
+	return _exeCmdWithOutput(ss.str(), members);
 }
 
 int RedisCli::setDiffStore(const string &destKey, const vector<string> &keys)
@@ -966,7 +926,7 @@ int RedisCli::setInter(const vector<string> &keys, vector<string> &members)
 	for (it = keys.begin(); it != keys.end(); it++) {
 		ss << *it << " ";
 	}
-	return _exeCmdWithOutput(members, ss.str());
+	return _exeCmdWithOutput(ss.str(), members);
 }
 
 int RedisCli::setInterStore(const string &destKey, const vector<string> &keys)
@@ -987,14 +947,14 @@ int RedisCli::setMove(const string &srcKey, const string &destKey, const string 
 
 int RedisCli::setPop(const string &key, string &member)
 {
-	return _exeCmdWithOutput(member, "SPOP " + key);
+	return _exeCmdWithOutput("SPOP " + key, member);
 }
 
 int RedisCli::setRandMember(const string &key, int count, vector<string> &members)
 {
 	stringstream ss;
 	ss << "SRANDMEMBER " << " " << key << " " << count;
-	return _exeCmdWithOutput(members, ss.str());
+	return _exeCmdWithOutput(ss.str(), members);
 }
 
 int RedisCli::setUnion(const vector<string> &keys, vector<string> &members)
@@ -1005,7 +965,7 @@ int RedisCli::setUnion(const vector<string> &keys, vector<string> &members)
 	for (it = keys.begin(); it != keys.end(); it++) {
 		ss << *it << " ";
 	}
-	return _exeCmdWithOutput(members, ss.str());
+	return _exeCmdWithOutput(ss.str(), members);
 }
 
 int RedisCli::setUnionStore(const string &destKey, const vector<string> &keys)
@@ -1024,7 +984,7 @@ int RedisCli::ssetIncrBy(const string &key, double increment,
 {
 	stringstream ss;
 	ss << "ZINCRBY " << key << " " << increment << " " << member;
-	return _exeCmdWithOutput(afterIncr, ss.str());
+	return _exeCmdWithOutput(ss.str(), afterIncr);
 }
 
 int RedisCli::ssetRangeByScore(const string &key, double minScore, double maxScore, 
@@ -1032,13 +992,13 @@ int RedisCli::ssetRangeByScore(const string &key, double minScore, double maxSco
 {
 	stringstream ss;
 	ss << "ZRANGEBYSCORE " << key << " " << minScore << " " << maxScore << " " << options;
-	return _exeCmdWithOutput(members, ss.str());
+	return _exeCmdWithOutput(ss.str(), members);
 }
 
 
 int RedisCli::ssetRank(const string &key, const string &member, int64 &rank)
 {
-	return _exeCmdWithOutput(rank, "ZRANK " + key + " " + member);
+	return _exeCmdWithOutput("ZRANK " + key + " " + member, rank);
 }
 
 int RedisCli::ssetRem(const string &key, const vector<string> &members)
@@ -1056,7 +1016,7 @@ int RedisCli::ssetRevRangeWithScore(const string &key, int start, int stop, vect
 {
 	stringstream ss;
 	ss << "ZREVRANGE " << key << " " << start << " " << stop << " WITHSCORES";
-	return _exeCmdWithOutput(members, ss.str());
+	return _exeCmdWithOutput(ss.str(), members);
 }
 
 int RedisCli::ssetRevRangeByScore(const string &key, double maxScore, double minScore, 
@@ -1064,7 +1024,7 @@ int RedisCli::ssetRevRangeByScore(const string &key, double maxScore, double min
 {
 	stringstream ss;
 	ss << "ZREVRANGEBYSCORE " << key << " " << maxScore << " " << minScore << " " << options;
-	return _exeCmdWithOutput(members, ss.str());
+	return _exeCmdWithOutput(ss.str(), members);
 }
 
 int RedisCli::ssetRevRangeByScoreWithScore(const string &key, double maxScore, 
@@ -1072,17 +1032,17 @@ int RedisCli::ssetRevRangeByScoreWithScore(const string &key, double maxScore,
 {
 	stringstream ss;
 	ss << "ZREVRANGEBYSCORE " << key << " " << maxScore << " " << minScore << " WITHSCORES " << options;
-	return _exeCmdWithOutput(members, ss.str());
+	return _exeCmdWithOutput(ss.str(), members);
 }
 
 int RedisCli::ssetRevRank(const string &key, const string &member, int64 &rank)
 {
-	return _exeCmdWithOutput(rank, "ZREVRANK " + key + " " + member);
+	return _exeCmdWithOutput("ZREVRANK " + key + " " + member, rank);
 }
 
 int RedisCli::ssetScore(const string &key, const string &member, string &score)
 {
-	return _exeCmdWithOutput(score, "ZSCORE " + key + " " + member);
+	return _exeCmdWithOutput("ZSCORE " + key + " " + member, score);
 }
 
 int RedisCli::connEcho(const string &msg)
@@ -1104,7 +1064,7 @@ int RedisCli::servBGRewriteAof()
 
 int RedisCli::servCliGetName(string &name)
 {
-	return _exeCmdWithOutput(name, "CLIENT GETNAME");
+	return _exeCmdWithOutput("CLIENT GETNAME", name);
 }
 
 int RedisCli::servCliKill(const string &ip, int port)
@@ -1116,7 +1076,7 @@ int RedisCli::servCliKill(const string &ip, int port)
 
 int RedisCli::servCliList(vector<string> &cliInfos)
 {
-	return _exeCmdWithOutput(cliInfos, "CLIENT LIST");
+	return _exeCmdWithOutput("CLIENT LIST", cliInfos);
 }
 
 int RedisCli::servCliSetName(const string &name)
@@ -1146,7 +1106,7 @@ int RedisCli::servFlushDB()
 
 int RedisCli::servLastSave(int &saveTime)
 {
-	return _exeCmdWithOutput(saveTime, "LASTSAVE");
+	return _exeCmdWithOutput("LASTSAVE", saveTime);
 }
 
 int RedisCli::servSave()
@@ -1161,7 +1121,7 @@ int RedisCli::servShutDown()
 
 int RedisCli::servTime(vector<string> &ts)
 {
-	return _exeCmdWithOutput(ts, "TIME");
+	return _exeCmdWithOutput("TIME", ts);
 }
 
 #endif

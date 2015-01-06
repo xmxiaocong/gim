@@ -4,7 +4,7 @@ import "pair.proto";
 
 message LoginRequest{
 	required string cid = 1;//cid of client
-	required int64 time = 2; //client timestamp
+	optional int64 time = 2; //client timestamp
 	optional string version = 3;//client version
 	optional int32 enc = 4;//0: raw data, 1:enc
 	optional string token = 5; //use for check
@@ -34,14 +34,14 @@ message SetTimeResponse{
 } 
 
 message ServiceRequest{
-	optional string sessid = 1;
+	required string sessid = 1;
 	required int32 svtype = 2;// 100:push 200:peer
 	required string sn = 3;//each req has an unique sn
 	optional bytes payload = 4;// payload
 }
 
 message ServiceResponse{
-	optional string sessid = 1;
+	required string sessid = 1;
 	required int32 svtype = 2;
 	required string sn = 3;//each req has an unique sn
 	required int32 status = 4;// 0 success

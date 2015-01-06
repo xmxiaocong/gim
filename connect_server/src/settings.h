@@ -37,6 +37,8 @@ public:
 	int MaxAcceptSpeed;
 	int MaxTimeDif;
 
+	int NoEncSupport;
+
 	std::string NLogLevel;
 	std::string NLogPath;
 	std::string LogConfig;

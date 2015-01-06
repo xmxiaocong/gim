@@ -11,6 +11,7 @@ enum{
 	CREATE_SESSION_FAIL = -10,
 	GET_USER_KEY_FAIL = -11,
 	CHECK_TOKEN_FAIL = -12,
+	NO_ENC_UNSUPPORT = -13,
 	INVLID_SESSION_ID = -20,
 	SESSION_TIMEOUT = -21, 
 	NO_SERVICE = -30,
@@ -35,6 +36,8 @@ inline const char* getErrStr(int e){
 		return "GET_USER_KEY_FAIL";
 	case CHECK_TOKEN_FAIL:
 		return "CHECK_TOKEN_FAIL";
+	case NO_ENC_UNSUPPORT:
+		return "NO_ENC_UNSUPPORT";
 	case INVLID_SESSION_ID:
 		return "INVLID_SESSION_ID";
 	case NO_SERVICE:

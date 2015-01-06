@@ -84,7 +84,7 @@ public:
 					<< "/" << itor->second.count << "=" 
 					<< (itor->second.count ? 
 					itor->second.us / itor->second.count : 0)
-					<< ">";
+					<< "> ";
 				itor->second.us = 0;
 				itor->second.count = 0;
 			}

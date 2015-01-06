@@ -14,7 +14,12 @@ UserDB* UserDBFactory::getUserDB(const Json::Value& config){
 
 	if(type.asString() == "DefaultType"){
 		DefUserDB* c = new DefUserDB();
-		return c;
+
+		if(c->init(conf) >= 0){
+			return c;
+		}
+		
+		delete c;
 	}
 
 	return NULL;

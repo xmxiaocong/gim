@@ -21,7 +21,7 @@ int32 SDispatcher::dispatchConnection(EventLoop*l, Connection* c){
 	}
 
 	EventLoop& lp = m_s->getEventLoop(idx);
-	id = (idx * EVENT_LOOP_ID_MASK) + (id / EVENT_LOOP_ID_MASK);
+	id = getConnectionId(idx, id);
 	c->setId(id);
 	lp.asynAddConnection(id, c);
 	return 0;		
@@ -81,7 +81,7 @@ int32 SrvCon::handlePacket(const std::string& req){
 	}catch(...){
 		ALogError("ConnectServer") << "<action:server_cmd> <svtype:" 
 			<< m_type << "> <event_loop:"<< getEventLoop() 
-			<< "> <conid:" << getId() << "<status:exception>"; 
+			<< "> <conid:" << getId() << "> <status:exception>"; 
 		ret = -1;
 	}
 	return ret;	

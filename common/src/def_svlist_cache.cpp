@@ -55,7 +55,6 @@ int DefSvLstCache::loadOneType(const Json::Value& config){
 
 int DefSvLstCache::loadOneServer(int type, const Json::Value& config){
 	
-	int ret = 0;
 	int id = 0;
 
 	const Json::Value& d = config["ID"];

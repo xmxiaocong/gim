@@ -42,6 +42,11 @@ using namespace ef;
 		return svevcnt;
 	}
 
+	inline int32 getConnectionId(int32 evlpid, int32 conid){
+		return (evlpid * EVENT_LOOP_ID_MASK)
+			 + (conid % EVENT_LOOP_ID_MASK);
+	}
+
 	inline int32 getEventLoopId(int32 conid){
 		return conid / EVENT_LOOP_ID_MASK;
 	}
@@ -54,6 +59,8 @@ using namespace ef;
 	#define ALogError(a) logError(a) << "<svid:" << (SVID) \
 		<< "> <addr:" << getIp() << ":" \
 		<< getPort() << "> <timestamp:" << gettime_ms() << "> " 
+
+	#define USER_KEY_FIELD_NAME "user_key"
 
 };
 

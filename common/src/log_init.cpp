@@ -43,6 +43,7 @@ int logInit(const std::string& config){
 		std::cout << "log <config:" << config << "> load loggers fail\n";
 		return ret;
 	}
+
 	ret = loadDefaultLogger(l, root);
 	if(ret < 0){
 		std::cout << "log <config:" << config << "> load default logger fail\n";
@@ -193,7 +194,7 @@ int loadAppenders(log& l, const Json::Value& conf){
 	return ret;	 
 }
 
-int getLoggerSetting(const Json::Value& conf, int& lv, const char*& append){
+int getLoggerSetting(const Json::Value& conf, int& lv, std::string& append){
 
 	const char* level = NULL;
 	const Json::Value& l = conf["Level"];
@@ -207,12 +208,11 @@ int getLoggerSetting(const Json::Value& conf, int& lv, const char*& append){
 	const Json::Value& a = conf["Appender"];
 
 	if(a.isString()){
-		append = a.asCString();
-	}
-
-	if(!append)
+		append = a.asString();
+	}else{
 		return -20;
-
+	}
+	
 	return 0;
 }
 
@@ -234,7 +234,7 @@ int loadLogger(log& l, const Json::Value& conf){
 	}
 
 	int lv = LOG_LEVEL_NOT; 
-	const char* append= NULL; 
+	std::string append; 
 	ret = getLoggerSetting(conf, lv, append);
 
 	if(ret >=0){
@@ -281,8 +281,8 @@ int loadDefaultLogger(log& l, const Json::Value& conf){
 	}
 
 	int lv = LOG_LEVEL_NOT; 
-	const char* append= NULL; 
-	ret = getLoggerSetting(conf, lv, append);
+	std::string append; 
+	ret = getLoggerSetting(dl, lv, append);
 
 	if(ret >= 0){
 		l.setDefaultLogger(lv, append); 
