@@ -65,7 +65,7 @@ public:
 	int strSet(const string &key, const string &value, const string &options = "");
 
 	int hashDel(const string &key, const string &field);
-  	int hashMDel(const string &key, const vector<string> &fields);
+  	int hashMdel(const string &key, const vector<string> &fields);
 	int hashExists(const string &key, const string &field);
 	int hashGet(const string &key, const string &field, string &value);
 	int hashGetAll(const string &key, map<string, string> &mfv);
@@ -219,11 +219,12 @@ public:
 #endif
 
 private:
-	int _exeCmd(Replyer &rpler, const string &cmd);
-	int _doExeCmd(Replyer &rpler, const string &cmd);
-	int _doExeCmdNoReconnect(Replyer &rpler, const string &cmd);
+	int _exeCmd(Replyer &rpler, const char *fmt, va_list ap);
+	int _doExeCmdNoReconnect(Replyer &rpler, const char *fmt, va_list ap);
 	int _exeCmdWithNoOutput(const string &cmd);
-	template <typename T> int _exeCmdWithOutput(const string &cmd, T &output);
+	int _exeCmdWithNoOutput(const char *fmt, ...);
+	template <typename T> int _exeCmdWithOutput(T &output, const string &cmd);
+	template <typename T> int _exeCmdWithOutput(T &output, const char *fmt, ...);
 	int disconnect();
 	string	m_addr;
 	int     m_port;
