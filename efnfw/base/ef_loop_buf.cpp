@@ -78,12 +78,13 @@ namespace	ef{
 		int32 wlen = 0;
 		int32 ret = 0;
 		frame*	f = m_w_pos;
-		while(len > wlen && f){
+		while(len > wlen && f && !f->full()){
 			ret = f->write(buf + wlen, len - wlen);
-			if((ret <= 0 || f->full() ) && f->m_next){
+			if(f->full() && f->m_next){
 				f = f->m_next;
 				m_w_pos = f;
 			}
+
 			wlen += ret;
 		}
 		m_size += wlen;
