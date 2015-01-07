@@ -44,6 +44,15 @@ static int output_statistic(const std::string& l){
 	return 0;
 }
 
+Json::Value getJsonArray(const std::vector<std::string>& v){
+	Json::Value a(Json::arrayValue);
+
+	for(size_t i = 0; i < v.size(); ++i){
+		a.append(v[i]);
+	}
+
+	return a;
+}
 
 int main(int argc, const char** argv){
 	
@@ -84,6 +93,8 @@ int main(int argc, const char** argv){
 	Serv sv;
 	sv.id = pSettings->Id;
 	sv.type = 0; 
+	sv.v["IPs"] = getJsonArray(pSettings->IPs);
+	sv.v["LocalIPs"] = getJsonArray(pSettings->LocalIPs);
 	sv.v["ClientListenPort"] = pSettings->ClientListenPort;
 	sv.v["ServerListenPort"] = pSettings->ServerListenPort;
 	sv.v["ClientCount"] = 0;

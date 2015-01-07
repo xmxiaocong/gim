@@ -792,8 +792,8 @@ public:
 				++kplvidx;
 				Client* tc = NULL;
 				int32 key = kplvidx % (m_max_port - m_start_port + 1) + m_start_port;
-				LOG_OUT_NO_SN << "key:" << key << ", max_port:" << m_max_port 
-					<< ", m_start_port:" << m_start_port << std::endl;
+				//LOG_OUT_NO_SN << "key:" << key << ", max_port:" << m_max_port 
+				//	<< ", m_start_port:" << m_start_port << std::endl;
 				std::map<int32, Client*>::iterator it = m_con_map.find(key);
 				if(it != m_con_map.end()){
 					tc = it->second;

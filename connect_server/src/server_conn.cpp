@@ -43,7 +43,13 @@ SrvCon::~SrvCon(){
 }
 
 int32 SrvCon::checkPackLen(){
-	return checkLen(*this);
+	int32 ret = checkLen(*this);
+	if(ret < 0){
+		ALogError("ConnectServer") << "<action:server_check_pack> <svtype:"
+			<< m_type << "> <event_loop:"<< getEventLoop()
+			<< "> <conid:" << getId() << "> <status:success>";
+	}
+	return ret;
 }
 
 int32 SrvCon::handlePacket(const std::string& req){
