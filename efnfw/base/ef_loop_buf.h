@@ -13,7 +13,17 @@ struct frame{
 	frame	*m_next;
 	int32   read(uint8 *buf, int32 len);
 	int32	write(const uint8 *buf, int32 len);
+
 	int32	peek(uint8 *buf, int32 len) const;
+
+	int32	freeSize() const{
+		return m_cap - m_size - m_start;
+	}
+
+	int32	full() const{
+		return m_size + m_start == m_cap;
+	}
+
 	int32   clear();
 };
 

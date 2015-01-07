@@ -6,8 +6,11 @@ namespace	ef{
 
 	int32	frame::peek(uint8 *buf, int32 len) const{
 		int32	realread = len;
-		if(m_size <= len)
+
+		if(m_size <= len){
 			realread = m_size;
+		}
+
 		memmove(buf, m_buf + m_start, realread);
 
 		return realread;
@@ -18,20 +21,27 @@ namespace	ef{
 		int32	realread = peek(buf, len);
 		m_start += realread;
 		m_size -= realread;					
-		if(m_size <= 0)
+
+		if(m_size <= 0){
 			m_start = 0;
+		}
 
 		return realread;
 	}
 
 	int32	frame::write(const uint8 *buf, int32 len){
 		int32	realwrite = len;
-		if(realwrite > m_cap - m_size - m_start)
-			realwrite = m_cap - m_size - m_start;
+
+		if(realwrite > freeSize()){
+			realwrite = freeSize();
+		}
+
 		int32 stop = m_start + m_size;
+
 		if(buf){
 			memmove(m_buf + stop, buf, realwrite);
 		}
+
 		m_size += realwrite;
 		return realwrite;
 	}
@@ -70,7 +80,7 @@ namespace	ef{
 		frame*	f = m_w_pos;
 		while(len > wlen && f){
 			ret = f->write(buf + wlen, len - wlen);
-			if(ret <= 0){
+			if((ret <= 0 || f->full() ) && f->m_next){
 				f = f->m_next;
 				m_w_pos = f;
 			}
@@ -160,7 +170,7 @@ namespace	ef{
 		frame* f = allocFrame(sz);
 		m_tail->m_next = f;
 		m_tail = f;
-		if(m_w_pos->m_size == m_w_pos->m_cap)
+		if(m_w_pos->full())
 			m_w_pos = m_w_pos->m_next;
 		return f->m_cap;
 	}	

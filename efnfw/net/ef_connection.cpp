@@ -101,15 +101,16 @@ int32	Connection::handleRead(EventLoop* l){
 		}
 		tmpbuf = (char*)m_buf.freeFrameBuf();
 		ret = tcpNbReceive(getFd(), tmpbuf, wantlen, &actrcv);
-		if(ret < 0 || actrcv == 0){
-			break;
-		}
 		NLogTrace << "con:" << std::hex << this 
 			<< std::dec << ", id:" << m_id 
 			<< ", fd:" << getFd() 
 			<< ", from " << ip << ":" << port
+			<< ", wantlen:" << wantlen
 			<< ", recv ret:" << ret 
 			<< ", actrcv:" << actrcv;
+		if(ret < 0 || actrcv == 0){
+			break;
+		}
 		totalrcv += actrcv;
 		m_buf.write(NULL, actrcv);
 		while(1){
@@ -127,20 +128,19 @@ int32	Connection::handleRead(EventLoop* l){
 			if(!len){
 				break;
 			}
-#if DETAIL_NET_LOG
-			NLogTrace << "con:" << std::hex << this 
-				<< std::dec << ", id:" 
-				<< m_id << ", fd:" << getFd() 
-				<< ", from " << ip << ":" << port
-				<< ", buf_size:"
-				<< m_buf.size() << ", pack_len:" 
-				<< len << ", handle_pack!";
-#endif
 			std::string	req;
 			req.resize(len);
 			readBuf((char*)req.data(), len);	
 			ret = handlePacket(req);
 			if(ret < 0){
+				NLogError<< "con:" << std::hex << this 
+					<< std::dec << ", id:" 
+					<< m_id << ", fd:" << getFd() 
+					<< ", from " << ip << ":" << port
+					<< ", buf_size:"
+					<< m_buf.size() << ", pack_len:" 
+					<< len << ", handle_pack fail!";
+
 				return	ret;
 			}
 		}
@@ -153,9 +153,16 @@ int32	Connection::handleRead(EventLoop* l){
 	} while(0);
 #endif
 	//get read event, but recv no data
-	if(totalrcv <= 0)
+	if(totalrcv <= 0){
+		NLogError<< "con:" << std::hex << this
+			<< std::dec << ", id:"
+			<< m_id << ", fd:" << getFd()
+			<< ", from " << ip << ":" << port
+			<< ", close";
+			
 		return -1;
-	
+	}	
+
 	return	ret;
 }
 
