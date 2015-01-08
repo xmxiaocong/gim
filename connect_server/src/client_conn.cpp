@@ -329,7 +329,7 @@ int32 CliCon::sendToClient(int32 cmd, const std::string& body){
 	}
 	head h;
 	h.cmd = cmd;
-	h.magic = 0x20140417;
+	h.magic = MAGIC_NUMBER;
 	constructPacket(h, req_enc, msg);
 	return sendMessage(msg);
 }
