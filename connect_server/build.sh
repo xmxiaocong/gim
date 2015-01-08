@@ -8,7 +8,7 @@ cd ../common;
 sh build.sh
 cd -
 
-cp -fr ../proto/* src/proto
+cp -fr ../proto src/
 
 protoc  src/proto/connect_server.proto --cpp_out=src/proto -I=src/proto 
 
