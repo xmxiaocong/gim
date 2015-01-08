@@ -8,7 +8,7 @@ add_definitions("-Wall -g")
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 # add dependency
-include_directories(/usr/local/include ../../../efnfw ../../include)
+include_directories(/usr/local/include ../../../efnfw ../../src)
 link_directories(/usr/local/lib ../../../efnfw/lib ../../lib)
 link_libraries(libcommon.a libefnfw.a hiredis)
 #file(GLOB_RECURSE SRC_LISTS ./*.cpp)
