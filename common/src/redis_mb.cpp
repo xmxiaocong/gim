@@ -63,14 +63,12 @@ int RedisMb::getMsgs(const string &mbName, int64 bMsgId, int length, vector<Mess
 	vector<string> vmem;
 	vector<pair<string, string> >::iterator it; 
 	
-	stringstream ss;
-	ss << "LIMIT 0 " << length;
-	hndl->ssetRangeByScoreWithScore(mbName, bMsgId, DBL_MAX, mems, ss.str());
+	hndl->ssetRangeByScoreWithScoreLimit(mbName, bMsgId, DBL_MAX, 0, length, mems);
 	for (it = mems.begin(); it != mems.end(); it++) {
 		Message temp;
 		string base64Str = base64Decode(it->second);
 		temp.ParseFromString(base64Str);
-		if (gettime_ms() - temp.time() < m_expiry * 1000) {
+		if (!m_expiry || (gettime_ms() - temp.time() < m_expiry * 1000)) {
 			vMsg.push_back(temp);
 			cnt++;
 		}
@@ -91,24 +89,22 @@ int RedisMb::getMsgsForward(const string &mbName, int64 bMsgId, int length, vect
 	vector<string> vmem;
 	vector<pair<string, string> >::iterator it; 
 
-	stringstream ss;
 	int64 cnt;
 	hndl->ssetCount(mbName, DBL_MIN, bMsgId, cnt);
 	if (cnt <= 0) {
 		return 0;
 	} else if (cnt <= length) {
-		ss << "LIMIT 0 " << length;
-		hndl->ssetRangeByScoreWithScore(mbName, DBL_MIN, bMsgId, mems, ss.str());
+		hndl->ssetRangeByScoreWithScoreLimit(mbName, DBL_MIN, bMsgId, 0, length, mems);
 	} else {
-		ss << "LIMIT " << cnt - length << " " << length;
-		hndl->ssetRangeByScoreWithScore(mbName, DBL_MIN, bMsgId, mems, ss.str());
+		hndl->ssetRangeByScoreWithScoreLimit(mbName, DBL_MIN, bMsgId, 
+			cnt - length, length, mems);
 	}	
 	
         for (it = mems.begin(); it != mems.end(); it++) {
                 Message temp;
                 string base64Str = base64Decode(it->second);
                 temp.ParseFromString(base64Str);
-                if (gettime_ms() - temp.time() < m_expiry * 1000) {
+                if (!m_expiry || (gettime_ms() - temp.time() < m_expiry * 1000)) {
                         vMsg.push_back(temp);
                         ret++;
                 }

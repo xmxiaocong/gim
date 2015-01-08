@@ -55,18 +55,18 @@ public:
 	
 	/* key related */
 	int keyDel(const string &key);
-	int keyExists(const string &key);
+	int keyExists(const string &key, int &exists);
 	int keyExpire(const string &key, int seconds);
 
 	int strGet(const string &key, string &value);
 	int strGetSet(const string &key, const string &value, string &oldValue);
 	int strIncr(const string &key, int64 &afterIncr);
 	int strIncrBy(const string &key, int64 increment, int64 &afterIncr);
-	int strSet(const string &key, const string &value, const string &options = "");
+	int strSet(const string &key, const string &value);
 
 	int hashDel(const string &key, const string &field);
   	int hashMDel(const string &key, const vector<string> &fields);
-	int hashExists(const string &key, const string &field);
+	int hashExists(const string &key, const string &field, int &exists);
 	int hashGet(const string &key, const string &field, string &value);
 	int hashGetAll(const string &key, map<string, string> &mfv);
 	int hashMSet(const string &key, const map<string, string> &mfv);
@@ -84,7 +84,9 @@ public:
 	int ssetRangeWithScore(const string &key, int start, int stop, 
 		vector<pair<string, string> > &members);
 	int ssetRangeByScoreWithScore(const string &key, double minScore, double maxScore, 
-		vector<pair<string, string> > &members, const string &options = "");
+		vector<pair<string, string> > &members);
+	int ssetRangeByScoreWithScoreLimit(const string &key, double minScore, double maxScore,
+		int offset, int length, vector<pair<string, string> >&members);
 	int ssetRemRangeByRank(const string &key, int start, int stop);
 	int ssetRemRangeByScore(const string &key, double minScore, double maxScore);
 	int ssetRevRange(const string &key, int start, int stop, vector<string> &members);
@@ -99,13 +101,19 @@ public:
 	int servSlaveOf(const string &masterip, int masterport);
 	int servSlaveOfNoOne();
 
+	int transDiscard();
+	int transExec();
+	int transMulti();
+	int transWatch(const string &key);
+	int transUnwatch();
+	
 #ifdef ENABLE_UNSTABLE_INTERFACE
 	/* key related */
 	int keyDump(const string &key, string &value);	
 	int keyExpireAt(const string &key, int64 timeStamp);
 	int keyKeys(const string &pattern, vector<string> &keys);
   	int keyMigrate(const string &host, int port, const string &key, 
-  		int destDB, int timeout, const string &options = "");
+  		int destDB, int timeout);
   	int keyMove(const string &key, int destDB);
   	int keyObject(const string &subCmd, const string &key, vector<string> &result);
   	int keyPersist(const string &key);
@@ -115,7 +123,7 @@ public:
   	int keyRandomKey(string &key);
   	int keyRename(const string &key, const string &newKey);
   	int keyRenameNx(const string &key, const string &newKey);
-  	int keyRestore(const string &key, int ttl, const string &value, const string &option = "");
+  	int keyRestore(const string &key, int ttl, const string &value);
   	int keyTTL(const string &key, int &ttl);
   	int keyType(const string &key, string &type);
 
@@ -187,15 +195,21 @@ public:
   	int ssetIncrBy(const string &key, double increment, 
 		const string &member, string &afterIncr);
   	int ssetRangeByScore(const string &key, double minScore, double maxScore, 
-  		vector<string> &members, const string &options = "");
+  		vector<string> &members);
+	int ssetRangeByScoreLimit(const string &key, double minScore, double maxScore,
+		int offset, int length, vector<string> &members);
   	int ssetRank(const string &key, const string &member, int64 &rank);
   	int ssetRem(const string &key, const vector<string> &members);
   	int ssetRevRangeWithScore(const string &key, int start, int stop, 
 		vector<pair<string, string> > &members);
   	int ssetRevRangeByScore(const string &key, double maxScore, double minScore, 
-  		vector<string> &members, const string &options = "");
+  		vector<string> &members);
+  	int ssetRevRangeByScoreLimit(const string &key, double maxScore, double minScore,
+  		int offset, int length, vector<string> &members);
   	int ssetRevRangeByScoreWithScore(const string &key, double maxScore, 
-		double minScore, vector<pair<string, string> > &members, const string &options = "");
+		double minScore, vector<pair<string, string> > &members);
+  	int ssetRevRangeByScoreWithScoreLimit(const string &key, double maxScore, 
+		double minScore, int offset, int length, vector<pair<string, string> > &members);
   	int ssetRevRank(const string &key, const string &member, int64 &rank);
   	int ssetScore(const string &key, const string &member, string &score);
 
@@ -219,11 +233,22 @@ public:
 #endif
 
 private:
-	int _exeCmd(Replyer &rpler, const string &cmd);
-	int _doExeCmd(Replyer &rpler, const string &cmd);
-	int _doExeCmdNoReconnect(Replyer &rpler, const string &cmd);
+	int _exeCmd(Replyer &rpler, const char *fmt, va_list ap);
+	int _exeCmd(Replyer &rpler, int argc, const char **argv, const size_t *argvLen);
+
+	int _doExeCmdNoReconnect(Replyer &rpler, const char *fmt, va_list ap);
+	int _doExeCmdNoReconnect(Replyer &rpler, int argc, const char **argv, const size_t *argvLen);
+
 	int _exeCmdWithNoOutput(const string &cmd);
-	template <typename T> int _exeCmdWithOutput(const string &cmd, T &output);
+	int _exeCmdWithNoOutput(const char *fmt, ...);
+	template <typename T> int _exeCmdWithNoOutputM(const string &cmdName, 
+		const string &key, const T &input);
+
+	template <typename T> int _exeCmdWithOutput(T &output, const string &cmd);
+	template <typename T> int _exeCmdWithOutput(T &output, const char *fmt, ...);
+	template <typename T, typename U> int _exeCmdWithOutputM(T &output, const string &cmdName,
+		const string &key, const U&input);
+
 	int disconnect();
 	string	m_addr;
 	int     m_port;
