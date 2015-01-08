@@ -40,25 +40,31 @@ int main(int argc, char *argv[])
 	RdsMbFactory rdsfac;
 	RedisMb *mb = (RedisMb *)rdsfac.createNewMbAdpt(cfg["RedisMbCfg"]);
 	mb->bindCG(&cg);
-	string key("keysd");
 
 	Message msg;
 	msg.set_to("234242145");
-	int64 newid;
-	mb->incrId(key, newid);
-	msg.set_id(newid);
+	msg.set_id(420809);
 	msg.set_from("8987945734");
 	msg.set_type(0);
 	msg.set_sn("dalijlid9da3w40j09u");
 	msg.set_data("hello");
-	mb->addMsg("mb_" + key, msg);
+	mb->addMsg("msgbox_344", msg);
+	mb->addMsg("msgbox_344", msg);
+	mb->addMsg("msgbox_344", msg);
+	mb->addMsg("msgbox_344", msg);
+	mb->addMsg("msgbox_344", msg);
+	mb->addMsg("msgbox_344", msg);
+	mb->addMsg("msgbox_344", msg);
+	mb->addMsg("msgbox_344", msg);
+	mb->addMsg("msgbox_344", msg);
+	mb->addMsg("msgbox_344", msg);
 	vector<Message> vmsg;
-	mb->getMsgs("mb_" + key, 0, 100, vmsg);
+	int ret = mb->getMsgs("msgbox_344", 0, 100, vmsg);
 	vector<Message>::iterator it;
 	for (it = vmsg.begin(); it != vmsg.end(); it++) {
-		cout << it->id() << endl;
+		cout << it->sn() << endl;
 	}
-	mb->clear("mb_" + key);
+//	mb->clear("msgbox_344");
 	delete mb;
 	return 0;	
 }
