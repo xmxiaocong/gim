@@ -93,13 +93,13 @@ int main(int argc, const char** argv){
 	Serv sv;
 	sv.id = pSettings->Id;
 	sv.type = 0; 
-	sv.v["IPs"] = getJsonArray(pSettings->IPs);
-	sv.v["LocalIPs"] = getJsonArray(pSettings->LocalIPs);
-	sv.v["ClientListenPort"] = pSettings->ClientListenPort;
-	sv.v["ServerListenPort"] = pSettings->ServerListenPort;
+	sv.v[GIM_PUBLIC_IPS] = getJsonArray(pSettings->PublicIPs);
+	sv.v[GIM_LOCAL_IPS] = getJsonArray(pSettings->LocalIPs);
+	sv.v[GIM_CLIENT_LISTEN_PORT] = pSettings->ClientListenPort;
+	sv.v[GIM_SERVER_LISTEN_PORT] = pSettings->ServerListenPort;
 	sv.v["ClientCount"] = 0;
-	if (svc->addServ(pSettings->Type, sv) < 0) {
-		std::cout << "zookeeper add_serv fail!\n";
+	if (svc->addServer(pSettings->Type, sv) < 0) {
+		std::cout << "add_serv fail!\n";
 		exit(4);
 	}
 	
@@ -132,14 +132,14 @@ int main(int argc, const char** argv){
 	while(g_run){
 		sv.v["ClientCount"] = CliCon::totalCount();
 		sv.v["ReportTimeStamp"] = int32(time(NULL));
-		svc->updateServ(0, sv);
+		svc->updateServer(0, sv);
 		sleep(1);
 	}
 
 	s.stopListen(pSettings->ServerListenPort);
 	s.stopListen(pSettings->ClientListenPort);
 	s.stop();
-	svc->deleteServ(0, sv.id);
+	svc->deleteServer(0, sv.id);
 
 	return 0;
 }

@@ -25,7 +25,7 @@ public:
 	int ThreadCount;
 
 	std::vector<std::string> LocalIPs;
-	std::vector<std::string> IPs;
+	std::vector<std::string> PublicIPs;
 	int ClientListenPort;
 	int ServerListenPort;
 

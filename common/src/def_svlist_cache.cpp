@@ -49,6 +49,12 @@ int DefSvLstCache::loadOneType(const Json::Value& config){
 			break;
 	}
 
+	SvLstListener* ln = getServerListListener();
+
+	if(ret >= 0 && ln){
+		ln->onListChange(t, m_svlsts[t]);
+	}
+
 	return ret;
 	
 }
@@ -78,36 +84,24 @@ int DefSvLstCache::loadOneServer(int type, const Json::Value& config){
 	return 0;
 }
 
-int DefSvLstCache::getEnableList(int type, vector<Serv> &servlist){
-	servlist = m_svlsts[type];
-	return 0;	
-}
 
-int DefSvLstCache::getAllList(int type, vector<Serv> &servlist){
-	return getEnableList(type, servlist);
-}
-
-int DefSvLstCache::getDisableSvIDList(int type, vector<int> &servlist){
+int DefSvLstCache::addServer(int type, const Serv &serv){
 	return 0;
 }
 
-int DefSvLstCache::addServ(int type, const Serv &serv){
+int DefSvLstCache::updateServer(int type, const Serv &serv){
 	return 0;
 }
 
-int DefSvLstCache::updateServ(int type, const Serv &serv){
+int DefSvLstCache::deleteServer(int type, int id){
 	return 0;
 }
 
-int DefSvLstCache::deleteServ(int type, int id){
+int DefSvLstCache::enableServer(int type, int id){
 	return 0;
 }
 
-int DefSvLstCache::enableServ(int type, int id){
-	return 0;
-}
-
-int DefSvLstCache::disableServ(int type, int id){
+int DefSvLstCache::disableServer(int type, int id){
 	return 0;
 }
 

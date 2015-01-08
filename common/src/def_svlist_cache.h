@@ -11,14 +11,20 @@ class DefSvLstCache:public SvLstCache{
 public:
 	virtual ~DefSvLstCache(){};
 	int init(const Json::Value& config);
-	virtual int getEnableList(int type, vector<Serv> &servlist);
-	virtual int getDisableSvIDList(int type, vector<int> &servlist);
-	virtual int getAllList(int type, vector<Serv> &servlist);
-	virtual int addServ(int type, const Serv &serv);
-	virtual int updateServ(int type, const Serv &serv);
-	virtual int deleteServ(int type, int id);
-	virtual int enableServ(int type, int id);
-	virtual int disableServ(int type, int id);
+
+	virtual int watchServerList(int type){
+		return 0;
+	}
+
+	virtual int unwatchServerList(int type){
+		return 0;
+	}
+
+	virtual int addServer(int type, const Serv &serv);
+	virtual int updateServer(int type, const Serv &serv);
+	virtual int deleteServer(int type, int id);
+	virtual int enableServer(int type, int id);
+	virtual int disableServer(int type, int id);
 private:
 	typedef vector<Serv> svlst_t;
 
@@ -26,6 +32,7 @@ private:
 	int loadOneServer(int type, const Json::Value& config);
 
 	map<int, svlst_t> m_svlsts;	
+	map<int, SvLstListener*> m_listeners;
 };
 
 }

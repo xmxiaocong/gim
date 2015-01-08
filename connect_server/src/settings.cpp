@@ -42,8 +42,8 @@ bool Settings::load(const char *filename)
 
 	ThreadCount = root["ThreadCount"].asInt();
 
-	ef::getIPs(IPs);
 	ef::getLocalIPs(LocalIPs); 
+	ef::getPublicIPs(PublicIPs);
 	ClientListenPort = root["ClientListenPort"].asInt();
 	ServerListenPort = root["ServerListenPort"].asInt();
 		
@@ -88,7 +88,7 @@ void Settings::print(){
 	std::cout << "Id:" << Id << std::endl;
 
 	std::cout << "LocalIPs:" << strVectorStr(LocalIPs) << std::endl;
-	std::cout << "IPs:" << strVectorStr(IPs) << std::endl;
+	std::cout << "PublicIPs:" << strVectorStr(PublicIPs) << std::endl;
 	std::cout << "ClientListenPort:" << ClientListenPort << std::endl;
 	std::cout << "ServerListenPort:" << ServerListenPort << std::endl;
 	std::cout << "CliMaxIdleMs:" << CliMaxIdleMs << std::endl;
