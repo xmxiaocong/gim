@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <float.h>
 #include "gtype.h"
 #include "hiredis/hiredis.h"
 #include "base/ef_btype.h"

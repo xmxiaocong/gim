@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 	}
 
 	RedisCG cg(cfg["RedisCGCfg"]);
-	cg.setCmdLog(print);
+//	cg.setCmdLog(print);
 	
 	RdsMbFactory rdsfac;
 	RedisMb *mb = (RedisMb *)rdsfac.createNewMbAdpt(cfg["RedisMbCfg"]);
@@ -43,28 +43,22 @@ int main(int argc, char *argv[])
 
 	Message msg;
 	msg.set_to("234242145");
-	msg.set_id(420809);
 	msg.set_from("8987945734");
 	msg.set_type(0);
 	msg.set_sn("dalijlid9da3w40j09u");
 	msg.set_data("hello");
-	mb->addMsg("msgbox_344", msg);
-	mb->addMsg("msgbox_344", msg);
-	mb->addMsg("msgbox_344", msg);
-	mb->addMsg("msgbox_344", msg);
-	mb->addMsg("msgbox_344", msg);
-	mb->addMsg("msgbox_344", msg);
-	mb->addMsg("msgbox_344", msg);
-	mb->addMsg("msgbox_344", msg);
-	mb->addMsg("msgbox_344", msg);
-	mb->addMsg("msgbox_344", msg);
+	for (int i = 0; i < 10; i++) {
+		msg.set_id(i + 100);
+		mb->addMsg("msgbox_344", msg);
+	}
 	vector<Message> vmsg;
 	int ret = mb->getMsgs("msgbox_344", 0, 100, vmsg);
+	std::cout << ret << std::endl;
 	vector<Message>::iterator it;
 	for (it = vmsg.begin(); it != vmsg.end(); it++) {
-		cout << it->sn() << endl;
+		cout << it->id() << endl;
 	}
-//	mb->clear("msgbox_344");
+	mb->clear("msgbox_344");
 	delete mb;
 	return 0;	
 }

@@ -1,9 +1,16 @@
 #include "redis_client.h"
 #include <iostream>
 #include <stdlib.h>
+#include <string.h>
 
 using namespace std;
 using namespace gim;
+
+
+struct point {
+	int x;
+	int y;
+};
 
 void log2cout(const string &data)
 {
@@ -22,10 +29,15 @@ int main(int argc, char *argv[])
 		std::cout << "connect server fail" << std::endl;
 		return -1;
 	}
+	point P, Q;
+	P.x = 342434;
+	P.y = 5345345;
+	string origvalue((const char *)&P, sizeof(P));;
 	string value;
-	redcli.strSet("testkey", "testvalue");
+	redcli.strSet("testkey", origvalue);
 	redcli.strGet("testkey", value);
-	std::cout << value << std::endl;
+	memcpy(&Q, value.data(), value.size());
+	std::cout << Q.x << "," << Q.y << std::endl;
 	string oldvalue;
 	redcli.strGetSet("testkey", "newvalue", oldvalue);
 	value = "";

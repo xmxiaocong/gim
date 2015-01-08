@@ -1,7 +1,5 @@
 #include "redis_mb.h"
-#include <float.h>
 #include <sstream>
-#include "base/ef_base64.h"
 #include "base/ef_utility.h"
 
 namespace gim {
@@ -66,8 +64,7 @@ int RedisMb::getMsgs(const string &mbName, int64 bMsgId, int length, vector<Mess
 	hndl->ssetRangeByScoreWithScoreLimit(mbName, bMsgId, DBL_MAX, 0, length, mems);
 	for (it = mems.begin(); it != mems.end(); it++) {
 		Message temp;
-		string base64Str = base64Decode(it->second);
-		temp.ParseFromString(base64Str);
+		temp.ParseFromString(it->second);
 		if (!m_expiry || (gettime_ms() - temp.time() < m_expiry * 1000)) {
 			vMsg.push_back(temp);
 			cnt++;
@@ -102,8 +99,7 @@ int RedisMb::getMsgsForward(const string &mbName, int64 bMsgId, int length, vect
 	
         for (it = mems.begin(); it != mems.end(); it++) {
                 Message temp;
-                string base64Str = base64Decode(it->second);
-                temp.ParseFromString(base64Str);
+                temp.ParseFromString(it->second);
                 if (!m_expiry || (gettime_ms() - temp.time() < m_expiry * 1000)) {
                         vMsg.push_back(temp);
                         ret++;
@@ -118,15 +114,14 @@ int RedisMb::addMsg(const string &mbName, Message &message)
         DBHandle hndl = m_cg->getHndl(mbName);
         if (hndl == NULL) return CONNECT_CACHE_FAILED;
 
-        string str, base64Str;
+        string str;
         stringstream ss;
         map<string, string> m;
 
         message.set_time(gettime_ms());
         ss << message.id();
         message.SerializeToString(&str);
-        base64Str = base64Encode(str);
-        m.insert(pair<string, string>(ss.str(), base64Str));
+        m.insert(pair<string, string>(ss.str(), str));
         int ret = hndl->ssetAdd(mbName, m);
         if (ret < 0) {
                 return ret;
@@ -218,8 +213,7 @@ int RedisMb::clearExpiredMessage(const string &mbName)
 
         vector<pair<string, string> >::iterator it = mems.end() - 1;
         Message tmp;
-        string base64Str = base64Decode(it->second);
-        tmp.ParseFromString(base64Str);
+        tmp.ParseFromString(it->second);
         if (now - tmp.time() > m_expiry * 1000) {
                 double exscore = atof(it->first.data());
                 return hndl->ssetRemRangeByScore(mbName, DBL_MIN, exscore);

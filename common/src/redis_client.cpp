@@ -1,7 +1,6 @@
 #include <sstream>
 #include <string>
 #include <stdlib.h>
-#include <float.h>
 #include "redis_client.h"
 
 namespace gim {
