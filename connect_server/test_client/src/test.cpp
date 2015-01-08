@@ -1,7 +1,6 @@
 #include "net/ef_sock.h"
 #include "proto/msg_head.h"
 #include "proto/connect_server.pb.h"
-#include "proto/push_server.pb.h"
 #include "proto/peer_server.pb.h"
 #include "base/ef_utility.h"
 #include "base/ef_log.h"
