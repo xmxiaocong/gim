@@ -12,9 +12,9 @@ namespace gim {
 using namespace std;
 using namespace ef;
 
-class MbAdaptor {
+class MsgDB {
 public:
-	virtual ~MbAdaptor(){};
+	virtual ~MsgDB(){};
 
 	virtual int size(const string &mbName) = 0;
 
