@@ -579,6 +579,28 @@ int RedisCli::ssetRange(const string &key, int start, int stop, vector<string> &
 	return _exeCmdWithOutput(members, "ZRANGE %b %d %d", key.data(), key.size(), start, stop);
 }
 
+int RedisCli::ssetRangeByScoreLimit(const string &key, double minScore, double maxScore,
+                int offset, int length, vector<string> &members)
+{
+         if (minScore == DBL_MIN) {
+                if (maxScore == DBL_MAX) {
+                        return _exeCmdWithOutput(members, "ZRANGEBYSCORE %b -inf +inf LIMIT %d %d",
+                                key.data(), key.size(), offset, length);
+                } else {
+                        return _exeCmdWithOutput(members, "ZRANGEBYSCORE %b -inf %f LIMIT %d %d",
+                                key.data(), key.size(), maxScore, offset, length);
+                }
+        } else {
+                if (maxScore == DBL_MAX) {
+                        return _exeCmdWithOutput(members, "ZRANGEBYSCORE %b %f +inf LIMIT %d %d",
+                                key.data(), key.size(), minScore, offset, length);
+                } else {
+                        return _exeCmdWithOutput(members, "ZRANGEBYSCORE %b %f %f LIMIT %d %d",
+                                key.data(), key.size(), minScore, maxScore, offset, length);
+                }
+        }
+}
+
 int RedisCli::ssetRangeWithScore(const string &key, int start, int stop, vector<pair<string, string> > &members)
 {
 	return _exeCmdWithOutput(members, "ZRANGE %b %d %d WITHSCORES", key.data(), key.size(), start, stop);
@@ -627,7 +649,8 @@ int RedisCli::ssetRangeByScoreWithScoreLimit(const string &key, double minScore,
                 }
         }
 }
-int RedisCli::ssetRemRangeByRank(const string &key, int start, int stop)
+
+int RedisCli::ssetRemRange(const string &key, int start, int stop)
 {
 	return _exeCmdWithNoOutput("ZREMRANGEBYRANK %b %d %d", key.data(), key.size(), start, stop);
 }
@@ -652,6 +675,72 @@ int RedisCli::ssetRemRangeByScore(const string &key, double minScore, double max
 int RedisCli::ssetRevRange(const string &key, int start, int stop, vector<string> &members)
 {
 	return _exeCmdWithOutput(members, "ZREVRANGE %b %d %d", key.data(), key.size(), start, stop);
+}
+
+int RedisCli::ssetRevRangeByScoreLimit(const string &key, double maxScore, double minScore,
+                int offset, int length, vector<string> &members)
+{
+         if (minScore == DBL_MIN) {
+                if (maxScore == DBL_MAX) {
+                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b +inf -inf LIMIT %d %d",
+                                key.data(), key.size(), offset, length);
+                } else {
+                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b %f -inf LIMIT %d %d",
+                                key.data(), key.size(), maxScore, offset, length);
+                }
+        } else {
+                if (maxScore == DBL_MAX) {
+                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b +inf %f LIMIT %d %d",
+                                key.data(), key.size(), minScore, offset, length);
+                } else {
+                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b %f %f LIMIT %d %d",
+                                key.data(), key.size(), maxScore, minScore, offset, length);
+                }
+        }
+}
+
+int RedisCli::ssetRevRangeByScoreWithScore(const string &key, double maxScore, 
+		double minScore, vector<pair<string, string> > &members)
+{
+	 if (minScore == DBL_MIN) {
+                if (maxScore == DBL_MAX) {
+                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b +inf -inf WITHSCORES", 
+				key.data(), key.size());
+                } else {
+                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b %f -inf WITHSCORES", 
+				key.data(), key.size(), maxScore);
+                }
+        } else {
+                if (maxScore == DBL_MAX) {
+                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b +inf %f WITHSCORES", 
+				key.data(), key.size(), minScore);
+                } else {
+                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b %f %f WITHSCORES", 
+				key.data(), key.size(), maxScore, minScore);
+                }
+        }
+}
+
+int RedisCli::ssetRevRangeByScoreWithScoreLimit(const string &key, double maxScore, 
+		double minScore, int offset, int length, vector<pair<string, string> > &members)
+{
+	 if (minScore == DBL_MIN) {
+                if (maxScore == DBL_MAX) {
+                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b +inf -inf WITHSCORES LIMIT %d %d",
+                                key.data(), key.size(), offset, length);
+                } else {
+                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b %f -inf WITHSCORES LIMIT %d %d",
+                                key.data(), key.size(), maxScore, offset, length);
+                }
+        } else {
+                if (maxScore == DBL_MAX) {
+                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b +inf %f WITHSCORES LIMIT %d %d",
+                                key.data(), key.size(), minScore, offset, length);
+                } else {
+                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b %f %f WITHSCORES LIMIT %d %d",
+                                key.data(), key.size(), maxScore, minScore, offset, length);
+                }
+        }
 }
 
 /* connection related */
@@ -1120,28 +1209,6 @@ int RedisCli::ssetRangeByScore(const string &key, double minScore, double maxSco
         }
 }
 
-int RedisCli::ssetRangeByScoreLimit(const string &key, double minScore, double maxScore, 
-  		int offset, int length, vector<string> &members)
-{
-	 if (minScore == DBL_MIN) {
-                if (maxScore == DBL_MAX) {
-                        return _exeCmdWithOutput(members, "ZRANGEBYSCORE %b -inf +inf LIMIT %d %d", 
-				key.data(), key.size(), offset, length);
-                } else {
-                        return _exeCmdWithOutput(members, "ZRANGEBYSCORE %b -inf %f LIMIT %d %d", 
-				key.data(), key.size(), maxScore, offset, length);
-                }
-        } else {
-                if (maxScore == DBL_MAX) {
-                        return _exeCmdWithOutput(members, "ZRANGEBYSCORE %b %f +inf LIMIT %d %d", 
-				key.data(), key.size(), minScore, offset, length);
-                } else {
-                        return _exeCmdWithOutput(members, "ZRANGEBYSCORE %b %f %f LIMIT %d %d", 
-				key.data(), key.size(), minScore, maxScore, offset, length);
-                }
-        }
-}
-
 int RedisCli::ssetRank(const string &key, const string &member, int64 &rank)
 {
 	return _exeCmdWithOutput(rank, "ZRANK %b %b", key.data(), key.size(), 
@@ -1165,81 +1232,15 @@ int RedisCli::ssetRevRangeByScore(const string &key, double maxScore, double min
 {
 	 if (minScore == DBL_MIN) {
                 if (maxScore == DBL_MAX) {
-                        return _exeCmdWithOutput(members, "ZREVRANGEBYSORE %b -inf +inf", key.data(), key.size());
+                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b +inf -inf", key.data(), key.size());
                 } else {
-                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b -inf %f", key.data(), key.size(), maxScore);
+                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b %f -inf", key.data(), key.size(), maxScore);
                 }
         } else {
                 if (maxScore == DBL_MAX) {
-                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b %f +inf", key.data(), key.size(), minScore);
+                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b +inf %f", key.data(), key.size(), minScore);
                 } else {
-                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b %f %f", key.data(), key.size(), minScore, maxScore);
-                }
-        }
-}
-
-int RedisCli::ssetRevRangeByScoreLimit(const string &key, double maxScore, double minScore, 
-  		int offset, int length, vector<string> &members)
-{
-	 if (minScore == DBL_MIN) {
-                if (maxScore == DBL_MAX) {
-                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b -inf +inf LIMIT %d %d", 
-				key.data(), key.size(), offset, length);
-                } else {
-                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b -inf %f LIMIT %d %d", 
-				key.data(), key.size(), maxScore, offset, length);
-                }
-        } else {
-                if (maxScore == DBL_MAX) {
-                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b %f +inf LIMIT %d %d", 
-				key.data(), key.size(), minScore, offset, length);
-                } else {
-                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b %f %f LIMIT %d %d", 
-				key.data(), key.size(), minScore, maxScore, offset, length);
-                }
-        }
-}
-
-int RedisCli::ssetRevRangeByScoreWithScore(const string &key, double maxScore, 
-		double minScore, vector<pair<string, string> > &members)
-{
-	 if (minScore == DBL_MIN) {
-                if (maxScore == DBL_MAX) {
-                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b -inf +inf WITHSCORES", 
-				key.data(), key.size());
-                } else {
-                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b -inf %f WITHSCORES", 
-				key.data(), key.size(), maxScore);
-                }
-        } else {
-                if (maxScore == DBL_MAX) {
-                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b %f +inf WITHSCORES", 
-				key.data(), key.size(), minScore);
-                } else {
-                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b %f %f WITHSCORES", 
-				key.data(), key.size(), minScore, maxScore);
-                }
-        }
-}
-
-int RedisCli::ssetRevRangeByScoreWithScoreLimit(const string &key, double maxScore, 
-		double minScore, int offset, int length, vector<pair<string, string> > &members)
-{
-	 if (minScore == DBL_MIN) {
-                if (maxScore == DBL_MAX) {
-                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b -inf +inf WITHSCORES LIMIT %d %d",
-                                key.data(), key.size(), offset, length);
-                } else {
-                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b -inf %f WITHSCORES LIMIT %d %d",
-                                key.data(), key.size(), maxScore, offset, length);
-                }
-        } else {
-                if (maxScore == DBL_MAX) {
-                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b %f +inf WITHSCORES LIMIT %d %d",
-                                key.data(), key.size(), minScore, offset, length);
-                } else {
-                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b %f %f WITHSCORES LIMIT %d %d",
-                                key.data(), key.size(), minScore, maxScore, offset, length);
+                        return _exeCmdWithOutput(members, "ZREVRANGEBYSCORE %b %f %f", key.data(), key.size(), maxScore, minScore);
                 }
         }
 }

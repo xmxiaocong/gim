@@ -9,7 +9,7 @@ namespace gim {
 using namespace std;
 using namespace ef;
 
-#define DEFAULT_MB_CAPABILITY 100
+#define DEFAULT_MB_CAPACITY 100
 #define DEFAULT_MSG_EXPIRY_TIME  60 * 60 * 24 * 7 /* a week */
 
 class RedisMb : public MbAdaptor {
@@ -45,15 +45,13 @@ public:
 
 	int setMsgId(const string &mbName, int64 recentReadId);
 private:
-	int clearExpiredMessage(const string &mbName);
-
 	RedisCG *m_cg;
 
 	Json::Value m_cfg;
 
 	int m_expiry;
 
-	int m_capability;
+	int m_capacity;
 };
 
 class RdsMbFactory : public MbAdptFactory {

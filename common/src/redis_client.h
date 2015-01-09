@@ -82,15 +82,23 @@ public:
 	int ssetCard(const string &key, int64 &card);
 	int ssetCount(const string &key, double minScore, double maxScore, int64 &count);
 	int ssetRange(const string &key, int start, int stop, vector<string> &members);
+	int ssetRangeByScoreLimit(const string &key, double minScore, double maxScore,
+		int offset, int length, vector<string> &members);
 	int ssetRangeWithScore(const string &key, int start, int stop, 
 		vector<pair<string, string> > &members);
 	int ssetRangeByScoreWithScore(const string &key, double minScore, double maxScore, 
 		vector<pair<string, string> > &members);
 	int ssetRangeByScoreWithScoreLimit(const string &key, double minScore, double maxScore,
 		int offset, int length, vector<pair<string, string> >&members);
-	int ssetRemRangeByRank(const string &key, int start, int stop);
+	int ssetRemRange(const string &key, int start, int stop);
 	int ssetRemRangeByScore(const string &key, double minScore, double maxScore);
 	int ssetRevRange(const string &key, int start, int stop, vector<string> &members);
+  	int ssetRevRangeByScoreLimit(const string &key, double maxScore, double minScore,
+  		int offset, int length, vector<string> &members);
+  	int ssetRevRangeByScoreWithScore(const string &key, double maxScore, 
+		double minScore, vector<pair<string, string> > &members);
+  	int ssetRevRangeByScoreWithScoreLimit(const string &key, double maxScore, 
+		double minScore, int offset, int length, vector<pair<string, string> > &members);
 
 	int connAuth(const string &passWord);
 	int connPing();
@@ -197,20 +205,12 @@ public:
 		const string &member, string &afterIncr);
   	int ssetRangeByScore(const string &key, double minScore, double maxScore, 
   		vector<string> &members);
-	int ssetRangeByScoreLimit(const string &key, double minScore, double maxScore,
-		int offset, int length, vector<string> &members);
   	int ssetRank(const string &key, const string &member, int64 &rank);
   	int ssetRem(const string &key, const vector<string> &members);
   	int ssetRevRangeWithScore(const string &key, int start, int stop, 
 		vector<pair<string, string> > &members);
   	int ssetRevRangeByScore(const string &key, double maxScore, double minScore, 
   		vector<string> &members);
-  	int ssetRevRangeByScoreLimit(const string &key, double maxScore, double minScore,
-  		int offset, int length, vector<string> &members);
-  	int ssetRevRangeByScoreWithScore(const string &key, double maxScore, 
-		double minScore, vector<pair<string, string> > &members);
-  	int ssetRevRangeByScoreWithScoreLimit(const string &key, double maxScore, 
-		double minScore, int offset, int length, vector<pair<string, string> > &members);
   	int ssetRevRank(const string &key, const string &member, int64 &rank);
   	int ssetScore(const string &key, const string &member, string &score);
 
