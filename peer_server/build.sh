@@ -21,6 +21,8 @@ mv src/peer_server.pb.cc src/peer_server.pb.cpp
 rm -fr CMakeCache.txt
 rm -fr CMakeFiles
 
+mkdir -p bin
+
 cmake .
 make clean;make
 rm -fr CMakeCache.txt
