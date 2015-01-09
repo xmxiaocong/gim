@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include "redis_msgdb.h"
+#include "redis_msg_interface.h"
 #include "redis_cg.h"
 
 using namespace std;
@@ -37,9 +37,8 @@ int main(int argc, char *argv[])
 	RedisCG cg(cfg["RedisCGCfg"]);
 //	cg.setCmdLog(print);
 	
-	RdsMbFactory rdsfac;
-	RedisMsgDB *mb = (RedisMsgDB *)rdsfac.createNewMbAdpt(cfg["RedisMbCfg"]);
-	mb->bindCG(&cg);
+	RedisMI mb(cfg["RedisMICfg"]);
+	mb.bindCG(&cg);
 
 	Message msg;
 	msg.set_to("234242145");
@@ -49,31 +48,30 @@ int main(int argc, char *argv[])
 	msg.set_data("hello");
 	for (int i = 0; i < 10; i++) {
 		msg.set_id(i + 100);
-		mb->addMsg("msgbox_344", msg);
+		mb.addMsg("msgbox_344", msg);
 	}
 	vector<Message> vmsg;
-	int ret = mb->getMsgs("msgbox_344", 0, 100, vmsg);
+	int ret = mb.getMsgs("msgbox_344", 0, 100, vmsg);
 	vector<Message>::iterator it;
 	for (it = vmsg.begin(); it != vmsg.end(); it++) {
 		cout << it->id() << endl;
 	}
 	cout << endl;
 	vmsg.clear();
-	mb->delMsgs("msgbox_344", 107, 3);
-	mb->getMsgs("msgbox_344", 0, 100, vmsg);
+	mb.delMsgs("msgbox_344", 107, 3);
+	mb.getMsgs("msgbox_344", 0, 100, vmsg);
 	for (it = vmsg.begin(); it != vmsg.end(); it++) {
 		cout << it->id() << endl;
 	}
 	cout << endl;
-	mb->delMsgs("msgbox_344", 108, 3);
+	mb.delMsgs("msgbox_344", 108, 3);
 	vmsg.clear();
-	mb->getMsgs("msgbox_344", 0, 100, vmsg);
+	mb.getMsgs("msgbox_344", 0, 100, vmsg);
 	for (it = vmsg.begin(); it != vmsg.end(); it++) {
 		cout << it->id() << endl;
 	}
 	cout << endl;
-	mb->clear("msgbox_344");
-	delete mb;
+	mb.clear("msgbox_344");
 	return 0;	
 }
 	
