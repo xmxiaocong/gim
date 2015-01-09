@@ -35,6 +35,12 @@ public:
 		int64 beginMsgId, int length) = 0;
 	
 	virtual int clear(const string &mbName) = 0;
+
+	virtual int incrId(const string &key, int64 &newId) = 0;
+	
+	virtual int getMsgId(const string &key, int64 &curId) = 0;
+
+	virtual int setMsgId(const string &key, int64 id) = 0;
 };
 
 class MsgInterfaceFactory {
