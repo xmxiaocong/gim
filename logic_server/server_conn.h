@@ -13,6 +13,7 @@ namespace gim{
 using namespace ef;
 
 class LogicServer;
+class Dispatcher;
 
 class SvCon:public Client
 {
@@ -53,6 +54,8 @@ public:
 	LogicServer* getLogicServer(){
 		return m_serv;
 	}
+
+	Dispatcher* getDispatcher();
 
 	virtual int onConnected();
 	virtual int onDisconnected();

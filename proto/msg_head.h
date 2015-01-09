@@ -19,8 +19,6 @@ enum{
 	KICK_CLIENT = 400,
 	REDIRECT_RESP = 1001,	
 	SET_TIME_RESP = 1101,
-	JSON_PUSH_REQ = 9999,
-	JSON_PUSH_RESP = JSON_PUSH_REQ + 1,
 	MAGIC_NUMBER = 0x20141228,
 };
 
@@ -33,7 +31,6 @@ struct head{
 	//300: regist service 301: regist service resp
 	//400: kick client
 	//1001: redericet
-	//9999:json push request 10000:json push response
 	int32 cmd;			
 };
 

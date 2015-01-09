@@ -17,8 +17,7 @@ namespace gim{
 
 	int32 constructPacket(const head& h, 
 		const std::string& body, std::string& pack);
-	int32 constructReqPacket(const head& h, 
-		const std::string& body, std::string& pack);
+
 	int32 constructServiceRequest(const std::string& sessid,
 		int32 service_type,
 		const std::string& sn,

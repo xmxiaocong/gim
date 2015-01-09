@@ -21,6 +21,8 @@ enum{
 	INVALID_SN = -40,
 	SN_TIMEOUT = -41,
 	DECRYPT_FAIL = -50,
+	DB_ERROR = -60,
+	SERVICE_TYPE_ERROR = -70,
 	INNER_ERROR = -100,
 };
 
@@ -56,6 +58,10 @@ inline const char* getErrStr(int e){
 		return "SN_TIMEOUT";
 	case DECRYPT_FAIL:
 		return "DECRYPT_FAIL";
+	case DB_ERROR:
+		return "DB_ERROR";
+	case SERVICE_TYPE_ERROR:
+		return "SERVICE_TYPE_ERROR";
 	case INNER_ERROR:
 		return "INNER_ERROR";
 	}

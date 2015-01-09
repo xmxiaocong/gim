@@ -44,7 +44,7 @@ namespace gim{
 		h.cmd = SERVICE_REQ;
 		constructServiceRequest(sessid, 
 				svtype, sn, payload, body);
-		constructReqPacket(h, body, msg);
+		constructPacket(h, body, msg);
 		return msg;
 	}
 	
@@ -57,7 +57,7 @@ namespace gim{
 		h.cmd = SERVICE_RESP;
 		constructServiceResponse(sessid, 
 				status, svtype, sn, payload, body);
-		constructReqPacket(h, body, msg);
+		constructPacket(h, body, msg);
 		return msg;
 	}
 

@@ -54,7 +54,11 @@ public:
 	}
 
 	int initServerListCache(const Json::Value& v);
-	int initSessCacheConfig(const Json::Value& v);
+
+	int initSessCacheConfig(const Json::Value& v){
+		m_ssch_conf = v;
+		return 0;
+	}
 
 	virtual int onListChange(int type, vector<Serv> &servlist);
 	virtual int onDisableListChange(int type, vector<int> &servlist){
@@ -87,7 +91,6 @@ private:
 	SvLstCache* m_cache;
 	Json::Value m_ssch_conf;
 	string m_logname;
-	bool m_run;
 };
 };
 

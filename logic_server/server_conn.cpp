@@ -1,10 +1,10 @@
 #include "server_conn.h"
 #include "dispatcher.h"
-#include "base/ef_utility.h"
-#include "base/ef_statistic.h"
 #include "logic_server.h"
 #include "msg_head.h"
 #include "err_no.h"
+#include "base/ef_utility.h"
+#include "base/ef_statistic.h"
 #include "connect_server.pb.h"
 
 namespace gim{
@@ -32,13 +32,17 @@ int SvCon::keepAlive(){
 	h.magic = MAGIC_NUMBER;
 	h.cmd = KEEPALIVE_REQ;	
 	std::string req;	
-	constructReqPacket(h, "", req);
+	constructPacket(h, "", req);
 	ALogError(m_serv->getLogName()) << "<action:keep_alive> "
 		"<event_loop:" << getEventLoop() << "> <conid:"
 		<< getId() << "> <con_serv_id:" << m_con_serv_id
 		<< ">";
 	ret = sendMessage(req);
 	return ret;
+}
+
+Dispatcher* SvCon::getDispatcher(){
+	return m_serv->getDispatcher();
 }
 
 int SvCon::doRegister(){
@@ -51,7 +55,7 @@ int SvCon::doRegister(){
 	h.cmd = SERVICE_REG_REQ;
 	h.magic = MAGIC_NUMBER;
 	std::string req;
-	constructReqPacket(h, reqbody, req);	
+	constructPacket(h, reqbody, req);	
 	ALogError(m_serv->getLogName()) << "<action:server_register> "
 		"<event_loop:" << getEventLoop() << "> <conid:"
 		<< getId() << "> <con_serv_id:" << m_con_serv_id

@@ -29,8 +29,7 @@ LogicServer::LogicServer()
 	m_keepalive_span(6000),
 	m_reconnect_span(0),
 	m_service_type(0),
-	m_confac(NULL),
-	m_run(false){
+	m_confac(NULL){
 }
 
 
@@ -152,18 +151,13 @@ int LogicServer::connectServer(const Serv& s){
 }
 
 int LogicServer::run(int threadcnt){
-	m_run = true;
 	m_cliset.setEventLoopCount(threadcnt);
 	startCliSets();	
-	while(m_run){
-		sleep_ms(1000);	
-	}
-	stopCliSets();
 	return 0;	
 }
 
 int LogicServer::stop(){
-	m_run = false;
+	stopCliSets();
 	return 0;
 }
 
