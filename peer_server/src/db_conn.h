@@ -1,7 +1,7 @@
 #ifndef __DB_CONN_H__
 #define __DB_CONN_H__
 
-#include "msg_interface.h"
+#include "msg_db.h"
 #include "base/ef_no_copy.h"
 
 namespace gim{
@@ -9,11 +9,11 @@ namespace gim{
 	public:
 		DBConn();
 		~DBConn();
-		static MsgInterface* getMsgDB();
+		static MsgDB* getMsgDB();
 		static DBConn* getDBConn(); 
 	private:
 		int init();
-		MsgInterface* m_msgdb;
+		MsgDB* m_msgdb;
 	};
 };
 

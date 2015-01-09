@@ -13,8 +13,8 @@ int DBConn::init(){
 	Settings *pSettings = Singleton<Settings>::instance();
 
 
-	MsgInterfaceFactory mdf;
-	m_msgdb = mdf.newMsgInterface(pSettings->MsgDBConfig); 
+	MsgDBFactory mdf;
+	m_msgdb = mdf.newMsgDB(pSettings->MsgDBConfig); 
 
 	return 0;
 }
@@ -41,7 +41,7 @@ DBConn* DBConn::getDBConn()
 	return	pDBC;
 }
 
-MsgInterface* DBConn::getMsgDB()
+MsgDB* DBConn::getMsgDB()
 {
 	DBConn *pDBC = getDBConn();
 

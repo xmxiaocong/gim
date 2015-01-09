@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include "redis_msg_interface.h"
+#include "redis_msg_db.h"
 #include "redis_cg.h"
 
 using namespace std;

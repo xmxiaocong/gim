@@ -1,5 +1,5 @@
-#ifndef __MSG_INTERFACE_H__
-#define __MSG_INTERFACE_H__
+#ifndef __MSG_DB_H__
+#define __MSG_DB_H__
 
 #include <string>
 #include <vector>
@@ -12,9 +12,9 @@ namespace gim {
 using namespace std;
 using namespace ef;
 
-class MsgInterface {
+class MsgDB {
 public:
-	virtual ~MsgInterface(){};
+	virtual ~MsgDB(){};
 
 	virtual int size(const string &mbName) = 0;
 
@@ -43,10 +43,10 @@ public:
 	virtual int setMsgId(const string &key, int64 id) = 0;
 };
 
-class MsgInterfaceFactory {
+class MsgDBFactory {
 public:
-	virtual MsgInterface *newMsgInterface(const Json::Value &config);
-	virtual ~MsgInterfaceFactory(){};
+	virtual MsgDB *newMsgDB(const Json::Value &config);
+	virtual ~MsgDBFactory(){};
 };
 
 };

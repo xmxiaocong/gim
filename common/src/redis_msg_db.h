@@ -1,7 +1,7 @@
-#ifndef __REDIS_MSG_INTERFACE_H__
-#define __REDIS_MSG_INTERFACE_H__
+#ifndef __REDIS_MSG_DB_H__
+#define __REDIS_MSG_DB_H__
 
-#include "msg_interface.h"
+#include "msg_db.h"
 #include "redis_cg.h"
 
 namespace gim {
@@ -12,7 +12,7 @@ using namespace ef;
 #define DEFAULT_MSG_BOX_CAPACITY 100
 #define DEFAULT_MSG_EXPIRY_TIME  60 * 60 * 24 * 7 /* a week */
 
-class RedisMI : public MsgInterface {
+class RedisMI : public MsgDB {
 public:
 	RedisMI(const Json::Value &config);
 
@@ -52,14 +52,6 @@ private:
 	int m_expiry;
 
 	int m_capacity;
-};
-
-class RedisMIFactory : public MsgInterfaceFactory {
-public:
-	MsgInterface *newMsgInterface(const Json::Value &config)
-	{
-		return new RedisMI(config);
-	}
 };
 
 }

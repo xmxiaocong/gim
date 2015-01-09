@@ -35,7 +35,7 @@ namespace gim{
 		int64 count = gmsgreq.count();	
 		int64 lastmsgid = 0;
 
-		MsgInterface* c = DBConn::getMsgDB();	
+		MsgDB* c = DBConn::getMsgDB();	
 
 		if(!c){
 			PeerErrorLog(svreq.sn(), "get_peer_message", cid, DB_ERROR);
@@ -140,7 +140,7 @@ namespace gim{
 		//get message from db
 		const Message& msg = gmsgreq.msg();
 
-		MsgInterface* c = DBConn::getMsgDB();
+		MsgDB* c = DBConn::getMsgDB();
 		if(!c){
 			PeerErrorLog(svresp.sn(), "recv_peer_message", msg.to(), DB_ERROR);
 			return DB_ERROR;
@@ -180,7 +180,7 @@ namespace gim{
 		*(resppm) = pm;
 		
 
-		MsgInterface* c = DBConn::getMsgDB();
+		MsgDB* c = DBConn::getMsgDB();
 		if(!c){
 			PeerErrorLog(svreq.sn(), "send_peer_message", pm.to(), DB_ERROR);
 			return DB_ERROR;		

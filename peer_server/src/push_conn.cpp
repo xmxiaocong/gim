@@ -72,7 +72,7 @@ namespace gim{
 			const Message&  pm = svreq.msg();
 			const string& cid = pm.to();
 
-			MsgInterface* c = DBConn::getMsgDB();
+			MsgDB* c = DBConn::getMsgDB();
 
 			if(!c){
 				PeerErrorLog(svreq.sn(), "push_message", cid, DB_ERROR);
