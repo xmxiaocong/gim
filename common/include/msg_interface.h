@@ -39,10 +39,8 @@ public:
 
 class MsgInterfaceFactory {
 public:
-	virtual MsgInterface *newMsgInterface(const Json::Value &config)
-	{
-		return NULL;
-	}
+	virtual MsgInterface *newMsgInterface(const Json::Value &config);
+	virtual ~MsgInterfaceFactory(){};
 };
 
 };
