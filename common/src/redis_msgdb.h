@@ -15,7 +15,7 @@ using namespace ef;
 class RedisMsgDB : public MbAdaptor {
 public:
 	RedisMsgDB(const Json::Value &config);
-
+	
 	// Caution! You must bind a valid RedisCG handler before any other operation
 	int bindCG(RedisCG *cg);
 
