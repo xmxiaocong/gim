@@ -20,7 +20,7 @@ int g_run = false;
 
 int system_shutdown( void )
 {
-	g_run = true;
+	g_run = false;
 	return 0;
 }
 
