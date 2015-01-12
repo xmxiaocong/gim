@@ -12,19 +12,26 @@ namespace gim {
 using namespace std;
 using namespace ef;
 
+typedef enum {
+	ORDER_BY_INCR,
+	ORDER_BY_DECR
+}order_t;
+
 class MsgDB {
 public:
 	virtual ~MsgDB(){};
 
 	virtual int size(const string &mbName) = 0;
 
+	virtual int count(const string &mbName, int64 lbId, int64 ubId) = 0;
+
 	virtual int addMsg(const string &mbName, Message &msg) = 0;
 
-	virtual int getMsgsForward(const string &mbName, 
-		int64 beginMsgId, int length, vector<Message> &msg) = 0;
+	virtual int getMsgs(vector<Message> &vMsg, const string &mbName, 
+			int64 beginMsgId, int length, order_t orderBy) = 0;
 
-	virtual int getMsgs(const string &mbName, 
-		int64 beginMsgId, int length, vector<Message> &msg) = 0;
+	virtual int getMsgsForward(vector<Message> &vMsg, const string &mbName, 
+			int64 beginMsgId, int length, order_t orderBy) = 0;
 
 	virtual int delMsg(const string &mbName, int64 msgId) = 0;
 

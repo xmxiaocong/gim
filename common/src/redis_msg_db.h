@@ -20,28 +20,36 @@ public:
 	// returns message numbers in the specified msgbox
 	int size(const string &mbName);
 	
-	// returns message numbers between lbId and ubId
-	// lbId: lower bound. 0 means the first message
+	// returns amount of messages between lbId and ubId
+	// lbId: lower bound. 0 means the oldest message
 	// ubId: upper bound. -1 means the latest message
 	int count(const string &mbName, int64 lbId = 0, int64 ubId = -1);
 
 	int addMsg(const string &mbName, Message &msg);
 
-	// get messages whose id are not less than bMsgId(contains bMsgId itself)
-	int getMsgs(const string &mbName, int64 bMsgId, int length,
-			vector<Message> &msg);
+	// get messages whose ids are not less than bMsgId(contains bMsgId itself)
+	// bMsgId: the begin message id. 0 means the oldest message
+	// length: amount of messages to get. -1 means to the latest message
+	int getMsgs(vector<Message> &vMsg, const string &mbName, int64 bMsgId = 0, 
+		int length = -1, order_t orderBy = ORDER_BY_INCR);
 
-	// get messages whose id are not larger than bMsgId(contains bMsgId itself)
-	int getMsgsForward(const string &mbName, 
-			int64 bMsgId, int length, vector<Message> &msg);
+	// get messages whose ids are not larger than bMsgId(contains eMsgId itself)
+	// eMsgId: the end message id. -1 means the latest message
+	// length: amount of messages to get. -1 means from the first message;
+	int getMsgsForward(vector<Message> &vMsg, const string &mbName, int64 eMsgId = -1, 
+			int length = -1, order_t orderBy = ORDER_BY_DECR);
 
 	int delMsg(const string &mbName, int64 msgId);
 
-	// delete messages whose id are not less than bMsgId(contains bMsgId itself)
-	int delMsgsBackward(const string &mbName, int64 bMsgId, int length = -1);
+	// delete messages whose ids are not less than bMsgId(contains bMsgId itself)
+	// bMsgId: the begin message id. 0 means the oldest message
+	// length: amount of message to delete. -1 means to the latest message
+	int delMsgsBackward(const string &mbName, int64 bMsgId = 0, int length = -1);
 
-	// delete messages whose id are not larger than bMsgId(contains bMsgId itself)
-	int delMsgs(const string &mbName, int64 bMsgId, int length = -1);
+	// delete messages whose ids are not larger than eMsgId(contains eMsgId itself)
+	// eMsgId: the end message id. -1 means the latest message
+	// length: amount of message to delete. -1 means from the first message
+	int delMsgs(const string &mbName, int64 eMsgId = -1, int length = -1);
 
 	int clear(const string &mbName);
 

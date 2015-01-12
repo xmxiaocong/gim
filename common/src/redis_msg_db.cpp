@@ -51,69 +51,6 @@ int RedisMI::count(const string &mbName, int64 lbId, int64 ubId)
 	return ret >= 0 ? count : -1;
 }
 
-int RedisMI::getMsgs(const string &mbName, int64 bMsgId, int length, vector<Message> &vMsg)
-{
-	if (length == 0) return -1;
-
-	DBHandle hndl = m_cg->getHndl(mbName);
-	if (hndl == NULL) return CONNECT_CACHE_FAILED;
-	int ret = 0;
-
-	vector<pair<string, string> > result, mems;
-	vector<string> vmem;
-	vector<pair<string, string> >::iterator it; 
-	
-	if (length == -1) {
-		ret = hndl->ssetRangeByScoreWithScore(mbName, bMsgId, DBL_MAX, mems);
-	} else {
-		ret = hndl->ssetRangeByScoreWithScoreLimit(mbName, bMsgId, DBL_MAX, 0, length, mems);
-	}
-	
-	if (ret < 0) return -1;
-	
-	for (it = mems.begin(); it != mems.end(); it++) {
-		Message temp;
-		temp.ParseFromString(it->second);
-		if (!m_expiry || (gettime_ms() - temp.time() < m_expiry * 1000)) {
-			vMsg.push_back(temp);
-		}
-	}
-	
-	return vMsg.size();
-}
-
-int RedisMI::getMsgsForward(const string &mbName, int64 bMsgId, int length, vector<Message> &vMsg)
-{
-	if (length == 0) return -1;
-
-	DBHandle hndl = m_cg->getHndl(mbName);
-	if (hndl == NULL) return CONNECT_CACHE_FAILED;
-	int ret = 0;
-
-	vector<pair<string, string> > result, mems;
-	vector<string> vmem;
-	vector<pair<string, string> >::reverse_iterator it; 
-
-	if (length == -1) {
-		ret = hndl->ssetRevRangeByScoreWithScore(mbName, bMsgId, DBL_MIN, mems);
-	} else {
-		ret = hndl->ssetRevRangeByScoreWithScoreLimit(mbName, bMsgId, DBL_MIN, 
-			0, length, mems);
-	}	
-	
-	if (ret < 0) return -1;
-	
-        for (it = mems.rbegin(); it != mems.rend(); it++) {
-                Message temp;
-                temp.ParseFromString(it->second);
-                if (!m_expiry || (gettime_ms() - temp.time() < m_expiry * 1000)) {
-                        vMsg.push_back(temp);
-                }
-        }
-
-        return vMsg.size();
-}
-
 int RedisMI::addMsg(const string &mbName, Message &message)
 {
         DBHandle hndl = m_cg->getHndl(mbName);
@@ -165,6 +102,93 @@ int RedisMI::addMsg(const string &mbName, Message &message)
         return ret;
 }
 
+int RedisMI::getMsgs(vector<Message> &vMsg, const string &mbName, int64 bMsgId, 
+		int length, order_t orderBy)
+{
+	if (length == 0) return -1;
+
+	DBHandle hndl = m_cg->getHndl(mbName);
+	if (hndl == NULL) return CONNECT_CACHE_FAILED;
+
+	int ret = 0;
+	double bId = bMsgId <= 0 ? DBL_MIN : bMsgId;
+	vector<pair<string, string> > result, mems;
+	
+	if (length == -1) {
+		ret = hndl->ssetRangeByScoreWithScore(mbName, bId, DBL_MAX, mems);
+	} else {
+		ret = hndl->ssetRangeByScoreWithScoreLimit(mbName, bId, DBL_MAX, 0, length, mems);
+	}
+	
+	if (ret < 0) return -1;
+	
+	if (orderBy == ORDER_BY_INCR) {
+		vector<pair<string, string> >::iterator it; 
+		for (it = mems.begin(); it != mems.end(); it++) {
+			Message temp;
+			temp.ParseFromString(it->second);
+			if (!m_expiry || (gettime_ms() - temp.time() < m_expiry * 1000)) {
+				vMsg.push_back(temp);
+			}
+		}
+	} else if (orderBy == ORDER_BY_DECR) {
+		vector<pair<string, string> >::reverse_iterator it;
+		for (it = mems.rbegin(); it != mems.rend(); it++) {
+			Message temp;
+			temp.ParseFromString(it->second);
+			if (!m_expiry || (gettime_ms() - temp.time() < m_expiry * 1000)) {
+				vMsg.push_back(temp);
+			}
+		}
+	}
+	
+	return vMsg.size();
+}
+
+int RedisMI::getMsgsForward(vector<Message> &vMsg, const string &mbName, int64 eMsgId, 
+		int length, order_t orderBy)
+{
+	if (length == 0) return -1;
+
+	DBHandle hndl = m_cg->getHndl(mbName);
+	if (hndl == NULL) return CONNECT_CACHE_FAILED;
+
+	int ret = 0;
+	double eId = eMsgId < 0 ? DBL_MAX : eMsgId;
+	vector<pair<string, string> > result, mems;
+
+	if (length == -1) {
+		ret = hndl->ssetRevRangeByScoreWithScore(mbName, eId, DBL_MIN, mems);
+	} else {
+		ret = hndl->ssetRevRangeByScoreWithScoreLimit(mbName, eId, DBL_MIN, 
+			0, length, mems);
+	}	
+	
+	if (ret < 0) return -1;
+	
+	if (orderBy == ORDER_BY_INCR) {
+		vector<pair<string, string> >::reverse_iterator it; 
+        	for (it = mems.rbegin(); it != mems.rend(); it++) {
+                	Message temp;
+               		temp.ParseFromString(it->second);
+                	if (!m_expiry || (gettime_ms() - temp.time() < m_expiry * 1000)) {
+                        	vMsg.push_back(temp);
+                	}
+		}
+        } else if (orderBy == ORDER_BY_DECR) {
+		vector<pair<string, string> >::iterator it; 
+		for (it = mems.begin(); it != mems.end(); it++) {
+			Message temp;
+			temp.ParseFromString(it->second);
+			if (!m_expiry || (gettime_ms() - temp.time() < m_expiry * 1000)) {
+				vMsg.push_back(temp);
+			}
+		}
+	}
+
+        return vMsg.size();
+}
+
 int RedisMI::delMsg(const string &mbName, int64 msgId)
 {
         DBHandle hndl = m_cg->getHndl(mbName);
@@ -186,11 +210,13 @@ int RedisMI::delMsgsBackward(const string &mbName, int64 bMsgId, int length)
         if (hndl == NULL) return CONNECT_CACHE_FAILED;
 
 	int ret = 0;
+	double bId = bMsgId <= 0 ? DBL_MIN : bMsgId;
+
 	if (length == -1) {
-		ret = hndl->ssetRemRangeByScore(mbName, bMsgId, DBL_MAX);
+		ret = hndl->ssetRemRangeByScore(mbName, bId, DBL_MAX);
 	} else {
 		vector<string> vStr;
-		ret = hndl->ssetRangeByScoreLimit(mbName, bMsgId, DBL_MAX, 0, length, vStr);
+		ret = hndl->ssetRangeByScoreLimit(mbName, bId, DBL_MAX, 0, length, vStr);
 		if (ret < 0) return CONNECT_CACHE_FAILED;
 		if (vStr.size() == 0) return -1;
 		Message bMsg, eMsg;
@@ -206,7 +232,7 @@ int RedisMI::delMsgsBackward(const string &mbName, int64 bMsgId, int length)
         return ret;
 }
 
-int RedisMI::delMsgs(const string &mbName, int64 bMsgId, int length)
+int RedisMI::delMsgs(const string &mbName, int64 eMsgId, int length)
 {
 	if (length == 0) return -1;
 	
@@ -214,11 +240,13 @@ int RedisMI::delMsgs(const string &mbName, int64 bMsgId, int length)
         if (hndl == NULL) return CONNECT_CACHE_FAILED;
 
 	int ret = 0;
+	double eId = eMsgId < 0 ? DBL_MAX : eMsgId;
+
 	if (length == -1) {
-		ret = hndl->ssetRemRangeByScore(mbName, DBL_MIN, bMsgId);
+		ret = hndl->ssetRemRangeByScore(mbName, DBL_MIN, eId);
 	} else {
 		vector<string> vStr;
-		ret = hndl->ssetRevRangeByScoreLimit(mbName, bMsgId, DBL_MIN, 0, length, vStr);
+		ret = hndl->ssetRevRangeByScoreLimit(mbName, eId, DBL_MIN, 0, length, vStr);
 		if (ret < 0) return CONNECT_CACHE_FAILED;
 		if (vStr.size() == 0) return -1;
 		Message bMsg, eMsg;
