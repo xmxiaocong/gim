@@ -1,0 +1,51 @@
+option optimize_for = LITE_RUNTIME;
+
+package gim;
+
+import "message.proto";
+
+message GetPeerMessageRequest{
+	optional string cid = 1;//to who
+	optional int64 start_msgid = 2;//mssage id
+	optional int64 count  = 3;//message count
+}
+
+message GetPeerMessageResponse{
+	optional int64 last_msgid = 1;
+	repeated Message msgs = 2;
+}
+
+message SendPeerMessageRequest{
+	required Message msg = 1;
+}
+
+//use for muti-point online
+message SendPeerMessageResponse{
+	required Message msg = 1;
+}
+
+message RecvPeerMessageResponse{
+	required Message msg = 1;	
+}
+
+message PushMessageRequest{
+	required string sn = 1;
+	required Message msg = 2;
+}
+
+message PushMessageResponse{
+	required string sn = 1;
+	required int32 status = 2;
+}
+
+
+message PeerPacket{
+	required int32 cmd = 1;//110: send_req, 
+		//111: send_resp, 112: get_req, 
+		//113: get_resp, 115:recv_resp
+	optional GetPeerMessageRequest get_peer_msg_req = 2;
+	optional GetPeerMessageResponse get_peer_msg_resp = 3;
+	optional SendPeerMessageRequest send_peer_msg_req = 4;
+	optional SendPeerMessageResponse send_peer_msg_resp = 5;
+	optional RecvPeerMessageResponse recv_peer_msg_resp = 6;
+}

@@ -1,0 +1,8 @@
+option optimize_for = LITE_RUNTIME;
+
+package gim;
+
+message Pair{
+	required string key = 1;
+	optional bytes value = 2;
+}

@@ -1,0 +1,15 @@
+option optimize_for = LITE_RUNTIME;
+
+package gim;
+
+message Message{
+	optional string to = 1;
+	optional int64 id = 2;//mssage id, did not set this field when send message
+	optional int64 time = 3;//message send time
+	optional string from = 4;//who send
+	optional int32 type = 5;
+	optional string sn = 6;
+	optional bytes data  = 7;//message data	
+}
+
+
