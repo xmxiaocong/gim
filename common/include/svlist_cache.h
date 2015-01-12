@@ -24,7 +24,7 @@ struct Serv{
 
 class SvLstListener{
 public:
-	virtual ~SvLstCache(){};
+	virtual ~SvLstListener(){};
 	virtual int onListChange(int type, vector<Serv> &servlist) = 0;
 	virtual int onDisableListChange(int type, vector<int> &servlist) = 0;
 };
@@ -47,6 +47,8 @@ public:
 	virtual int deleteServer(int type, int id) = 0;
 	virtual int enableServer(int type, int id) = 0;
 	virtual int disableServer(int type, int id) = 0;
+	//when watch, may call m_ln->onListChange
+	//be careful
 	virtual int watchServerList(int type) = 0;
 	virtual int unwatchServerList(int type) = 0;
 
