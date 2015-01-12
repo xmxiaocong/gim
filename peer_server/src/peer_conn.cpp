@@ -72,7 +72,7 @@ namespace gim{
 		}
 
 		vector<Message> msgs;
-		ret = c->getMsgs("peer_" + cid, start_msgid, count, msgs);
+		ret = c->getMsgs(msgs, "peer_" + cid, start_msgid, count, ORDER_BY_INCR);
 
 		if(ret < 0){
 			PeerErrorLog(svreq.sn(), "get_peer_message", cid, DB_ERROR);
