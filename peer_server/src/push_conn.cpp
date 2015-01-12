@@ -31,7 +31,8 @@ namespace gim{
 		try{
 			switch(h.cmd){
 			case SERVICE_REQ:
-				ret = handlePushMessage(h, req, resp);
+				ret = handlePushMessage(h, 
+					req.substr(sizeof(h)), resp);
 				break;
 			}
 			if(resp.size()){
@@ -124,7 +125,7 @@ namespace gim{
 				break;
 			}
 
-			ret = d->sendServiceRequest(getEventLoop(), 
+			d->sendServiceRequest(getEventLoop(), 
 					pm.to(), SERVICE_TYPE_PEER, 
 					svreq.sn(), payload);
 

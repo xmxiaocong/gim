@@ -110,7 +110,7 @@ namespace gim{
 		c->setMsgId("peer_" + cid + "_last_read", 
 				lastread);
 
-		c->delMsgsBackward("peer_" + cid, 
+		c->delMsgs("peer_" + cid, 
 			start_msgid - MSG_LEFT_COUNT, -1);
 
 		PLogTrace("PeerServer")
@@ -146,7 +146,7 @@ namespace gim{
 			return DB_ERROR;
 		}
 
-		c->delMsgsBackward("peer_" + msg.to(), msg.id() - MSG_LEFT_COUNT, -1);
+		c->delMsgs("peer_" + msg.to(), msg.id() - MSG_LEFT_COUNT, -1);
 
 		ALogTrace("PeerServer")
 			<< "<sn:" << svresp.sn()
