@@ -105,4 +105,16 @@ int DefSvLstCache::disableServer(int type, int id){
 	return 0;
 }
 
+int DefSvLstCache::watchServerList(int type){
+	SvLstListener* ln = getServerListListener();
+	if(ln){
+		ln->onListChange(type, m_svlsts[type]);
+	}
+	return 0;
+}
+
+int DefSvLstCache::unwatchServerList(int type){
+	return 0;
+}
+
 }

@@ -12,19 +12,14 @@ public:
 	virtual ~DefSvLstCache(){};
 	int init(const Json::Value& config);
 
-	virtual int watchServerList(int type){
-		return 0;
-	}
-
-	virtual int unwatchServerList(int type){
-		return 0;
-	}
 
 	virtual int addServer(int type, const Serv &serv);
 	virtual int updateServer(int type, const Serv &serv);
 	virtual int deleteServer(int type, int id);
 	virtual int enableServer(int type, int id);
 	virtual int disableServer(int type, int id);
+	virtual int watchServerList(int type);
+	virtual int unwatchServerList(int type);
 private:
 	typedef vector<Serv> svlst_t;
 

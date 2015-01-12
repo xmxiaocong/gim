@@ -82,16 +82,6 @@ int LogicServer::onListChange(int type, vector<Serv> &slist){
 	return 0;
 }
 
-int LogicServer::startCliSets(){
-	m_cliset.run();
-	return 0;
-}
-
-int LogicServer::stopCliSets(){
-	m_cliset.stop();
-	return 0;
-}
-
 int LogicServer::connectIPArray(SvCon* c, const Json::Value& a, 
 	int port){
 
@@ -152,12 +142,13 @@ int LogicServer::connectServer(const Serv& s){
 
 int LogicServer::run(int threadcnt){
 	m_cliset.setEventLoopCount(threadcnt);
-	startCliSets();	
+	m_cliset.init();
+	m_cliset.run();
 	return 0;	
 }
 
 int LogicServer::stop(){
-	stopCliSets();
+	m_cliset.stop();
 	return 0;
 }
 

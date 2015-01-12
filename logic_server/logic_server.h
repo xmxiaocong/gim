@@ -79,8 +79,6 @@ private:
 	int connectIPArray(SvCon* c, const Json::Value& a, int port);
 	int allThreadConnectServer(const Serv& s);
 
-	int startCliSets();
-	int stopCliSets();
 	int m_thread_cnt;	
 	int m_keepalive_span;
 	int m_reconnect_span;

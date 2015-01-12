@@ -24,6 +24,7 @@ struct Serv{
 
 class SvLstListener{
 public:
+	virtual ~SvLstCache(){};
 	virtual int onListChange(int type, vector<Serv> &servlist) = 0;
 	virtual int onDisableListChange(int type, vector<int> &servlist) = 0;
 };

@@ -98,11 +98,13 @@ int main(int argc, const char** argv){
 	s.initSessCacheConfig(pSettings->SessCacheConfig);
 	s.startListen(pSettings->PushListenPort, pcf);
 
+	g_run = true;
 	s.run(pSettings->ThreadCount);
 
 	while(g_run){
 		sleep(1);
 	}
+
 	s.stopListen(pSettings->PushListenPort);
 	s.stop();
 
