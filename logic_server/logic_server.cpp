@@ -88,6 +88,10 @@ int LogicServer::connectIPArray(SvCon* c, const Json::Value& a,
 	int ret = 0;
 	string addr;
 
+	if(a.size() <= 0){
+		return -1;
+	}
+
 	for(Json::UInt i = 0; i < a.size(); ++i){
 		addr = a[i].asString();
 		ret = c->connectTo(addr, port);
@@ -140,15 +144,23 @@ int LogicServer::connectServer(const Serv& s){
 	return 0;
 }
 
-int LogicServer::run(int threadcnt){
-	m_cliset.setEventLoopCount(threadcnt);
-	m_cliset.init();
+int LogicServer::run(){
 	m_cliset.run();
 	return 0;	
 }
 
 int LogicServer::stop(){
 	m_cliset.stop();
+	return 0;
+}
+
+int LogicServer::init(int threadcnt, const Json::Value& svlstconf,
+	const Json::Value& sschconf){
+	m_thread_cnt = threadcnt;
+	m_cliset.setEventLoopCount(threadcnt);
+	m_cliset.init();
+	initServerListCache(svlstconf);
+	initSessCacheConfig(sschconf);
 	return 0;
 }
 

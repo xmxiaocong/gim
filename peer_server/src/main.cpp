@@ -94,12 +94,12 @@ int main(int argc, const char** argv){
 	s.setKeepAliveSpan(pSettings->KeepAliveSpan);
 	s.setReconnectSpan(pSettings->ReconnectSpan);
 	s.setServiceType(pSettings->ServiceType);
-	s.initServerListCache(pSettings->SvLstCacheConfig);
-	s.initSessCacheConfig(pSettings->SessCacheConfig);
+	s.init(pSettings->ThreadCount, pSettings->SvLstCacheConfig, 
+		pSettings->SessCacheConfig);
 	s.startListen(pSettings->PushListenPort, pcf);
 
 	g_run = true;
-	s.run(pSettings->ThreadCount);
+	s.run();
 
 	while(g_run){
 		sleep(1);

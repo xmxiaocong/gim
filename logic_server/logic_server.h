@@ -53,12 +53,8 @@ public:
 		m_confac = f;
 	}
 
-	int initServerListCache(const Json::Value& v);
-
-	int initSessCacheConfig(const Json::Value& v){
-		m_ssch_conf = v;
-		return 0;
-	}
+	int init(int threadcnt, const Json::Value& svlstconf, 
+		const Json::Value& sschconf);
 
 	virtual int onListChange(int type, vector<Serv> &servlist);
 	virtual int onDisableListChange(int type, vector<int> &servlist){
@@ -69,7 +65,7 @@ public:
 		ConnectionDispatcher* d = NULL);
 	int stopListen(int port);
 
-	int run(int threadcnt);
+	int run();
 	int stop();
 
 	Dispatcher* getDispatcher();
@@ -78,6 +74,13 @@ private:
 	int connectServer(const Serv& s);
 	int connectIPArray(SvCon* c, const Json::Value& a, int port);
 	int allThreadConnectServer(const Serv& s);
+
+	int initServerListCache(const Json::Value& v);
+
+	int initSessCacheConfig(const Json::Value& v){
+		m_ssch_conf = v;
+		return 0;
+	}
 
 	int m_thread_cnt;	
 	int m_keepalive_span;

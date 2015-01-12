@@ -291,7 +291,8 @@ public:
         }
 
 
-	int32	handle_peer_message_req(const std::string& sn,const PeerPacket& pack){
+	int32	handle_peer_message_req(const std::string& sn,const PeerPacket& pack,
+			std::string& resppayload){
 		int32 ret = 0;
 		if(!pack.has_send_peer_msg_req()){
 			LOG_OUT_NO_SN << "cid:" << m_cid << ", sn:" << sn
@@ -308,6 +309,13 @@ public:
 			<< ", from:" << pm.from()
 			<< ", data:" << pm.data() 
 			<< ", delay:" << gettime_ms() - pm.time() << std::endl;
+
+		PeerPacket resppack;
+		resppack.set_cmd(115);
+		RecvPeerMessageResponse* rmresp = resppack.mutable_recv_peer_msg_resp();
+
+		*(rmresp->mutable_msg()) = (pm); 		
+		resppack.SerializeToString(&resppayload);
 
 		return ret;	
 	}
@@ -368,7 +376,7 @@ public:
 		}
 		switch(reqpack.cmd()){
 		case 110:
-			ret = handle_peer_message_req(sn, reqpack);		
+			ret = handle_peer_message_req(sn, reqpack, outpayload);		
 			break;
 		case 112:
 			break;

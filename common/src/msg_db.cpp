@@ -13,7 +13,7 @@ MsgDB* MsgDBFactory::newMsgDB(const Json::Value& config){
 	const Json::Value& conf = config["Config"];
 
 	if(type.asString() == "RedisMI"){
-		RedisMI* c = new RedisMI(config);
+		RedisMI* c = new RedisMI(conf);
 		return c;
 	}
 
