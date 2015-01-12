@@ -17,22 +17,30 @@ public:
 	RedisMI(const Json::Value &config);
 	~RedisMI();
 
+	// returns message numbers in the specified msgbox
 	int size(const string &mbName);
 	
-	int sizeFrom(const string &mbName, int64 bMsgId);
+	// returns message numbers between lbId and ubId
+	// lbId: lower bound. 0 means the first message
+	// ubId: upper bound. -1 means the latest message
+	int count(const string &mbName, int64 lbId = 0, int64 ubId = -1);
 
 	int addMsg(const string &mbName, Message &msg);
 
+	// get messages whose id are not less than bMsgId(contains bMsgId itself)
 	int getMsgs(const string &mbName, int64 bMsgId, int length,
 			vector<Message> &msg);
 
+	// get messages whose id are not larger than bMsgId(contains bMsgId itself)
 	int getMsgsForward(const string &mbName, 
 			int64 bMsgId, int length, vector<Message> &msg);
 
 	int delMsg(const string &mbName, int64 msgId);
 
+	// delete messages whose id are not less than bMsgId(contains bMsgId itself)
 	int delMsgsBackward(const string &mbName, int64 bMsgId, int length = -1);
 
+	// delete messages whose id are not larger than bMsgId(contains bMsgId itself)
 	int delMsgs(const string &mbName, int64 bMsgId, int length = -1);
 
 	int clear(const string &mbName);

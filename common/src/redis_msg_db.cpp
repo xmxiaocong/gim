@@ -36,17 +36,19 @@ int RedisMI::size(const string &mbName)
 	int64 size = 0;
 	DBHandle hndl = m_cg->getHndl(mbName);
 	if (hndl == NULL) return CONNECT_CACHE_FAILED;
-	hndl->ssetCard(mbName, size);
-	return size;
+	int ret = hndl->ssetCard(mbName, size);
+	return ret >= 0 ? size : -1;
 }
 
-int RedisMI::sizeFrom(const string &mbName, int64 bMsgId)
+int RedisMI::count(const string &mbName, int64 lbId, int64 ubId)
 {
 	int64 count = 0;
 	DBHandle hndl = m_cg->getHndl(mbName);
 	if (hndl == NULL) return CONNECT_CACHE_FAILED;
-	hndl->ssetCount(mbName, bMsgId, DBL_MAX, count);
-	return count;
+	double min = lbId <= 0 ? DBL_MIN : lbId;
+	double max = ubId < 0 ? DBL_MAX : ubId;
+	int ret = hndl->ssetCount(mbName, min, max, count);
+	return ret >= 0 ? count : -1;
 }
 
 int RedisMI::getMsgs(const string &mbName, int64 bMsgId, int length, vector<Message> &vMsg)
@@ -252,7 +254,7 @@ int RedisMI::getMsgId(const string &mbName, int64 &recentReadId)
 
         string str;
         int ret = hndl->strGet(mbName, str);
-        if (ret < 0) return ret;
+        if (ret < 0) return 0;
         recentReadId = atoll(str.data());
 
         return ret;

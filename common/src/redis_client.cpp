@@ -357,8 +357,9 @@ int RedisCli::_exeCmdWithNoOutputM(const string &cmdName, const string &key, con
         ret = _exeCmd(rpler, argc, argv, argvLen);
 	if (ret < 0) {
 		ret = -1;
+	} else {
+		ret = 0;
 	}
-	ret = 0;	
 exit:
         if (argv) free(argv);
         if (argvLen) free(argvLen);
@@ -421,9 +422,10 @@ int RedisCli::_exeCmdWithOutputM(T &output, const string &cmdName, const string 
 
         ret = _exeCmd(rpler, argc, argv, argvLen);
         if (ret < 0) {
-                return -1;
-        }
-        ret = getResultFromReply(rpler.reply(), output);
+                ret = -1;
+        } else {
+       		ret = getResultFromReply(rpler.reply(), output);
+	}
 exit:
         if (argv) free(argv);
         if (argvLen) free(argvLen);
