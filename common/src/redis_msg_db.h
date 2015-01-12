@@ -15,9 +15,7 @@ using namespace ef;
 class RedisMI : public MsgDB {
 public:
 	RedisMI(const Json::Value &config);
-
-	// Caution! You must bind a valid RedisCG handler before any other operation
-	int bindCG(RedisCG *cg);
+	~RedisMI();
 
 	int size(const string &mbName);
 	

@@ -6,7 +6,6 @@ namespace gim {
 
 RedisMI::RedisMI(const Json::Value &config)
 {
-	m_cg = NULL;
 	m_cfg = config;
 	m_expiry = DEFAULT_MSG_EXPIRY_TIME;
 	m_capacity = DEFAULT_MSG_BOX_CAPACITY;
@@ -21,14 +20,15 @@ RedisMI::RedisMI(const Json::Value &config)
 		cpValue.type() == Json::uintValue) {
 		m_capacity = cpValue.asInt();
 	}
+
+	m_cg = new RedisCG(m_cfg["CacheCluster"]);
 }
 		
-int RedisMI::bindCG(RedisCG *cg)
+RedisMI::~RedisMI()
 {
-        if (m_cg == NULL) {
-                m_cg = cg;
-        }
-        return 0;
+	if (m_cg) {
+		delete m_cg;
+	}
 }
 
 int RedisMI::size(const string &mbName)

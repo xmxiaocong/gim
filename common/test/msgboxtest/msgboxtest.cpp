@@ -34,12 +34,9 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	RedisCG cg(cfg["RedisCGCfg"]);
 //	cg.setCmdLog(print);
 	
 	RedisMI mb(cfg["RedisMICfg"]);
-	mb.bindCG(&cg);
-
 	Message msg;
 	msg.set_to("234242145");
 	msg.set_from("8987945734");
