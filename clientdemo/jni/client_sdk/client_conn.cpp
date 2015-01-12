@@ -57,7 +57,15 @@ namespace gim
 		m_svrlist.push_back(AddrItem(ip, port));
 		return 0;
 	}
-
+	void CliConn::closefd()
+	{
+		SDK_LOG(LOG_LEVEL_TRACE, "cid=%s, CliConn::closefd", m_cid.c_str());
+		if (m_fd != INVALID_SOCKET)
+		{
+			closesocket(m_fd);
+			m_fd = INVALID_SOCKET;
+		}
+	}
 	int32 CliConn::connectServer()
 	{
 		while (!m_svrlist.empty())
@@ -75,16 +83,17 @@ namespace gim
 				break;
 			}
 		}
-		return m_fd == INVALID_SOCKET ? -1 : 0;
+
+		if (m_fd == INVALID_SOCKET)
+		{
+			OnLoginFail(MY_NETWORK_ERROR);
+			return -1;
+		}
+		return 0;
 	}
-	int32 CliConn::onDisconnect(bool notify)
+	int32 CliConn::onDisconnect(bool notify, int code)
 	{
 		SDK_LOG(LOG_LEVEL_TRACE, "cid=%s, CliConn::onDisconnect", m_cid.c_str());
-		if (m_fd != INVALID_SOCKET)
-		{
-			closesocket(m_fd);
-			m_fd = INVALID_SOCKET;
-		}		
 		for (TimerList::reverse_iterator rit = m_timers.rbegin(); rit != m_timers.rend(); ++rit)
 		{
 			if (rit->second.get())
@@ -92,15 +101,20 @@ namespace gim
 				rit->second->OnCancel(this);
 			}
 		}
-		m_timers.clear();
-		m_buf.clear();
-		m_login_time = 0;
-		setStatus(STATUS_DISCONNECT, 0, notify);
+		closefd();
+		setStatus(STATUS_DISCONNECT, code,true);
+		return 0;
+	}
+	int32 CliConn::OnLoginFail(int code)
+	{
+		SDK_LOG(LOG_LEVEL_TRACE, "cid=%s, CliConn::OnLoginFail", m_cid.c_str());
+		closefd();
+		setStatus(STATUS_LOGIN_FAIL, code, true);
 		return 0;
 	}
 	int32 CliConn::publish(const std::string& json)
 	{
-		SDK_LOG(LOG_LEVEL_TRACE, "[cid=%s] publish [%s]", m_cid.c_str(), json.c_str());
+		SDK_LOG(LOG_LEVEL_TRACE, "[cid=%s] publish: %s", m_cid.c_str(), json.c_str());
 		return 0;
 	}
 
@@ -265,6 +279,9 @@ namespace gim
 	}
 	int32 CliConn::handleLoginResponse(const std::string& resp)
 	{
+		SmartOp op(NULL);
+		findAndDelTimer(LOGIN_OP_SN, op);
+
 		LoginResponse lgresp;
 		if (!lgresp.ParseFromArray(resp.data(), resp.size()))
 		{
@@ -294,7 +311,7 @@ namespace gim
 			if (m_svrlist.empty())
 			{
 				SDK_LOG(LOG_LEVEL_ERROR, "cid=%s, handleLoginResponse fail ret=%d", m_cid.c_str(), status);
-				setStatus(STATUS_LOGIN_FAIL, status);
+				OnLoginFail(status);
 			}
 			else
 			{
@@ -312,7 +329,7 @@ namespace gim
 			SDK_LOG(LOG_LEVEL_ERROR, "cid=%s, handleRedirectResponse parse probuf error", m_cid.c_str());
 			return MY_PROBUF_FORMAT_ERROR;
 		};
-		onDisconnect(false);
+		closefd();
 		m_svrlist.pop_back();
 		for (size_t i = 0; i < rdresp.addrs_size(); ++i)
 		{
@@ -478,17 +495,18 @@ namespace gim
 	}
 	int32 CliConn::processTimers(const struct timeval& tnow, struct timeval& tv)
 	{
-		//SDK_LOG(LOG_LEVEL_TRACE, "CliConn::processTimers size=%d", m_timers.size());
 		std::vector<SmartOp> ops;
 		for (TimerList::iterator it = m_timers.begin(); it != m_timers.end();)
 		{
 			TimerKey key = it->first;
-			//SDK_LOG(LOG_LEVEL_TRACE, "key=%s,%s", itostr(key.deadline.tv_sec).c_str(), itostr(key.deadline.tv_usec).c_str());
-			//SDK_LOG(LOG_LEVEL_TRACE, "now=%s,%s", itostr(tnow.tv_sec).c_str(), itostr(tnow.tv_usec).c_str());
 			if (tv_cmp(key.deadline, tnow) > 0)
 			{
-				tv = tv_diff(key.deadline, tnow);
-				break;
+				timeval tvtemp = tv_diff(key.deadline, tnow);
+				if (tv_cmp(tv, tvtemp) < 0)
+				{
+					tv = tvtemp;
+				}
+				it++;
 			}
 			else
 			{

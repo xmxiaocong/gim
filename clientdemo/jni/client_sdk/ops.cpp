@@ -42,9 +42,28 @@ namespace gim
 			conn->setEnc(m_enc);
 			conn->setSrvAddr(m_srvip, m_srvport);
 		}
+		else
+		{
+			SDK_LOG(LOG_LEVEL_ERROR, "LoginImsOp::process, connection %s exists", getCid().c_str());
+			return -1;
+		}
 
 		int32 ret = conn->connectAndLogin();
+		if (ret == 0)
+		{
+			increase_();
+		}
 		return ret;
+	}
+	int32 LoginOp::OnTimeout(CliConn* conn)
+	{
+		SDK_LOG(LOG_LEVEL_TRACE, "LoginImsOp::OnTimeout");
+		if (conn)
+		{
+			conn->OnLoginFail(MY_TIMEOUT);
+		}
+
+		return 0;
 	}
 	//KeepaliveOp
 	int32 KeepaliveOp::process(CliConn* conn)
@@ -71,7 +90,7 @@ namespace gim
 		CliConn* conn = el->findConn(getCid());
 		if (conn)
 		{
-			conn->onDisconnect();
+			conn->onDisconnect(true, 0);
 			el->delConn(getCid());
 			return 0;
 		}

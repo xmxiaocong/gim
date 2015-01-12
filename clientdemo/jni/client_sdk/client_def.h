@@ -26,7 +26,8 @@ namespace gim
 		MY_JNI_ERROR = -9996,
 		MY_JSON_ERROR = -9995,
 		MY_UNDEFINED_CMD = -9994,
-		MY_NOT_LOGGED = -9993
+		MY_NOT_LOGGED = -9993,
+		MY_TIMEOUT	= -9992
 	}GResult;
 
 

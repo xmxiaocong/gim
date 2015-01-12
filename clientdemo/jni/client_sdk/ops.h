@@ -11,6 +11,8 @@ using namespace ef;
 #define GET_OFFLINE_PEER_MSG_SIZE_EACH 20
 #define GET_OFFLINE_PUSH_MSG_SIZE_EACH 20
 #define KEEPALIVE_TIMEOUT 300
+
+#define LOGIN_OP_SN "Login"
 namespace gim
 {
 	class EventLoop;
@@ -21,7 +23,7 @@ namespace gim
 	{
 	public:
 		LoginOp(const std::string& cid)
-			:Op(std::string("Login"), cid),
+			:Op(LOGIN_OP_SN, cid),
 			m_srvport(0),
 			m_enc(0)
 		{
@@ -29,6 +31,7 @@ namespace gim
 		~LoginOp(){};
 		int32 init(const std::string& srvip, int32 srvport, const std::string& cliver, int32 enc, const std::string& pwd);
 		virtual int32 process(EventLoop* el);
+		virtual int32 OnTimeout(CliConn* conn);
 	private:
 		std::string m_srvip;
 		int32 m_srvport;

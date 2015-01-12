@@ -15,7 +15,6 @@ using namespace ef;
 
 namespace gim
 {
-
 	struct TimerKey
 	{
 		TimerKey(const std::string& _id, const timeval& tv)
@@ -31,7 +30,7 @@ namespace gim
 		~TimerKey(){};
 		bool operator < (const TimerKey& right) const
 		{
-			return tv_cmp(this->deadline, right.deadline);
+			return tv_cmp(this->deadline, right.deadline) < 0;
 		}
 		std::string id;
 		timeval deadline;
@@ -54,7 +53,8 @@ namespace gim
 		void setEnc(int32 enc);
 		const std::string& getCid();
 		int32 setSrvAddr(const std::string& ip, int32 port);
-		int32 onDisconnect(bool notify=true);
+		int32 onDisconnect(bool notify, int code);
+		int32 OnLoginFail(int code);
 		int32 publish(const std::string& json);
 		int32 connectAndLogin();
 
@@ -72,6 +72,7 @@ namespace gim
 		void setStatus(int32 status, int32 code = 0, bool notify=false);
 		int32 send_(const std::string& m);
 		int32 addSrvaddr(const std::string& ip, int32 port);
+		void closefd();
 	private:
 		virtual int32 handlePacket(const head& h, const std::string& body);
 		int32 handleLoginResponse(const std::string& resp);

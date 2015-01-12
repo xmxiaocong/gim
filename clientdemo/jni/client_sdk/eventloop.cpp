@@ -72,7 +72,8 @@ namespace gim
 				}
 			}
 			maxfd++;
-			//SDK_LOG(LOG_LEVEL_TRACE, "select time out = %s", itostr(tv.tv_sec * 1000 * 1000 + tv.tv_usec).c_str());
+
+			//SDK_LOG(LOG_LEVEL_TRACE, "select time out = %s", itostr(tv.tv_sec).c_str());
 			int32 ret = select(maxfd, &fds, NULL, NULL, ptv);
 			if (ret < 0)
 			{
@@ -101,7 +102,7 @@ namespace gim
 					{
 						if (pcon->handleRead() < 0)
 						{
-							pcon->onDisconnect();
+							pcon->onDisconnect(true, MY_NETWORK_ERROR);
 							errconns.push_back(pcon->getCid());
 						}
 					}
@@ -170,21 +171,36 @@ namespace gim
 		gettimeofday(&tnow, NULL);
 		tv.tv_sec = 0;
 		tv.tv_usec = 0;
-		for (CliConnMap::iterator it = m_conns.begin(); it != m_conns.end(); it++)
+		for (CliConnMap::iterator it = m_conns.begin(); it != m_conns.end();)
 		{
 			CliConn* pcon = it->second;
-			if (pcon)
+			if (!pcon)
 			{
-				timeval tvtem;
-				tvtem.tv_sec = 0;
-				tvtem.tv_usec = 0;
-				pcon->processTimers(tnow, tvtem);
-				if (!(tvtem.tv_sec == 0 || tvtem.tv_usec == 0) && tv_cmp(tv, tvtem) < 0)
+				m_conns.erase(it++);
+			}
+			else 
+			{
+				if (pcon->getfd() == INVALID_SOCKET)
 				{
-					tv = tvtem;
+					m_conns.erase(it++);
+					delete pcon;
+				}
+				else
+				{
+					timeval tvtem;
+					tvtem.tv_sec = 0;
+					tvtem.tv_usec = 0;
+					pcon->processTimers(tnow, tvtem);
+					if (!(tvtem.tv_sec == 0 || tvtem.tv_usec == 0) && tv_cmp(tv, tvtem) < 0)
+					{
+						tv = tvtem;
+					}
+					it++;
 				}
 			}
 		}
+
+		return 0;
 	}
 	int32 EventLoop::asynAddOp(Op* op)
 	{

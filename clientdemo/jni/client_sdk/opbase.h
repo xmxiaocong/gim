@@ -9,7 +9,7 @@ namespace gim
 	class EventLoop;
 	class CliConn;
 
-#define OP_DEFAULT_TIMEOUT 20
+#define OP_DEFAULT_TIMEOUT 30
 
 	// ops do process in eventloop, and wait for respone in connection
 	class Op
