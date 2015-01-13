@@ -83,15 +83,24 @@ namespace gim
 		}
 		return -1;
 	}
+	// class DelConnOp
+	int32 DelConnOp::process(EventLoop* el)
+	{
+		SDK_LOG(LOG_LEVEL_TRACE, "DelConnOp::process");
+		if (el)
+		{
+			return el->delConn(getCid());
+		}
+		return -1;
+	}
 	// class DisconnectOp
 	int32 DisconnectOp::process(EventLoop* el)
 	{
-		SDK_LOG(LOG_LEVEL_TRACE, "CloseOp::process");
-		CliConn* conn = el->findConn(getCid());
+		SDK_LOG(LOG_LEVEL_TRACE, "DisconnectOp::process");
+		CliConn* conn = el ? el->findConn(getCid()) : NULL;
 		if (conn)
 		{
 			conn->onDisconnect(true, 0);
-			el->delConn(getCid());
 			return 0;
 		}
 		return -1;
@@ -134,6 +143,7 @@ namespace gim
 		int32 ret = 0;
 		MsgType msgtype = MSG_TYPE_SEND_PEER_RESP;
 
+		v[JKEY_CID] = getCid();
 		v[JKEY_MSG_TYPE] = msgtype;
 		v[JKEY_MSG_STATUS] = status;
 		v[JKEY_MSG_SN] = getSN();
@@ -182,6 +192,7 @@ parse_end:
 			Json::FastWriter w;
 			Json::Value v;
 
+			v[JKEY_CID] = getCid();
 			v[JKEY_MSG_TYPE] = MSG_TYPE_SEND_PEER_RESP;
 			v[JKEY_MSG_STATUS] = REQUEST_TIME_OUT;
 			v[JKEY_MSG_SN] = getSN();
@@ -228,6 +239,8 @@ parse_end:
 
 		Json::FastWriter w;
 		Json::Value v;
+
+		v[JKEY_CID] = getCid();
 		v[JKEY_MSG_TYPE] = MSG_TYPE_OFFLINE_PEER_RESP;
 		v[JKEY_MSG_SN] = getSN();
 		v[JKEY_MSG_STATUS] = status;

@@ -19,14 +19,14 @@ namespace gim
 		int32 stop();
 		int32 disconnect(const std::string& cid);
 		int32 sendPeerMessage(const std::string& cid, const std::string& sn, const GPeerMessage& msg);
+		virtual int handleMessage(const std::string& msg);
 		std::string getSN()
 		{
 			return itostr(m_sn++);
 		}
 	private:
+		static int eventLoopMsgRoutine(void* cli, const std::string& msg);
 		EventLoop m_evlp;
-		typedef std::vector<std::string> CidList;
-		CidList m_cids;
 		int64 m_sn;
 	};
 }

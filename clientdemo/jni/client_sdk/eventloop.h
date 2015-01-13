@@ -11,12 +11,16 @@
 using namespace ef;
 namespace gim
 {
+	typedef int (*MSG_HANDLE_CB)(void* context, const std::string& msg);
+
 	class EventLoop
 	{
 		friend class Op;
 	public:
 		EventLoop();
 		~EventLoop();
+		void setMsgCb(MSG_HANDLE_CB cb, void* context);
+		int32 publish(const std::string& msg);
 		int32 startLoop();
 		int32 asynAddOp(Op* op);
 		int32 asynStop();
@@ -42,6 +46,8 @@ namespace gim
 
 		typedef std::map<std::string, CliConn*> CliConnMap;
 		CliConnMap m_conns;
+		MSG_HANDLE_CB m_msgHandler;
+		void* m_MsgHandleCtx;
 	};
 }
 #endif

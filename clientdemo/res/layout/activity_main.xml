@@ -81,14 +81,16 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dip"
+                android:layout_marginTop="30dip" 
                 android:text="信息列表" />
 
             <TextView
-                android:id="@+id/tvDesA"
-                android:layout_width="wrap_content"
+                android:id="@+id/tvMsgsA"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_weight="0.93"
                 android:text="..." />
+
         </LinearLayout>
         
         <LinearLayout
@@ -156,18 +158,6 @@
                     android:layout_weight="0.7"
                     android:text="发送" />
             </LinearLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="30dip"
-                android:text="信息列表" />
-
-            <TextView
-                android:id="@+id/tvDesB"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="..." />
         </LinearLayout>
     </LinearLayout>
 

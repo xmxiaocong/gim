@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 	JNIEXPORT jint JNICALL Java_com_gim_client_init
-		(JNIEnv *, jobject);
+		(JNIEnv *, jobject, jobject);
 
 	JNIEXPORT jint JNICALL Java_com_gim_client_stop
 		(JNIEnv *, jobject);

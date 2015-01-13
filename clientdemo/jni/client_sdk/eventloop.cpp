@@ -7,13 +7,27 @@ namespace gim
 {	
 	//Eventloop
 	EventLoop::EventLoop()
-		:m_run(false)
+		:m_run(false),
+		m_msgHandler(NULL)
 	{
 	}
 	EventLoop::~EventLoop()
 	{
 	}
 
+	void EventLoop::setMsgCb(MSG_HANDLE_CB cb, void* context)
+	{
+		m_msgHandler = cb;
+		m_MsgHandleCtx = context;
+	}
+	int32 EventLoop::publish(const std::string& msg)
+	{
+		if (m_msgHandler)
+		{
+			SDK_LOG(LOG_LEVEL_TRACE, "EventLoop::publish");
+			m_msgHandler(m_MsgHandleCtx, msg);
+		}
+	}
 	int32 EventLoop::startCtl()
 	{
 		mutex_init(&m_ops_mtx);
@@ -248,7 +262,7 @@ namespace gim
 			return conn;
 		}
 
-		conn = new CliConn();
+		conn = new CliConn(this);
 		std::pair<CliConnMap::iterator, bool> ret = m_conns.insert(CliConnMap::value_type(cid, conn));
 		m_conns[cid] = conn;
 		return conn;

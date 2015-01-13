@@ -3,9 +3,11 @@
 #include "common/ef_utility.h"
 namespace gim
 {
+
 	int32 Client::init()
 	{
 		m_sn = gettime_ms();
+		m_evlp.setMsgCb(eventLoopMsgRoutine, (void*)this);
 		m_evlp.startLoop();
 		return 0;
 	}
@@ -31,5 +33,13 @@ namespace gim
 		SendPeerMessageOp* op = new SendPeerMessageOp(getSN(), cid);
 		op->init(msg);
 		return m_evlp.asynAddOp((Op*)op);
+	}
+	int Client::eventLoopMsgRoutine(void* cli, const std::string& msg)
+	{
+		return cli ? ((Client*)cli)->handleMessage(msg) : -1;
+	}
+	int Client::handleMessage(const std::string& msg)
+	{
+		return 0;
 	}
 }

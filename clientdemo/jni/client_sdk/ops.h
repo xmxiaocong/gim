@@ -54,6 +54,17 @@ namespace gim
 		virtual int32 OnTimeout(CliConn* conn);
 	};
 
+	class DelConnOp
+		:public Op
+	{
+	public:
+		DelConnOp(const std::string& cid)
+			:Op(std::string("delconnect"), cid)
+		{
+		}
+		~DelConnOp(){};
+		virtual int32 process(EventLoop* el);
+	};
 	class DisconnectOp
 		:public Op
 	{

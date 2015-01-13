@@ -67,7 +67,7 @@ namespace gim
 		}
 		int sendMessageWithJson(const char* json);
 		int initJniEnv(JNIEnv* env, jobject objLstn);
-		virtual int handleMessage(const char* msg);
+		virtual int handleMessage(const std::string& msg);
 	private:
 
 		//invoked in client thread

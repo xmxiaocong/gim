@@ -36,16 +36,18 @@ namespace gim
 		timeval deadline;
 	};
 
+	class EventLoop;
 	class CliConn
 	{
 	public:
-		CliConn();
+		CliConn(EventLoop *lp);
 		virtual ~CliConn();
 	public:
 		SOCKET getfd() const
 		{
 			return m_fd;
 		}
+
 		void setCliver(const std::string& cliver);
 		int32 getDeviceType();
 		void setCid(const std::string& cid);
@@ -73,6 +75,7 @@ namespace gim
 		int32 send_(const std::string& m);
 		int32 addSrvaddr(const std::string& ip, int32 port);
 		void closefd();
+		void asynDestroy();
 	private:
 		virtual int32 handlePacket(const head& h, const std::string& body);
 		int32 handleLoginResponse(const std::string& resp);
@@ -115,6 +118,8 @@ namespace gim
 
 		typedef std::map<TimerKey, SmartOp> TimerList;
 		TimerList m_timers;
+
+		EventLoop* m_evlp;
 	};
 }
 #endif

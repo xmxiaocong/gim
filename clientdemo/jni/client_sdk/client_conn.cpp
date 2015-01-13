@@ -9,16 +9,19 @@
 #include "common/ef_md5.h"
 #include "ops.h"
 #include "err_no.h"
+#include "eventloop.h"
 
 namespace gim
 {
-	CliConn::CliConn()
+	CliConn::CliConn(EventLoop* lp)
 		:m_fd(INVALID_SOCKET),
 		m_login_time(0),
 		m_loginStatus(STATUS_DISCONNECT),
 		m_devicetype(0),
-		m_enc(0)
+		m_enc(0),
+		m_evlp(lp)
 	{
+		assert(m_evlp);
 	}
 	CliConn::~CliConn()
 	{
@@ -66,6 +69,11 @@ namespace gim
 			m_fd = INVALID_SOCKET;
 		}
 	}
+	void CliConn::asynDestroy()
+	{
+		DelConnOp* op = new DelConnOp(getCid());
+		m_evlp->asynAddOp((Op*)op);
+	}
 	int32 CliConn::connectServer()
 	{
 		while (!m_svrlist.empty())
@@ -103,6 +111,7 @@ namespace gim
 		}
 		closefd();
 		setStatus(STATUS_DISCONNECT, code,true);
+		asynDestroy();
 		return 0;
 	}
 	int32 CliConn::OnLoginFail(int code)
@@ -110,11 +119,13 @@ namespace gim
 		SDK_LOG(LOG_LEVEL_TRACE, "cid=%s, CliConn::OnLoginFail", m_cid.c_str());
 		closefd();
 		setStatus(STATUS_LOGIN_FAIL, code, true);
+		asynDestroy();
 		return 0;
 	}
 	int32 CliConn::publish(const std::string& json)
 	{
 		SDK_LOG(LOG_LEVEL_TRACE, "[cid=%s] publish: %s", m_cid.c_str(), json.c_str());
+		m_evlp->publish(json);
 		return 0;
 	}
 
@@ -130,6 +141,7 @@ namespace gim
 			{
 				Json::FastWriter w;
 				Json::Value v;
+				v[JKEY_CID] = getCid();
 				v[JKEY_MSG_TYPE] = MSG_TYPE_LOGIN_STATUS_CHANGE;
 				v[JKEY_MSG_STATUS] = code;
 				v[JKEY_MSG_LOGIN_STATUS] = status;
@@ -379,6 +391,7 @@ namespace gim
 		Json::FastWriter w;
 		Json::Value v;
 
+		v[JKEY_CID] = getCid();
 		v[JKEY_MSG_TYPE] = MSG_TYPE_PEER;
 		v[JKEY_MSG_SN] = sn;
 

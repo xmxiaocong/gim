@@ -10,6 +10,7 @@ import android.app.Activity;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -26,6 +27,7 @@ public class MainActivity extends Activity {
 	public String cidA;
 	public EditText editCidA, editToA, editDataA;
 	public Button btnLoginA,btnLogoutA, btnSendA;
+	public TextView tvMsgA;
 	
 	public String cidB;
 	public EditText editCidB, editToB, editDataB;
@@ -36,17 +38,33 @@ public class MainActivity extends Activity {
 	public String srvip;
 	public int srvport;
 	
+	public Handler handle;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		cli= new client();
-		cli.init();
+		cli = new client();
+		cli.init(new listener() {
+			@Override
+			public void handleMessage(String s)
+			{
+				 try {
+					    Message m = new Message();
+		                m.what = 123;
+		                m.obj = s;
+		                handle.sendMessage(m);
+			        } 
+				 catch (Exception e) {
+			            e.printStackTrace();
+			        }
+			}
+			
+		});
+		
 		sn = 55550000;
 		
 		srvip = new String("114.215.85.30");
 		srvport = 3000;
-		
 		///AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 		editCidA = (EditText)findViewById(R.id.editCidA);
 		editToA = (EditText)findViewById(R.id.editToA);
@@ -54,10 +72,10 @@ public class MainActivity extends Activity {
 		btnLoginA = (Button)findViewById(R.id.btnLoginA);
 		btnLogoutA = (Button)findViewById(R.id.btnLogoutA);
 		btnSendA = (Button)findViewById(R.id.btnSendA);
+		tvMsgA = (TextView)findViewById(R.id.tvMsgsA);
 		editCidA.setText("test0001");
 		editToA.setText("test0002");
 		editDataA.setText("haha");
-		
 		btnLoginA.setOnClickListener(new OnClickListener() 
 		{	
 			@Override
@@ -160,6 +178,20 @@ public class MainActivity extends Activity {
 				}
 			}
 		});
+		
+		
+		//handle msg
+		handle = new Handler() {
+        public void handleMessage(Message msg) { /* 这里是处理信息的方法 */
+            switch (msg.what) {
+            case 123: /* 在这处理要TextView对象Show时间的事件 */
+            	tvMsgA.setText(tvMsgA.getText() + (String)msg.obj);
+                break;
+            }
+            super.handleMessage(msg);
+        }
+    };
+	
 	}
 	
 }

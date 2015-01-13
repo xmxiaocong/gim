@@ -6,8 +6,11 @@
 extern "C" {
 #endif
 	static gim::AndroidClient s_cli;
-	JNIEXPORT jint JNICALL Java_com_gim_client_init(JNIEnv *, jobject)
+	JNIEXPORT jint JNICALL Java_com_gim_client_init(JNIEnv *env, jobject jcli, jobject jlstn)
 	{
+		if(s_cli.initJniEnv(env, jlstn) < 0)
+			return -1;
+
 		return s_cli.init();
 	}
 	JNIEXPORT jint JNICALL Java_com_gim_client_stop(JNIEnv *, jobject)

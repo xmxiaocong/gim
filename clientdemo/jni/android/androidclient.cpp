@@ -47,9 +47,9 @@ namespace gim
 
 		return ret;
 	}
-	int AndroidClient::handleMessage(const char* json)
+	int AndroidClient::handleMessage(const std::string& json)
 	{
-		SDK_LOG(LOG_LEVEL_TRACE, "handleMessage :%s", json);
+		SDK_LOG(LOG_LEVEL_TRACE, "handleMessage :%s", json.c_str());
 
 		//std::string msg = ef::base64_encode(json);
 		std::string msg = json;
