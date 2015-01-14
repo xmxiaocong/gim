@@ -30,7 +30,7 @@ namespace gim
 	}
 	int32 Client::sendPeerMessage(const std::string& cid, const std::string& sn, const GPeerMessage& msg)
 	{
-		SendPeerMessageOp* op = new SendPeerMessageOp(getSN(), cid);
+		SendPeerMessageOp* op = new SendPeerMessageOp(sn, cid);
 		op->init(msg);
 		return m_evlp.asynAddOp((Op*)op);
 	}

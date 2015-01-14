@@ -342,6 +342,7 @@ namespace gim
 			return MY_PROBUF_FORMAT_ERROR;
 		};
 		closefd();
+		setStatus(STATUS_DISCONNECT, 0, false);
 		m_svrlist.pop_back();
 		for (size_t i = 0; i < rdresp.addrs_size(); ++i)
 		{
