@@ -40,6 +40,7 @@ namespace gim
 			conn->setCid(getCid());
 			conn->setPwd(m_pwd);
 			conn->setEnc(m_enc);
+			conn->setCliver(m_cliver);
 			conn->setSrvAddr(m_srvip, m_srvport);
 		}
 		else
