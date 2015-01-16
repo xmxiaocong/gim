@@ -28,9 +28,9 @@ namespace gim{
 	
 		int32 addServer(SrvCon* con, ef::EventLoop* l);
 		int32 delServer(SrvCon* con, ef::EventLoop* l);	
-		int32 dispatchRequest(const std::string& req, 
-			ef::EventLoop* const req_loop, 
-			ef::EventLoop*& l, int32& conid);
+		int32 dispatchRequest(const std::string& key, 
+			const std::string& req, 
+			ef::EventLoop* const req_loop);
 	private:
 		struct ServerNode{
 			EventLoop* l;
@@ -70,9 +70,8 @@ namespace gim{
 
 		int32 addServer(int32 type, SrvCon* con, ef::EventLoop* l);
 		int32 delServer(int32 type, SrvCon* con, ef::EventLoop* l);	
-		int32 dispatchRequest(int32 type, const std::string& req,
-			ef::EventLoop* const req_loop,
-			ef::EventLoop*& l, int32& conid);
+		int32 dispatchRequest(int32 type, const std::string& key,
+			const std::string& req, ef::EventLoop* const req_loop);
 	private:
 		ServList* getAddServList(int32 type);
 		ServList* getServList(int32 type);

@@ -308,7 +308,7 @@ namespace gim{
 			return INPUT_FORMAT_ERROR;	
 		}
 		ServiceResponse svresp;
-		svresp.set_sessid(svreq.sessid());
+		svresp.set_to_sessid(svreq.from_sessid());
 		svresp.set_svtype(svreq.svtype());
 		svresp.set_sn(svreq.sn());
 		string resppayload;

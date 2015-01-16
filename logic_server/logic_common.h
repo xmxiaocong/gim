@@ -19,12 +19,14 @@ namespace gim{
 		const std::string& body, std::string& pack);
 
 	int32 constructServiceRequest(const std::string& sessid,
+		const std::string& tosessid,
 		int32 service_type,
 		const std::string& sn,
 		const std::string& payload,
 		std::string& req);
 
 	int32 constructServiceResponse(const std::string& sessid,
+		const std::string& tosessid,
 		int32 status,
 		int32 service_type,
 		const std::string& sn,

@@ -78,6 +78,7 @@ private:
 	int m_status;
 	int m_con_serv_id;
 	int m_service_type;
+	std::string m_sessid;
 	LogicServer* m_serv;
 };
 

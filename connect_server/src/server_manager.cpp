@@ -39,10 +39,10 @@ int32	ServList::delServer(SrvCon* con, ef::EventLoop* l){
 	return 0;
 }
 
-int32	ServList::dispatchRequest(const std::string& req, 
-		ef::EventLoop* const req_loop,
-		ef::EventLoop*& l, int32& conid){
+int32	ServList::dispatchRequest(const std::string& key,
+		const std::string& req, ef::EventLoop* const req_loop){
 	int32 sendquesize = 0;
+	int32 conid = 0;
 	ServerNode n;
 	{
 		ef::AutoLock lk(&m_cs);
@@ -58,7 +58,6 @@ int32	ServList::dispatchRequest(const std::string& req,
 		}
 	}
 
-	l = n.l;
 	if(n.con->sendQueueSize() > MAX_SEND_QUE_SIZE){
 		std::cout << "conid:" << conid << ", noti:"
 			<< n.con->getNotify() << ", sendQueueSize:"
@@ -121,13 +120,13 @@ int32 ServMan::delServer(int32 type, SrvCon* con, ef::EventLoop* l){
 	return NO_SERVICE; 
 }
 
-int32 ServMan::dispatchRequest(int32 type, const std::string& req, 
-		ef::EventLoop* const req_loop,
-		ef::EventLoop*& l, int32& conid){
+int32 ServMan::dispatchRequest(int32 type, const std::string& key, 
+		const std::string& req, 
+		ef::EventLoop* const req_loop){
 	
 	ServList* lst = getServList(type);
 	if(lst){
-		return lst->dispatchRequest(req, req_loop, l, conid);
+		return lst->dispatchRequest(key, req, req_loop);
 	}
 
 	return NO_SERVICE; 

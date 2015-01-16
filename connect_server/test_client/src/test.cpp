@@ -213,7 +213,7 @@ public:
 		ServiceRequest srreq;
 		srreq.set_svtype(type);
 		srreq.set_payload(payload);
-		srreq.set_sessid(m_sessid);
+		srreq.set_from_sessid(m_sessid);
 		srreq.set_sn(lastSn());
 		const_service_req(srreq, req);	
 		std::string rsp;
@@ -414,9 +414,10 @@ public:
 				<< " handle_service_request ParseFromString fail\n";
 			return -1;
 		}
-		if(svreq.sessid() != m_sessid){
+		if(svreq.from_sessid() != m_sessid){
 			LOG_OUT << "cid:" << m_cid
-				<< " handle_service_request,ret sessid:" << svreq.sessid()
+				<< " handle_service_request,ret sessid:" 
+				<< svreq.from_sessid()
 				<< " != m_sessid:" << m_sessid << std::endl;
 			ret = -200;				
 		}		
@@ -428,7 +429,8 @@ public:
 exit:
 		ServiceResponse svresp;
 		svresp.set_sn(svreq.sn());
-		svresp.set_sessid(svreq.sessid());
+		svresp.set_from_sessid(m_sessid);
+		svresp.set_to_sessid(svreq.from_sessid());
 		svresp.set_svtype(svreq.svtype());
 		svresp.set_status(ret);
 		svresp.set_payload(outpayload);	

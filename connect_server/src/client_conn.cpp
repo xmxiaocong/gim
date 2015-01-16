@@ -237,7 +237,7 @@ std::string CliCon::getSessKVsString(){
 	return os.str();
 }
 
-int32 CliCon::getServConFromSN(const std::string& sn, 
+int32 CliCon::getServConFromSessid(const std::string& sn, 
 	EventLoop*& l, int32& conid, std::string& oldsn){
 	int32 ret = 0;
 	int32 svid = 0;
@@ -289,13 +289,12 @@ int32 CliCon::handleServiceResponse(const head& h, const std::string& req){
 		goto exit;
 	}
 	
-	ret = getServConFromSN(svresp.sn(), l, conid, oldsn);
+	ret = getServConFromSessid(svresp.to_sessid(), l, conid, oldsn);
 	if(ret < 0){
 		goto exit;
 	}
 
 	oldsvresp = svresp;
-	oldsvresp.set_sn(oldsn);
 	oldsvresp.SerializeToString(&oldresp);
 	constructPacket(h, oldresp, respbuf);
 	if(l != getEventLoop()){
@@ -306,7 +305,9 @@ int32 CliCon::handleServiceResponse(const head& h, const std::string& req){
 exit:
 	ALogError("ConnectServer") << "<action:client_service_response> <cid:" 
 		<< m_sess.cid() << "> <version:" << m_version 
-		<< "> <sessid:" << m_sess.sessid() << "> <svtype:"
+		<< "> <from_sessid:" << m_sess.sessid()
+		<< "> <to_sessid:" << svresp.to_sessid() 
+		<< "> <svtype:"
 		<< svresp.svtype() << "> <sn:" << svresp.sn()
 		<< "> <event_loop:" << l << "> <conid:" << conid
 		<< "> <status:" << ret  << "> <errstr:"
@@ -316,7 +317,7 @@ exit:
 	return ret;
 }
 
-int32 CliCon::sendToClient(int32 cmd, const std::string& body){
+int32 CliCon::sendCmd(int32 cmd, const std::string& body){
 	std::string req_enc;
 	std::string msg;
 	if((cmd == SERVICE_REQ || cmd == SERVICE_RESP) 
@@ -367,15 +368,15 @@ int32 CliCon::handleServiceRequest(const head& h, const std::string& req,
 	int32 ret = 0;
 	int32 ret1 = 0;
 	int32 conid = 0;
-	EventLoop* l = NULL;
 	ServiceResponse sresp;
 	ServiceRequest sreq;
 	std::string treq;
 	//decode req
 	std::string req_dec;
+	std::string key;
 
-
-	sresp.set_sessid("null");
+	sresp.set_from_sessid("NULL");
+	sresp.set_to_sessid("NULL");
 	sresp.set_svtype(0);
 	sresp.set_sn("null");
 
@@ -396,17 +397,21 @@ int32 CliCon::handleServiceRequest(const head& h, const std::string& req,
 	sresp.set_svtype(sreq.svtype());
 	sresp.set_sn(sreq.sn());
 	sresp.set_status(0);
+	sresp.set_callback(sreq.callback());
 
+	if(sreq.has_key()){
+		key = sreq.key();
+	}
 
-	if(sreq.sessid() != sessId()){
+	if(sreq.from_sessid() != sessId()){
 		ret = INVLID_SESSION_ID;	
 		goto exit;
 	}
 
-	sresp.set_sessid(sreq.sessid());
+	sresp.set_from_sessid(sreq.from_sessid());
 	constructPacket(h, req_dec, treq);
-	ret1 = getServMan().dispatchRequest(sreq.svtype(), 
-		treq, getEventLoop(), l, conid);
+	ret1 = getServMan().dispatchRequest(sreq.svtype(), key, 
+		treq, getEventLoop());
 exit:
 	if(ret < 0){
 		sresp.set_status(ret);
@@ -513,7 +518,7 @@ int32 CliCon::setClientTime(){
 	stresp.set_server_time(m_login_time);		
 	std::string body;
 	stresp.SerializeToString(&body);
-	int ret = sendToClient(SET_TIME_RESP, body);
+	int ret = sendCmd(SET_TIME_RESP, body);
 	ALogError("ConnectServer") << "<cid:" << m_sess.cid()
 		<< "> <version:" << m_version << "> <client_time:"
 		<< m_client_login_time << "> <server_time:"
@@ -573,7 +578,7 @@ int32 CliCon::handlePacket(const std::string& req){
 			ret = -1;
 		}
 		if(resp.size() || h.cmd == KEEPALIVE_REQ){	
-			ret = sendToClient(h.cmd + 1, resp);
+			ret = sendCmd(h.cmd + 1, resp);
 		}
 	}catch(...){
 		ALogError("ConnectServer") << "<action:client_cmd> <cid:" 

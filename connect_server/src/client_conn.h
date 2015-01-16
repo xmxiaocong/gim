@@ -1,9 +1,8 @@
 #ifndef __CLIENT_CONN_H__
 #define __CLIENT_CONN_H__
 
-#include "net/ef_server.h"
-#include "net/ef_operator.h"
 #include "base/ef_atomic.h"
+#include "base_conn.h"
 #include "cache_conn.h"
 #include "settings.h"
 #include <string>
@@ -15,7 +14,7 @@ using namespace ef;
 
 class head;
 
-class CliCon:public Connection
+class CliCon:public BaseCon 
 {
 public:
 	enum{
@@ -25,7 +24,7 @@ public:
 	};
 
 	CliCon(Server* s, int32 alive_ms)
-		:m_serv(s), m_alive_ms(alive_ms),
+		:BaseCon(s), m_alive_ms(alive_ms),
 		m_status(STATUS_INIT), 
 		m_pack_cnt_one_cycle(0),
 		m_last_check_time(0),
@@ -51,7 +50,8 @@ public:
 		return cnt;
 	}
 
-	int32 sendToClient(int32 cmd, const std::string& body);
+	virtual int32 sendCmd(int32 cmd, const std::string& body);
+
 protected:
 
 private:
@@ -61,11 +61,11 @@ private:
 			const std::string& req, std::string& resp);
 	int32 handleServiceResponse(const head& h,
 			const std::string& req);
+	int32 getServConFromSessid(const std::string& sessid, 
+		EventLoop*& svlp, int32& conid, std::string& old);
 
 	int32 kickClient(const std::string& reason);
 	int32 setClientTime();
-	int32 getServConFromSN(const std::string& sn,
-			EventLoop*& l, int32& conid, std::string& oldsn);
 	int32 delSession();
 	int32 updateSession();
 
@@ -78,7 +78,6 @@ private:
 	int32 encodeBody(const char* body, int32 bodylen, std::string& encbody);
 
 
-	Server* m_serv;
 	int32 m_alive_ms;
 	int32 m_status;
 	int32 m_pack_cnt_one_cycle;
@@ -90,27 +89,6 @@ private:
 	int32 m_enc;
 	std::string m_key;
 	static volatile int32 cnt;
-};
-
-class	CliRespOp:public NetOperator{
-public:
-	CliRespOp(int32 conid, int32 cmd, const std::string& body):
-		m_conid(conid), m_cmd(cmd), m_body(body){
-	}
-
-	virtual int32 process(EventLoop *l){
-		CliCon* clic = (CliCon*)l->getConnection(m_conid);
-		if(!clic){
-			std::cout << "cli transMessage old id INVLID_SESSION_ID\n";
-			return -1;
-		}
-		return clic->sendToClient(m_cmd, m_body);
-	}
-	
-private:
-	int32 m_conid;
-	int32 m_cmd;
-	std::string m_body;
 };
 
 class   CliConFactory:public ConnectionFactory{

@@ -82,11 +82,11 @@ int SvCon::handleRegisterResponse(const char* respbody, int len){
 		Dispatcher* d = m_serv->getDispatcher();
 		d->addConnectServer(m_con_serv_id, getEventLoop(), getId());	
 		m_status = STATUS_LOGIN; 
-		
+		m_sessid = lgresp.sessid();		
 		ALogError(m_serv->getLogName()) << "<action:server_register_resp> " 
 			"<event_loop:" << getEventLoop() << "> <conid:"
 			<< getId() << "> <con_serv_id:" << m_con_serv_id
-			<< "> <status:0>";  
+			<< "> <status:0> <sessid:" << m_sessid << ">";  
 	}
 	return ret;
 }

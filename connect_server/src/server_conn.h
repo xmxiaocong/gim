@@ -2,15 +2,13 @@
 #define __SERVER_CONN_H__
 
 
-#include "net/ef_server.h"
-#include "proto/msg_head.h"
-#include "common.h"
+#include "base_conn.h"
 
 namespace gim{
 
 using namespace ef;
 
-class SrvCon:public Connection
+class SrvCon:public BaseCon 
 {
 public:
 	enum{
@@ -19,7 +17,7 @@ public:
 	};
 
 	SrvCon(Server* s)
-		:m_serv(s), m_status(STATUS_INIT), m_type(0){ 
+		:BaseCon(s), m_status(STATUS_INIT), m_type(0){ 
 	}
 
 	Server* getServer(){
@@ -35,6 +33,8 @@ public:
 	// < 0, error, = 0, wait more, > 0, recv whole pack
 	virtual int32 checkPackLen();
 
+	virtual int32 sendCmd(int32 cmd, const std::string& body);
+
 protected:
 
 private:
@@ -46,15 +46,14 @@ private:
 		const std::string& req);
 	int32 constructServiceRequestSN(const std::string& oldsn,
 		std::string& sn);
-	int32 getCliConFromSessid(const std::string& sessid,
+	int32 getConFromSessid(const std::string& sessid,
 		EventLoop*& l, int32& conid);
 
-	Server* m_serv;
 	int32 m_status;
 	int32 m_type;
+	std::string m_sessid;
 
 };
-
 class   SrvConFactory:public ConnectionFactory{
 public:
 	SrvConFactory(Server* s, int32 connectionAlivems):m_serv(s){

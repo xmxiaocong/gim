@@ -51,6 +51,7 @@ using namespace ef;
 		return conid / EVENT_LOOP_ID_MASK;
 	}
 
+
 	#define SVID ef::Singleton<Settings>::instance()->Id 
 
 	#define ALogTrace(a) logTrace(a) << "<svid:" << (SVID) \

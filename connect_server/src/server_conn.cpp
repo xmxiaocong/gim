@@ -93,7 +93,7 @@ int32 SrvCon::handlePacket(const std::string& req){
 	return ret;	
 }
 
-int32 SrvCon::getCliConFromSessid(const std::string& sessid, 
+int32 SrvCon::getConFromSessid(const std::string& sessid, 
 	EventLoop*& l, int32& conid){
 	int32 ret = 0;
 	int32 svid = 0;
@@ -122,21 +122,15 @@ exit:
 	return ret;	
 }
 
-int32 SrvCon::constructServiceRequestSN(const std::string& oldsn, 
-	std::string& sn){
-
-	Settings *pSettings = Singleton<Settings>::instance();
-	decorationName(pSettings->Id, getId(), oldsn, sn); 
-
-	return 0;	
-}
-
 int32 SrvCon::handleRegRequest(const head& h, 
 		const std::string& req, std::string& resp){
 
 	TimeRecorder t("SrvCon::handleRegRequest");
 	int32 ret = 0;
 	SvRegRequest regreq;
+	std::string sessid;
+
+	Settings* pSettings = Singleton<Settings>::instance();
 
 	if(!regreq.ParseFromArray(req.data()+sizeof(h), 
 		req.size()-sizeof(h))){
@@ -151,9 +145,12 @@ int32 SrvCon::handleRegRequest(const head& h,
 		m_status = STATUS_REG;
 	}
 
+	decorationName(pSettings->Id, getId(), itostr(m_type), m_sessid);
+
 exit:
 	SvRegResponse regrsp;
 	regrsp.set_status(ret);
+	regrsp.set_sessid(m_sessid);
 	regrsp.SerializeToString(&resp);
 	ALogError("ConnectServer") << "<action:server_login> <svtype:"
 		<< m_type << "> <event_loop:"<< getEventLoop() 
@@ -168,16 +165,16 @@ int32 SrvCon::handleServiceRequest(const head& h,
 	TimeRecorder t("SrvCon::handleServiceRequest");
 	int32 ret = 0;
 	ServiceRequest svreq;
-	ServiceRequest newsvreq;
 	ServiceResponse svresp;
-	std::string newsn;
 	std::string newreq;
 	std::string reqbuf;
+	std::string key;
 	EventLoop* l = NULL;
-	CliRespOp* op = NULL;
+	SendMsgOp* op = NULL;
 	int32 conid = 0;
 
-	svresp.set_sessid("null");
+	svresp.set_from_sessid(svreq.from_sessid());
+	svresp.set_to_sessid(svreq.to_sessid());
 	svresp.set_svtype(0);
 	svresp.set_sn("null");
 	if(!svreq.ParseFromArray(req.data()+sizeof(h), req.size()-sizeof(h))){
@@ -186,23 +183,36 @@ int32 SrvCon::handleServiceRequest(const head& h,
 		goto exit;
 	}
 
-	svresp.set_sessid(svreq.sessid());
+	key = svreq.key();
+
+	//if do not has to, trance to the right server
+	if(!svreq.has_to_sessid()){
+		ret = getServMan().dispatchRequest(svreq.svtype(), key, req, 
+			getEventLoop());
+		ALogError("ConnectServer")
+			<< "<action:trance_service_request> <from_sessid:"
+			<< svreq.from_sessid() << "> <key:" << key
+			<< "> <sn:" << svreq.sn() << "> <svtype:"
+			<< svreq.svtype() << "> <status:" << ret
+			<< ">"; 
+		return ret;
+	}
+
+	svresp.set_from_sessid(m_sessid);
 	svresp.set_svtype(svreq.svtype());
 	svresp.set_sn(svreq.sn());
+	svresp.set_callback(svreq.callback());
 
-	ret = getCliConFromSessid(svreq.sessid(), l, conid);
+	ret = getConFromSessid(svreq.to_sessid(), l, conid);
 	if(ret < 0){
 		svresp.set_status(ret);
 		ret = 0;
 		goto exit;
 	}
 
-	constructServiceRequestSN(svreq.sn(), newsn);
-	newsvreq = svreq;
-	newsvreq.set_sn(newsn);	
-	newsvreq.SerializeToString(&newreq);
-	//constructReqPacket(h, newreq, reqbuf);
-	op = new CliRespOp(conid, SERVICE_REQ, newreq);	
+	svreq.set_from_sessid(m_sessid);
+	svreq.SerializeToString(&newreq);
+	op = new SendMsgOp(conid, SERVICE_REQ, newreq);	
 	ret = l->addAsynOperator(op);
 	if(ret < 0){
 		svresp.set_status(ret);
@@ -214,13 +224,20 @@ exit:
 		svresp.SerializeToString(&resp);
 	}
 	ALogError("ConnectServer") 
-		<< "<action:server_service_request> <sessid:" 
-		<< svresp.sessid() 
-		<< "> <svtype:" << svresp.svtype() 
-		<< "> <sn:" << svreq.sn() << "> <new_sn:" << newsn
-		<< "> <status:" << svresp.status()
+		<< "<action:server_service_request> <from_sessid:" 
+		<< svresp.from_sessid() << "> <to_sessid:"
+		<< svreq.to_sessid() << "> <svtype:" << svresp.svtype() 
+		<< "> <sn:" << svreq.sn() << "> <status:" << svresp.status()
 		<< "> <errstr:" << getErrStr(svresp.status()) << ">";
 	return ret; 
+}
+
+int32 SrvCon::sendCmd(int32 cmd, const std::string& body){
+	std::string msg;
+	head resph;
+	resph.cmd = cmd;
+	constructPacket(resph, body, msg);
+	return sendMessage(msg);
 }
 
 int32 SrvCon::handleServiceResponse(const head& h, 
@@ -229,23 +246,25 @@ int32 SrvCon::handleServiceResponse(const head& h,
 	int32 ret = 0;
 	ServiceResponse svresp;
 	EventLoop* l = NULL;
-	CliRespOp* op = NULL;
+	SendMsgOp* op = NULL;
 	int32 conid = 0;
 	if(!svresp.ParseFromArray(req.data()+sizeof(h), req.size()-sizeof(h))){
 		ret = INPUT_FORMAT_ERROR;	
 		goto exit;
 	}
 
-	ret = getCliConFromSessid(svresp.sessid(), l, conid);
+	ret = getConFromSessid(svresp.to_sessid(), l, conid);
 	if(ret < 0){
 		goto exit;
 	}
-	op = new CliRespOp(conid, SERVICE_RESP, req.substr(sizeof(h)));
+	op = new SendMsgOp(conid, SERVICE_RESP, req.substr(sizeof(h)));
 	ret = l->addAsynOperator(op);
 exit:
 	ALogError("ConnectServer")  
 		<< "<action:server_service_response> <sessid:" 
-		<< svresp.sessid() << "> <svtype:" << svresp.svtype()
+		<< svresp.from_sessid() << "> <to_sessid:"
+		<< svresp.to_sessid()
+		<< "> <svtype:" << svresp.svtype()
 		<< "> <sn:" << svresp.sn() << "> <status:" << ret
 		<< "> <errstr:" << getErrStr(ret) << ">";
 	if(ret != INPUT_FORMAT_ERROR)

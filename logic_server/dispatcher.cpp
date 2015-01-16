@@ -42,7 +42,7 @@ namespace gim{
 		h.magic = MAGIC_NUMBER;
 		string body;
 		h.cmd = SERVICE_REQ;
-		constructServiceRequest(sessid, 
+		constructServiceRequest("", sessid, 
 				svtype, sn, payload, body);
 		constructPacket(h, body, msg);
 		return msg;
@@ -55,7 +55,7 @@ namespace gim{
 		h.magic = MAGIC_NUMBER;
 		string body;
 		h.cmd = SERVICE_RESP;
-		constructServiceResponse(sessid, 
+		constructServiceResponse("", sessid, 
 				status, svtype, sn, payload, body);
 		constructPacket(h, body, msg);
 		return msg;

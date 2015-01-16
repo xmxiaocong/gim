@@ -115,9 +115,10 @@ public:
                         return  ret;
                 }
 		lgresp.ParseFromString(rsp);
+		m_sessid = lgresp.sessid();
 		if(lgresp.status() == 0){
-			std::cout << "test_register success " 
-				<< std::endl;	
+			std::cout << "test_register success, sessid:" 
+				<< m_sessid << std::endl;	
 		}else{
 			std::cout << "test_register fail: status:" 
 				<< lgresp.status() << std::endl;	
@@ -226,7 +227,8 @@ public:
 			ServiceRequest svreq;
 			parse_service_req(resp, svreq);
 			ServiceResponse svresp;
-			svresp.set_sessid(svreq.sessid());
+			svresp.set_from_sessid(m_sessid);
+			svresp.set_to_sessid(svreq.from_sessid());
 			svresp.set_svtype(svreq.svtype());
 			svresp.set_sn(svreq.sn());
 			svresp.set_status(0);
@@ -235,11 +237,11 @@ public:
 			const_service_resp(svresp, req);
 			ret = send_req(SERVICE_RESP, req);
 			if(ret < 0){
-				std::cout << "send_req fail, sessid:" << svreq.sessid() 
+				std::cout << "send_req fail, sessid:" << svreq.from_sessid() 
 					<< ", sn:" << svreq.sn() << std::endl;
 				return -1;
 			}else{
-				std::cout << "handle request, sessid:" << svreq.sessid() 
+				std::cout << "handle request, sessid:" << svreq.from_sessid() 
 					<< ", sn:" << svreq.sn() 
 					<< " ,send ret:" << ret << std::endl;
 			}	
@@ -294,6 +296,7 @@ private:
 	std::string	m_server_addr;
 	int		m_server_port;
 	std::string	m_buf;
+	std::string	m_sessid;
 	int32		m_status;
 	SOCKET	m_fd;
 }; 
