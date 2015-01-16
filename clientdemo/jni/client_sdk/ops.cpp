@@ -1,6 +1,3 @@
-#ifndef _EVENT_LOOP_OPERATION_H_
-#define _EVENT_LOOP_OPERATION_H_
-
 #include "ops.h"
 #include "proto/connect_server.pb.h"
 #include "msg_head.h"
@@ -142,10 +139,8 @@ namespace gim
 		Json::Value v;
 
 		int32 ret = 0;
-		MsgType msgtype = MSG_TYPE_SEND_PEER_RESP;
-
 		v[JKEY_CID] = getCid();
-		v[JKEY_MSG_TYPE] = msgtype;
+		v[JKEY_MSG_TYPE] = MSG_TYPE_SEND_PEER_RESP;
 		v[JKEY_MSG_STATUS] = status;
 		v[JKEY_MSG_SN] = getSN();
 
