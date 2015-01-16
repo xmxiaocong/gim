@@ -296,5 +296,4 @@ parse_end:
 		return ret;
 	}
 }//end of namespace
-#endif // !_EVENT_LOOP_OPERATION_H_
 
