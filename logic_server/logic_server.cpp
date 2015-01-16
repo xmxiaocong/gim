@@ -109,17 +109,18 @@ int LogicServer::connectIPArray(SvCon* c, const Json::Value& a,
 int LogicServer::allThreadConnectServer(const Serv& s){
 
 	for(int i = 0; i < m_thread_cnt; ++i){
-		connectServer(s);
+		connectServer(s, m_id * 100000 + m_thread_cnt % 100000);
 	}
 	
 	return 0;
 }
 
-int LogicServer::connectServer(const Serv& s){
+int LogicServer::connectServer(const Serv& s, int svid){
 	int ret = 0;
 	SvCon* c = m_confac->createSvCon(NULL);
 
 	c->setConnectServerId(s.id);
+	c->setServerId(svid);
 	c->setServiceType(m_service_type);
 	c->setReconnectSpan(m_reconnect_span);
 	c->setKeepAliveSpan(m_keepalive_span);

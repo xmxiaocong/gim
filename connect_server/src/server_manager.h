@@ -26,8 +26,8 @@ namespace gim{
 		ServList();
 		~ServList();
 	
-		int32 addServer(SrvCon* con, ef::EventLoop* l);
-		int32 delServer(SrvCon* con, ef::EventLoop* l);	
+		int32 addServer(int32 svid, SrvCon* con, ef::EventLoop* l);
+		int32 delServer(int32 svid, SrvCon* con, ef::EventLoop* l);	
 		int32 dispatchRequest(const std::string& key, 
 			const std::string& req, 
 			ef::EventLoop* const req_loop);
@@ -35,13 +35,20 @@ namespace gim{
 		struct ServerNode{
 			EventLoop* l;
 			SrvCon* con;
-			ServerNode(EventLoop* pl = NULL, SrvCon* con = 0):
-				l(pl), con(con){
+			int32 id;
+			ServerNode(EventLoop* pl = NULL, 
+				SrvCon* con = 0, int32 svid = 0):
+				l(pl), con(con), id(svid){
 			}
 
 			bool operator==(const ServerNode& n) const{
 				return n.l == l && n.con == con;
 			}
+
+			bool operator<(const ServerNode& n) const{
+				return id < n.id;
+			}
+
 		};
 
 		struct NodeCmp{
@@ -68,8 +75,8 @@ namespace gim{
 		ServMan();
 		~ServMan();
 
-		int32 addServer(int32 type, SrvCon* con, ef::EventLoop* l);
-		int32 delServer(int32 type, SrvCon* con, ef::EventLoop* l);	
+		int32 addServer(int32 type, int32 svid, SrvCon* con, ef::EventLoop* l);
+		int32 delServer(int32 type, int32 svid, SrvCon* con, ef::EventLoop* l);	
 		int32 dispatchRequest(int32 type, const std::string& key,
 			const std::string& req, ef::EventLoop* const req_loop);
 	private:

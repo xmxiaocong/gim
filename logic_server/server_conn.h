@@ -47,6 +47,14 @@ public:
 		return m_service_type;
 	}
 
+	void setServerId(int id){
+		m_svid = id;
+	}
+
+	int getServerId() const{
+		return m_svid;
+	}
+
 	void setLogicServer(LogicServer* s){
 		m_serv = s;
 	}
@@ -77,6 +85,7 @@ private:
 
 	int m_status;
 	int m_con_serv_id;
+	int m_svid;
 	int m_service_type;
 	std::string m_sessid;
 	LogicServer* m_serv;

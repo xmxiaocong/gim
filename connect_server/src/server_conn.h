@@ -17,7 +17,8 @@ public:
 	};
 
 	SrvCon(Server* s)
-		:BaseCon(s), m_status(STATUS_INIT), m_type(0){ 
+		:BaseCon(s), m_status(STATUS_INIT), 
+		m_type(0), m_svid(0){ 
 	}
 
 	Server* getServer(){
@@ -51,6 +52,7 @@ private:
 
 	int32 m_status;
 	int32 m_type;
+	int32 m_svid;
 	std::string m_sessid;
 
 };

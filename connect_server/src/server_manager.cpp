@@ -1,7 +1,7 @@
 #include "server_manager.h"
 #include "proto/err_no.h"
 #include "net/ef_event_loop.h"
-#include "base/ef_log.h"
+#include "base/ef_md5.h"
 #include "server_conn.h"
 #include <cassert>
 #include <iostream>
@@ -10,6 +10,12 @@
 namespace gim{
 
 static ServMan g_servman;
+
+static int32 hash_value(const std::string& k){
+	uint8 m[16] = {0};
+	MD5(m, (uint8*)k.data(), k.size());
+	return *(int32*)m;
+}
 
 ServMan& getServMan(){
 	return g_servman;
@@ -23,15 +29,16 @@ ServList::~ServList(){
 	ef::mutexDestroy(&m_cs);
 }
 
-int32	ServList::addServer(SrvCon* con, ef::EventLoop* l){
-	ServerNode n(l, con);
+int32	ServList::addServer(int32 id, SrvCon* con, ef::EventLoop* l){
+	ServerNode n(l, con, id);
 	ef::AutoLock lk(&m_cs);
 	m_nodes.push_back(n);
+	std::sort(m_nodes.begin(), m_nodes.end());
 	return 0;
 }
 
-int32	ServList::delServer(SrvCon* con, ef::EventLoop* l){
-	ServerNode n(l, con);
+int32	ServList::delServer(int32 id, SrvCon* con, ef::EventLoop* l){
+	ServerNode n(l, con, id);
 	NodeCmp c(l, con);
 	ef::AutoLock lk(&m_cs); 
 	Nodes::iterator it = remove_if(m_nodes.begin(), m_nodes.end(), c);
@@ -47,15 +54,19 @@ int32	ServList::dispatchRequest(const std::string& key,
 	{
 		ef::AutoLock lk(&m_cs);
 		int32 s = m_nodes.size();
-		if(s){
-			n = m_nodes[m_req_cnt++ % s]; 
-			assert(n.l);
-			assert(n.con);
-			sendquesize = n.con->sendQueueSize();
-			conid = n.con->getId();
-		}else{
+		if(!s){
 			return THIS_SERVICE_EMPTY;			
 		}
+		int32 idx = m_req_cnt;
+		if(key.size()){
+			idx = hash_value(key);
+		}
+		n = m_nodes[idx++ % s]; 
+		assert(n.l);
+		assert(n.con);
+		sendquesize = n.con->sendQueueSize();
+		conid = n.con->getId();
+		++m_req_cnt;
 	}
 
 	if(n.con->sendQueueSize() > MAX_SEND_QUE_SIZE){
@@ -107,15 +118,15 @@ ServList* ServMan::getServList(int32 type){
 	return l;
 }
 
-int32 ServMan::addServer(int32 type, SrvCon* con, ef::EventLoop* l){
+int32 ServMan::addServer(int32 type, int32 svid, SrvCon* con, ef::EventLoop* l){
 	ServList* lst = getAddServList(type);
-	return lst->addServer(con, l);
+	return lst->addServer(svid, con, l);
 }
 
-int32 ServMan::delServer(int32 type, SrvCon* con, ef::EventLoop* l){
+int32 ServMan::delServer(int32 type, int32 svid, SrvCon* con, ef::EventLoop* l){
 	ServList* lst = getServList(type);
 	if(lst){
-		return lst->delServer(con, l);
+		return lst->delServer(svid, con, l);
 	}
 	return NO_SERVICE; 
 }

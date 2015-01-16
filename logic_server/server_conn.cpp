@@ -49,6 +49,7 @@ int SvCon::doRegister(){
 	int ret = 0;
 	SvRegRequest lgr;
 	lgr.set_svtype(m_service_type);
+	lgr.set_id(m_svid);
 	std::string reqbody;
 	lgr.SerializeToString(&reqbody);	
 	head h;
@@ -78,16 +79,17 @@ int SvCon::handleRegisterResponse(const char* respbody, int len){
 			"<event_loop:" << getEventLoop() << "> <conid:"
 			<< getId() << "> <con_serv_id:" << m_con_serv_id
 			<< "> <status:" << lgresp.status() << ">";
-	}else{
-		Dispatcher* d = m_serv->getDispatcher();
-		d->addConnectServer(m_con_serv_id, getEventLoop(), getId());	
-		m_status = STATUS_LOGIN; 
-		m_sessid = lgresp.sessid();		
-		ALogError(m_serv->getLogName()) << "<action:server_register_resp> " 
-			"<event_loop:" << getEventLoop() << "> <conid:"
-			<< getId() << "> <con_serv_id:" << m_con_serv_id
-			<< "> <status:0> <sessid:" << m_sessid << ">";  
+		return ret;
 	}
+	Dispatcher* d = m_serv->getDispatcher();
+	d->addConnectServer(m_con_serv_id, getEventLoop(), getId());	
+	m_status = STATUS_LOGIN; 
+	m_sessid = lgresp.sessid();		
+	ALogError(m_serv->getLogName()) << "<action:server_register_resp> " 
+		"<event_loop:" << getEventLoop() << "> <conid:"
+		<< getId() << "> <con_serv_id:" << m_con_serv_id
+		<< "> <status:0> <sessid:" << m_sessid << ">";  
+
 	return ret;
 }
 

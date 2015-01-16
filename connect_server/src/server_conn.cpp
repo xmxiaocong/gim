@@ -33,7 +33,7 @@ int32 SrvCon::onCreate(EventLoop* l){
 
 SrvCon::~SrvCon(){
 	if(m_status == STATUS_REG){
-		getServMan().delServer(m_type, this, 
+		getServMan().delServer(m_type, m_svid, this, 
 			getEventLoop());
 		m_status = STATUS_INIT;
 		ALogError("ConnectServer") << "<action:server_logout> <svtype:" 
@@ -139,13 +139,14 @@ int32 SrvCon::handleRegRequest(const head& h,
 	}
 
 	m_type = regreq.svtype();
-	ret = getServMan().addServer(m_type, this, getEventLoop());
+	m_svid = regreq.id();
+	ret = getServMan().addServer(m_type, m_svid, this, getEventLoop());
 
 	if(ret >= 0){
 		m_status = STATUS_REG;
 	}
 
-	decorationName(pSettings->Id, getId(), itostr(m_type), m_sessid);
+	decorationName(pSettings->Id, getId(), itostr(m_svid), m_sessid);
 
 exit:
 	SvRegResponse regrsp;

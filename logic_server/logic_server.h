@@ -41,6 +41,14 @@ public:
 		return m_logname;
 	}
 
+	void setId(int id){
+		m_id = id;
+	}
+
+	int getId() const{
+		return m_id;
+	}
+
 	void setServiceType(int type){
 		m_service_type = type;
 	}
@@ -71,7 +79,7 @@ public:
 	Dispatcher* getDispatcher();
 	
 private:
-	int connectServer(const Serv& s);
+	int connectServer(const Serv& s, int id);
 	int connectIPArray(SvCon* c, const Json::Value& a, int port);
 	int allThreadConnectServer(const Serv& s);
 
@@ -86,6 +94,7 @@ private:
 	int m_keepalive_span;
 	int m_reconnect_span;
 	int m_service_type;
+	int m_id;
 	SvConFactory* m_confac;
 	Server m_cliset;
 	vector<Serv> m_servlist;
