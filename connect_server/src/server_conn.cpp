@@ -110,8 +110,7 @@ int32 SrvCon::getConFromSessid(const std::string& sessid,
 
 	evlpid = getEventLoopId(conid);
 
-	if(evlpid < serverEventLoopCount(m_serv->getEventLoopCount())
-		|| evlpid >= m_serv->getEventLoopCount()){
+	if(evlpid < 0 || evlpid >= m_serv->getEventLoopCount()){
 		ret = INVLID_SESSION_ID;
 		goto exit;
 	}
