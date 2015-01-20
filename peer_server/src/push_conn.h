@@ -1,18 +1,16 @@
 #ifndef PEER_CONN_H
 #define PEER_CONN_H
 
-#include "net/ef_connection.h"
-#include "net/ef_acceptor.h"
+#include "logic_conn.h"
 
 namespace gim{
 
-using namespace ef;
 
 struct head;
 class LogicServer;
 class Dispatcher;
 
-class PushCon:public Connection{
+class PushCon:public LogicCon{
 public:
 	PushCon():m_serv(NULL){
 	}
@@ -24,15 +22,6 @@ public:
 	virtual int32 handlePacket(const std::string& req);
 	virtual int32 checkPackLen();
 
-	void setLogicServer(LogicServer* s){
-		m_serv = s;
-	}
-
-	LogicServer* getLogicServ(){
-		return m_serv;
-	}
-
-	Dispatcher* getDispatcher();
 
 private:
 	int32 handlePushMessage(const head& h, const std::string& svreq, 
@@ -41,22 +30,18 @@ private:
 	LogicServer* m_serv;
 };
 
-class PushConFac:public ConnectionFactory{
+class PushConFac:public LogicConFactory{
 public:
 	virtual PushCon* createConnection(ef::EventLoop*, ef::int32, 
 		const std::string&, ef::int32){
 
 		PushCon* pc = new PushCon();
-		pc->setLogicServer(m_serv);
+		pc->setLogicServer(getLogicServer());
 	
 		return pc;
 	}
 
-	void setLogicServer(LogicServer* s){
-		m_serv = s;
-	}
 private:
-	LogicServer* m_serv;
 };
 
 PushConFac* getPushConFactory();

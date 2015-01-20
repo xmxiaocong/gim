@@ -2,7 +2,7 @@
 
 cd `dirname $0`
 
-cp -fr ../src/proto src/
+cp -fr ../../proto src/
 
 protoc src/proto/pair.proto -I=src/proto/ --cpp_out=src/proto
 mv src/proto/pair.pb.cc src/proto/pair.pb.cpp

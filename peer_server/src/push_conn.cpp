@@ -114,20 +114,9 @@ namespace gim{
 			string payload;
 			msgpk.SerializeToString(&payload);
 			
-			Dispatcher* d = getDispatcher();
 
-			if(!d){
-				PLogError("PeerServer")
-					<< "<action:push_message> <from:"
-					<< pm.from() << "> <to:" << pm.to() 
-					<< "> <status:-1> <msgid:" << msgid 
-					<< "> <errstr: get_dispatche_fail>";
-				break;
-			}
-
-			d->sendServiceRequest(getEventLoop(), 
-					pm.to(), SERVICE_TYPE_PEER, 
-					svreq.sn(), payload);
+			sendServiceRequestToClient(pm.to(), SERVICE_TYPE_PEER, 
+					svreq.sn(), payload, "");
 
 		} while (0);
 	
@@ -137,7 +126,7 @@ namespace gim{
 		svresp.set_status(ret);
 		svresp.SerializeToString(&resp);
 		//construct resp
-		PLogTrace("PeerServer")
+		ALogError("PeerServer")
 			<< "<action:push_message> <from:" 
 			<< m.from() << "> <to:" << m.to() 
 			<< "> <type:" << m.type() << "> <data:" 
@@ -145,10 +134,6 @@ namespace gim{
 			<< ret << "> <msgid:" << msgid << "> <errstr:"
 			<< getErrStr(ret) << ">";
 		return ret;	
-	}
-
-	Dispatcher* PushCon::getDispatcher(){
-		return m_serv->getDispatcher();
 	}
 
 	int PushCon::checkPackLen(){

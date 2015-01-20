@@ -63,7 +63,6 @@ public:
 		return m_serv;
 	}
 
-	Dispatcher* getDispatcher();
 
 	virtual int onConnected();
 	virtual int onDisconnected();
@@ -73,21 +72,64 @@ public:
 	// < 0, error, = 0, wait more, > 0, recv whole pack
 	virtual int checkPackLen();
 
-	virtual int handleServiceRequest(const char* reqbody, 
-		int len, std::string& respbody) = 0;
-	virtual int handleServiceResponse(const char* respbody, 
-		int len) = 0;
+	virtual int handleServiceRequest(const std::string& payload) = 0;
+	//maybe from other logic server
+	virtual int handleServiceResponse(int svtype,
+		int status, const std::string& payload,
+		const std::string& callback) = 0;
+
+	int sendServiceResponse(int status, 
+		const std::string& payload);
+	int sendServiceRequest(int svtype, const std::string& key,
+		const std::string& payload, const std::string& callback = "");
+
+	int sendServiceRequestToClient(const string& cid, const std::string& sn, 
+		const string& payload, const std::string& callback = "");
+	int sendServiceResponseToClient(const string& cid, const std::string& sn,
+		int status, const string& payload, 
+		const std::string& callback = "");
+
+	std::string getPackFromSessid() const{
+		return m_from_sessid;
+	}
+
+	std::string getPackSN() const{
+		return m_cur_pack_sn;
+	}
+
+	std::string getPackKey() const{
+		return m_cur_pack_key;
+	}
+
+	std::string getPackCallBack() const{
+		return m_callback;
+	}
+
+	int getPackSvType() const{
+		return m_packsvtype;
+	}
+
+	int processRegisterResponse(const char* respbody, int len);
+	int doRegister();
+	int processServiceRequest(const char* respbody, int len);
+	int processServiceResponse(const char* respbody, int len);
+
 protected:
 
 private:
-	int handleRegisterResponse(const char* respbody, int len);
-	int doRegister();
+
+	Dispatcher* getDispatcher();
 
 	int m_status;
 	int m_con_serv_id;
 	int m_svid;
 	int m_service_type;
 	std::string m_sessid;
+	std::string m_from_sessid;
+	std::string m_cur_pack_sn;
+	std::string m_cur_pack_key;
+	std::string m_callback;
+	int m_packsvtype;
 	LogicServer* m_serv;
 };
 

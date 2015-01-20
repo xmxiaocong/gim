@@ -6,6 +6,7 @@
 #include "net/ef_server.h"
 #include "svlist_cache.h"
 #include "server_conn.h"
+#include "logic_conn.h"
 #include "dispatcher.h"
 
 namespace gim{
@@ -69,14 +70,12 @@ public:
 		return 0;
 	}
 
-	int startListen(int port, ConnectionFactory*, 
+	int startListen(int port, LogicConFactory*, 
 		ConnectionDispatcher* d = NULL);
 	int stopListen(int port);
 
 	int run();
 	int stop();
-
-	Dispatcher* getDispatcher();
 	
 private:
 	int connectServer(const Serv& s, int id);
@@ -85,10 +84,7 @@ private:
 
 	int initServerListCache(const Json::Value& v);
 
-	int initSessCacheConfig(const Json::Value& v){
-		m_ssch_conf = v;
-		return 0;
-	}
+	int initDispatcher(const Json::Value& v);
 
 	int m_thread_cnt;	
 	int m_keepalive_span;
@@ -99,9 +95,11 @@ private:
 	Server m_cliset;
 	vector<Serv> m_servlist;
 	SvLstCache* m_cache;
-	Json::Value m_ssch_conf;
 	string m_logname;
 };
+
+
+
 };
 
 #endif

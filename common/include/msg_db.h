@@ -21,33 +21,48 @@ class MsgDB {
 public:
 	virtual ~MsgDB(){};
 
+	// returns message numbers in the specified msgbox
 	virtual int size(const string &mbName) = 0;
+	
+	// returns amount of messages between lbId and ubId
+	// lbId: lower bound. 0 means the oldest message
+	// ubId: upper bound. -1 means the latest message
+	virtual int count(const string &mbName, int64 lbId = 0, int64 ubId = -1) = 0;
+	
+	virtual int addMsg(const string &mbName, const Message &msg) = 0;
 
-	virtual int count(const string &mbName, int64 lbId, int64 ubId) = 0;
+	// get messages whose ids are not less than bMsgId(contains bMsgId itself)
+	// bMsgId: the begin message id. 0 means the oldest message
+	// length: amount of messages to get. -1 means to the latest message
+	virtual int getMsgs(vector<Message> &vMsg, const string &mbName, int64 bMsgId = 0, 
+		int length = -1, order_t orderBy = ORDER_BY_INCR) = 0;
 
-	virtual int addMsg(const string &mbName, Message &msg) = 0;
-
-	virtual int getMsgs(vector<Message> &vMsg, const string &mbName, 
-			int64 beginMsgId, int length, order_t orderBy) = 0;
-
-	virtual int getMsgsForward(vector<Message> &vMsg, const string &mbName, 
-			int64 beginMsgId, int length, order_t orderBy) = 0;
+	// get messages whose ids are not larger than bMsgId(contains eMsgId itself)
+	// eMsgId: the end message id. -1 means the latest message
+	// length: amount of messages to get. -1 means from the first message;
+	virtual int getMsgsForward(vector<Message> &vMsg, const string &mbName, int64 eMsgId = -1, 
+			int length = -1, order_t orderBy = ORDER_BY_DECR) = 0;
 
 	virtual int delMsg(const string &mbName, int64 msgId) = 0;
 
-	virtual int delMsgsBackward(const string &mbName,
-		int64 beginMsgId, int length) = 0;
+	// delete messages whose ids are not less than bMsgId(contains bMsgId itself)
+	// bMsgId: the begin message id. 0 means the oldest message
+	// length: amount of message to delete. -1 means to the latest message
+	virtual int delMsgsBackward(const string &mbName, int64 bMsgId = 0, int length = -1) = 0;
 
-	virtual int delMsgs(const string &mbName, 
-		int64 beginMsgId, int length) = 0;
-	
+	// delete messages whose ids are not larger than eMsgId(contains eMsgId itself)
+	// eMsgId: the end message id. -1 means the latest message
+	// length: amount of message to delete. -1 means from the first message
+	virtual int delMsgs(const string &mbName, int64 eMsgId = -1, int length = -1) = 0;
+
 	virtual int clear(const string &mbName) = 0;
 
-	virtual int incrId(const string &key, int64 &newId) = 0;
-	
-	virtual int getMsgId(const string &key, int64 &curId) = 0;
+	virtual int incrId(const string &mbName, int64 &newId) = 0;
 
-	virtual int setMsgId(const string &key, int64 id) = 0;
+	virtual int getMsgId(const string &mbName, int64 &recentReadId) = 0;
+
+	virtual int setMsgId(const string &mbName, int64 recentReadId) = 0;
+
 };
 
 class MsgDBFactory {

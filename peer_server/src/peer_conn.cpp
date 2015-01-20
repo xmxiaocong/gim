@@ -14,77 +14,121 @@
 namespace gim{
 
 
-	int PeerCon::handleGetPeerMessage(const ServiceRequest& svreq,
-			const PeerPacket& reqpk, PeerPacket& resppk){
-		int ret = 0;
-		TimeRecorder t("PeerCon::handleGetMessage");
-		//construct resp
-		resppk.set_cmd(GET_PEER_MESSAGE_RESP);
-		GetPeerMessageResponse* gresp = resppk.mutable_get_peer_msg_resp();
-		gresp->set_last_msgid(0);
+	int getPeerMsg(const std::string& cid, int64 start_msgid,
+		int64 count, vector<Message>& msgs, int64& msgid){
 
-		if(!reqpk.has_get_peer_msg_req()){
-			FormatErrorLog(svreq.sn(), "get_peer_message");
-			return INPUT_FORMAT_ERROR;	
-		}	
-
-		const GetPeerMessageRequest& gmsgreq = reqpk.get_peer_msg_req();
-		//get message from db
-		const string& cid = gmsgreq.cid();
-		int64 start_msgid = gmsgreq.start_msgid();
-		int64 count = gmsgreq.count();	
-		int64 lastmsgid = 0;
+		int ret= 0;
 
 		MsgDB* c = DBConn::getMsgDB();	
 
 		if(!c){
-			PeerErrorLog(svreq.sn(), "get_peer_message", cid, DB_ERROR);
 			return DB_ERROR;	
 		}
 
-		int64 msgid = 0;
 
 		//get last msg id
 		ret = c->getMsgId("peer_" + cid + "_last_msgid", msgid);
 		if(ret < 0){
-			PeerErrorLog(svreq.sn(), "get_peer_message", cid, DB_ERROR);
 			return DB_ERROR;
 		}
 
-		lastmsgid = msgid;
+		int64 smsgid = 0;
+		int64 lastread = 0;
 
 		//get last read
 		if(start_msgid <= 0){
 			msgid = 0;
-			ret = c->getMsgId("peer_" + cid + "_last_read", msgid);
+			ret = c->getMsgId("peer_" + cid + "_last_read", lastread);
 
 			if(ret < 0){
-				PeerErrorLog(svreq.sn(), "get_peer_message", cid, DB_ERROR);
 				return DB_ERROR;
 			}
 
-			if(msgid)
-				start_msgid = msgid;
+			if(smsgid)
+				start_msgid = lastread;
 		}
 
 		if(count <= 0){
 			count = DEFAULT_MSG_COUNT; 
 		}
 
-		vector<Message> msgs;
 		ret = c->getMsgs(msgs, "peer_" + cid, start_msgid, count, ORDER_BY_INCR);
 
 		if(ret < 0){
-			PeerErrorLog(svreq.sn(), "get_peer_message", cid, DB_ERROR);
 			return DB_ERROR;
 		}
 
-		if(ret > 0)
-			ret = 0;
+		if(!msgs.size()){
+			return 0;
+		}
+
+		if(lastread < msgs.back().id()){
+			lastread = msgs.back().id();
+
+			c->setMsgId("peer_" + cid + "_last_read", 
+				lastread);
+
+			c->delMsgs("peer_" + cid, 
+				start_msgid - MSG_LEFT_COUNT, -1);
+		}
+
+		return ret; 
+
+	}
+
+	int sendPeerMsg(const Message& pm, int64& msgid){
+
+		int ret = 0;
+
+		MsgDB* c = DBConn::getMsgDB();
+		if(!c){
+			return DB_ERROR;		
+		}
+
+		ret = c->incrId("peer_" + pm.to() + "_last_msgid", msgid);
+		if(ret < 0){
+			return DB_ERROR;
+		}
+	
+		ret = c->addMsg("peer_" + pm.to(), pm);	
+
+		return ret; 
+
+	}
+
+	int PeerCon::handleGetPeerMessage(const PeerPacket& reqpk){
+		int ret = 0;
+		TimeRecorder t("PeerCon::handleGetMessage");
+		//construct resp
+		PeerPacket resppk;
+		resppk.set_cmd(GET_PEER_MESSAGE_RESP);
+		GetPeerMessageResponse* gresp = resppk.mutable_get_peer_msg_resp();
+	
+		const GetPeerMessageRequest& gmsgreq = reqpk.get_peer_msg_req();
+		//get message from db
+		const string& cid = gmsgreq.cid();
+		int64 start_msgid = gmsgreq.start_msgid();
+		int64 count = gmsgreq.count();	
+		int64 lastmsgid = 0;
+		vector<Message> msgs;
 
 		std::stringstream os;
+	
+		gresp->set_last_msgid(0);
 
-		int64 lastread = start_msgid;
+		if(!reqpk.has_get_peer_msg_req()){
+			FormatErrorLog(getPackSN(), "get_peer_message");
+			ret = INPUT_FORMAT_ERROR;
+			goto exit;
+		}	
+
+		ret = getPeerMsg(cid, start_msgid, count, msgs, lastmsgid);
+		
+		if(ret < 0){
+			PeerErrorLog(getPackSN(), "get_peer_message", cid, DB_ERROR);
+			ret = ret;
+			goto exit;
+		}
 
 		//construct resp
 		gresp->set_last_msgid(lastmsgid);
@@ -103,15 +147,7 @@ namespace gim{
 				<< msgs[i].id() << "> <time:"
 				<< msgs[i].time() << "> <msg_sn:"
 				<< msgs[i].sn() << "\n";
-			if(lastread < msgs[i].id())
-				lastread = msgs[i].id();
 		}
-
-		c->setMsgId("peer_" + cid + "_last_read", 
-				lastread);
-
-		c->delMsgs("peer_" + cid, 
-			start_msgid - MSG_LEFT_COUNT, -1);
 
 		PLogTrace("PeerServer")
 			<< "<action:handle_get_peer_message> <cid:" 
@@ -123,16 +159,22 @@ namespace gim{
 			<< getErrStr(ret) << ">";
 		if(gresp->msgs_size())
 			PLogTrace("PeerServer") << os.str();
+		ret = 0;
+exit:
+		std::string payload;
+		resppk.SerializeToString(&payload);
+
+		ret = sendServiceResponse(ret, payload);	
+		
 		return ret;
 	}
 
-	int PeerCon::handleRecvPeerMessage(const ServiceResponse& svresp,
-			const PeerPacket& reqpk){
+	int PeerCon::handleRecvPeerMessage(const PeerPacket& reqpk){
 		int ret = 0;
 		TimeRecorder t("PeerCon::handleRecvMessage");
 
 		if(!reqpk.has_recv_peer_msg_resp()){
-			FormatErrorLog(svresp.sn(), "recv_peer_message");
+			FormatErrorLog(getPackSN(), "recv_peer_message");
 			return INPUT_FORMAT_ERROR;	
 		}	
 
@@ -142,153 +184,97 @@ namespace gim{
 
 		MsgDB* c = DBConn::getMsgDB();
 		if(!c){
-			PeerErrorLog(svresp.sn(), "recv_peer_message", msg.to(), DB_ERROR);
+			PeerErrorLog(getPackSN(), "recv_peer_message", msg.to(), DB_ERROR);
 			return DB_ERROR;
 		}
 
 		c->delMsgs("peer_" + msg.to(), msg.id() - MSG_LEFT_COUNT, -1);
 
 		ALogTrace("PeerServer")
-			<< "<sn:" << svresp.sn()
+			<< "<sn:" << getPackSN()
 			<< "> <action:recv_peer_message> <to:" 
 			<< msg.to() << "> <msgid:" 
 			<< msg.id() << "> <from:"
 			<< msg.from() << "> <time:"
 			<< msg.time() << "> <msg_sn:" 
-			<< svresp.sn() << "> <errstr:" 
+			<< getPackSN() << "> <errstr:" 
 			<< getErrStr(ret) << ">";
 		return ret;
 	}
 
 
-	int PeerCon::handleSendPeerMessage(const ServiceRequest& svreq,
-			const PeerPacket& reqpk, PeerPacket& resppk){
+	int PeerCon::handleSendPeerMessage(const PeerPacket& reqpk){
+
 		int ret = 0;
 
 		TimeRecorder trcd("PeerCon::handleSendMessage");
+
+		int64 msgid = 0;
+		PeerPacket resppk;
+
 		//construct resp
 		resppk.set_cmd(SEND_PEER_MESSAGE_RESP);
 		SendPeerMessageResponse* gresp = resppk.mutable_send_peer_msg_resp();	
+		Message* resppm = gresp->mutable_msg();
 
-		if(!reqpk.has_send_peer_msg_req()){
-			FormatErrorLog(svreq.sn(), "recv_peer_message");
-			return INPUT_FORMAT_ERROR;
-		}
 		const SendPeerMessageRequest& smsgreq = reqpk.send_peer_msg_req();
 		const Message&  pm = smsgreq.msg();
-		Message* resppm = gresp->mutable_msg();
-		*(resppm) = pm;
-		
 
-		MsgDB* c = DBConn::getMsgDB();
-		if(!c){
-			PeerErrorLog(svreq.sn(), "send_peer_message", pm.to(), DB_ERROR);
-			return DB_ERROR;		
-		}
+		string payload;
+		string resppayload;
 
-		int64 msgid = 0;
-		ret = c->incrId("peer_" + pm.to() + "_last_msgid", msgid);
-		if(ret < 0){
-			PeerErrorLog(svreq.sn(), "send_peer_message", pm.to(), DB_ERROR);
-			return DB_ERROR;
-		}
-
-		int64 t = gettime_ms();
-		resppm->set_id(msgid);
-		resppm->set_time(t);
-		Message m;
-		m.set_id(msgid);
-		m.set_from(pm.from());
-		m.set_time(t);
-		m.set_data(pm.data());	
-		m.set_sn(svreq.sn());
-		if(ret < 0){
-			PeerErrorLog(svreq.sn(), "send_peer_message", pm.to(), DB_ERROR);
-			return DB_ERROR;
-		}
-	
 		Settings *pSettings = Singleton<Settings>::instance();			
-
 		//send to reciver 
 		PeerPacket msgpk;
 		msgpk = reqpk;
 		SendPeerMessageRequest* spreq = msgpk.mutable_send_peer_msg_req();
 		Message* pmsg = spreq->mutable_msg();
-		pmsg->set_id(msgid);
-		pmsg->set_time(t);
-		if(ret > 0){
-			ret = 0;
-		}
+		*pmsg = *resppm;
 
-		string payload;
-		msgpk.SerializeToString(&payload);
-
-		Dispatcher* d = getDispatcher();
-
-		if(!d){
-			PLogError("PeerServer")
-				<< "<action:dispatch_peer_message> <from:"
-				<< pm.from() << "> <to:" << pm.to() 
-				<< "> <status:-1> <msgid:" << msgid 
-				<< "> <errstr: get_dispatche_fail>";
+		if(!reqpk.has_send_peer_msg_req()){
+			FormatErrorLog(getPackSN(), "send_peer_message");
+			ret = INPUT_FORMAT_ERROR;
 			goto exit;
 		}
 
-		d->sendServiceRequest(getEventLoop(), 
-				pm.to(), svreq.svtype(), 
-				svreq.sn(), payload);
+		*(resppm) = pm;
+		
+		resppm->set_sn(getPackSN());
+		resppm->set_time(gettime_ms());
+
+		ret = sendPeerMsg(*resppm, msgid);
+		if(ret < 0){
+			PeerErrorLog(getPackSN(), "send_peer_message", pm.to(), DB_ERROR);
+			goto exit;
+		}		
+
+	exit:
+		if(ret >= 0){
+			msgpk.SerializeToString(&payload);
+			sendServiceRequestToClient(pm.to(), getPackSN(), payload);
+			resppk.SerializeToString(&resppayload);	
+		}
+
 
 		if(pSettings->RespToMutiDevice){
 			//when muti device online at the same time, 
 			//should send the response
 			//to all the device			
-			string resppayload;
-			resppk.SerializeToString(&resppayload);	
-			d->sendServiceResponse(getEventLoop(), 
-				pm.from(), svreq.svtype(), 
-				svreq.sn(), ret, resppayload);
+			sendServiceResponseToClient(pm.from(),
+				getPackSN(), ret, resppayload);
+		}else{
+			sendServiceResponse(ret, resppayload);
 		}
-	exit:
+
 		//construct resp
 		PLogTrace("PeerServer")
 			<< "<action:send_peer_message> <to:" << pm.to()
 			<< "> <from:" << pm.from() 
 			<< "> <data:" << base64Encode(pm.data())
-			<< "> <msg_sn:" << m.sn() << "> <status:" 
+			<< "> <msg_sn:" << getPackSN() << "> <status:" 
 			<< ret << "> <msgid:" << msgid << "> <errstr:"
 			<< getErrStr(ret) << ">";
 		return ret;	
-	}
-
-	int PeerCon::handlePeerCmd(const ServiceRequest& svreq, string& resppayload){
-		int ret = 0;
-		PeerPacket reqpack;
-
-		if(!reqpack.ParseFromString(svreq.payload())){
-			FormatErrorLog(svreq.sn(), "handle_peer_cmd");
-			return INPUT_FORMAT_ERROR;
-		}
-
-		PeerPacket resppack;
-		Settings *pSettings = Singleton<Settings>::instance();			
-
-		switch(reqpack.cmd()){
-			case	SEND_PEER_MESSAGE_REQ:
-				ret = handleSendPeerMessage(svreq, reqpack, resppack);
-				if(!pSettings->RespToMutiDevice){
-					resppack.SerializeToString(&resppayload);
-				}
-				break;
-			case	GET_PEER_MESSAGE_REQ:
-				ret = handleGetPeerMessage(svreq, reqpack, resppack);
-				resppack.SerializeToString(&resppayload);	
-				break;
-			default:
-				FormatErrorLog(svreq.sn(), "handle_peer_cmd");
-				break;
-		}
-
-		return ret;
 	}
 
 	PeerConFac	g_peerconfac;
@@ -297,69 +283,63 @@ namespace gim{
 		return &g_peerconfac;
 	}
 
-	int PeerCon::handleServiceRequest(const char* reqbody, int len,
-			std::string& resp){
+	int PeerCon::handleServiceRequest(const std::string& payload){
 		int ret = 0;
-		ServiceRequest svreq;
-		if(!svreq.ParseFromArray(reqbody, len)){
-			ALogError("PeerServer") << "<action:handle_cmd> <status:"
-				<< (int)INPUT_FORMAT_ERROR
-				<< "> <errstr:INPUT_FORMAT_ERROR>";
-			return INPUT_FORMAT_ERROR;	
+		PeerPacket reqpack;
+
+		if(!reqpack.ParseFromString(payload)){
+			FormatErrorLog(getPackSN(), "handle_peer_cmd");
+			return INPUT_FORMAT_ERROR;
 		}
-		ServiceResponse svresp;
-		svresp.set_to_sessid(svreq.from_sessid());
-		svresp.set_svtype(svreq.svtype());
-		svresp.set_sn(svreq.sn());
-		string resppayload;
-		switch(svreq.svtype()){
-			case SERVICE_TYPE_PEER:
-				ret = handlePeerCmd(svreq, resppayload);
+
+		switch(reqpack.cmd()){
+			case	SEND_PEER_MESSAGE_REQ:
+				ret = handleSendPeerMessage(reqpack);
+				break;
+			case	GET_PEER_MESSAGE_REQ:
+				ret = handleGetPeerMessage(reqpack);
 				break;
 			default:
-				PLogError("PeerServer") 
-					<< "<action:handle_cmd> <status:"
-					<< (int)SERVICE_TYPE_ERROR 
-					<< "> <errstr:SERVICE_TYPE_ERROR>";
-				ret = SERVICE_TYPE_ERROR; 
+				FormatErrorLog(getPackSN(), "handle_peer_cmd");
+				break;
 		}
-		if(resppayload.size()){
-			svresp.set_status(ret);
-			svresp.set_payload(resppayload);
-			svresp.SerializeToString(&resp);
-		}
-		return 0;
+
+		return ret;
 	}
 
-	int PeerCon::handleServiceResponse(const char* reqbody, int len){
+	int PeerCon::handleServiceResponse(int svtype, int status, 
+		const std::string& payload, const std::string& callback){
+
 		int ret = 0;
-		ServiceResponse svresp;
-		if(!svresp.ParseFromArray(reqbody, len)){
+		
+		if(status < 0){
 			ALogError("PeerServer") 
-				<< "<action:handleServiceResponse> <status:"
-				<< (int)INPUT_FORMAT_ERROR
-				<< "> <errstr:INPUT_FORMAT_ERROR>";
-			return 0;	
+				<< "<sn:" << getPackSN()
+				<< "> <action:handleServiceResponse> <status:"
+				   "0> <errstr:STATUS_OK> <svtype:" << svtype
+				<< "> <resp_status:" << status;
+			return 0;
 		}
-		if(svresp.svtype() != SERVICE_TYPE_PEER){
+
+		if(svtype != SERVICE_TYPE_PEER){
 			ALogError("PeerServer") 
-				<< "<sn:" << svresp.sn()
+				<< "<sn:" << getPackSN()
 				<< "> <action:handleServiceResponse> <status:"
 				<< (int)SERVICE_TYPE_ERROR 
 				<< "> <errstr:SERVICE_TYPE_ERROR>";
 			return 0;
 		}
 		PeerPacket reqpk;
-		if(!reqpk.ParseFromArray(svresp.payload().data(), 
-			svresp.payload().size())){
+		if(!reqpk.ParseFromArray(payload.data(), 
+			payload.size())){
 			ALogError("PeerServer")
-				<< "<sn:" << svresp.sn()
+				<< "<sn:" << getPackSN()
 				<< "<action:handleServiceResponse> <status:"
 				<< (int)(INPUT_FORMAT_ERROR)
 				<< "> <errstr:INPUT_FORMAT_ERROR>";
 
 		}
-		ret = handleRecvPeerMessage(svresp, reqpk);
+		ret = handleRecvPeerMessage(reqpk);
 		return 0;
 	}	
 	

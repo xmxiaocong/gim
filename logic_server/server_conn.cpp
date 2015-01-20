@@ -17,7 +17,7 @@ int SvCon::onConnected(){
 }
 
 int SvCon::onDisconnected(){
-	Dispatcher* d = m_serv->getDispatcher();
+	Dispatcher* d = getDispatcher();
 	d->delConnectServer(m_con_serv_id);
 	ALogError(m_serv->getLogName()) << "<action:server_disconnect> "
 		"<event_loop:" << getEventLoop() << "> <conid:"
@@ -42,7 +42,7 @@ int SvCon::keepAlive(){
 }
 
 Dispatcher* SvCon::getDispatcher(){
-	return m_serv->getDispatcher();
+	return (Dispatcher*)getEventLoop()->getObj();
 }
 
 int SvCon::doRegister(){
@@ -65,7 +65,7 @@ int SvCon::doRegister(){
 	return ret;
 }
 
-int SvCon::handleRegisterResponse(const char* respbody, int len){
+int SvCon::processRegisterResponse(const char* respbody, int len){
 	int ret = 0;
 	ef::TimeRecorder t("SvCon::handleRegisterResponse");
 	SvRegResponse lgresp;	
@@ -81,8 +81,8 @@ int SvCon::handleRegisterResponse(const char* respbody, int len){
 			<< "> <status:" << lgresp.status() << ">";
 		return ret;
 	}
-	Dispatcher* d = m_serv->getDispatcher();
-	d->addConnectServer(m_con_serv_id, getEventLoop(), getId());	
+	Dispatcher* d = getDispatcher();
+	d->addConnectServer(m_con_serv_id, getId());	
 	m_status = STATUS_LOGIN; 
 	m_sessid = lgresp.sessid();		
 	ALogError(m_serv->getLogName()) << "<action:server_register_resp> " 
@@ -95,23 +95,30 @@ int SvCon::handleRegisterResponse(const char* respbody, int len){
 
 int SvCon::handlePacket(const std::string& req){
 	int ret = 0;
-	head h = *(head*)req.data();
+	head h;
+	h = *(head*)req.data();
 	h.cmd = htonl(h.cmd);
 	h.len = htonl(h.len);
 	h.magic = htonl(h.magic);
-	std::string resp;
+
+	m_from_sessid.clear();
+	m_cur_pack_sn.clear();
+	m_cur_pack_key.clear();
+	m_callback.clear();
+	m_packsvtype = 0;
+
 	try{
 		switch(h.cmd){
 		case SERVICE_REG_RESP:
-			ret = handleRegisterResponse(req.data() + sizeof(h),
+			ret = processRegisterResponse(req.data() + sizeof(h),
 				req.size() - sizeof(h));		
 			break;
 		case SERVICE_REQ:
-			ret = handleServiceRequest(req.data() + sizeof(h), 
-				req.size() - sizeof(h), resp);
+			ret = processServiceRequest(req.data() + sizeof(h), 
+				req.size() - sizeof(h));
 			break;
 		case SERVICE_RESP:
-			ret = handleServiceResponse(req.data() + sizeof(h),
+			ret = processServiceResponse(req.data() + sizeof(h),
 				req.size() - sizeof(h));
 			break;
 		case KEEPALIVE_RESP:
@@ -119,40 +126,175 @@ int SvCon::handlePacket(const std::string& req){
 		default:
 			ret = -1;
 		}
-		if(resp.size()){	
-			std::string respbuf;
-			head resph = h;
-			resph.cmd = h.cmd + 1;
-			constructPacket(resph, resp, respbuf);
-			ret = sendMessage(respbuf);
-		}
 	}catch(...){
 		ret = -1;
 	}
 	return ret;
 }
 
-int checkLen(ef::Connection& c){
-	head h;
-	if(c.bufLen() < (int)sizeof(h)){
-		return 0;
+int SvCon::processServiceRequest(const char* reqbody, int len){
+	int ret = 0;
+	ServiceRequest svreq;
+
+	if(!svreq.ParseFromArray(reqbody, len)){
+		ALogError(m_serv->getLogName()) << "<action:handle_cmd> <status:"
+			<< (int)INPUT_FORMAT_ERROR
+			<< "> <errstr:INPUT_FORMAT_ERROR>";
+		return INPUT_FORMAT_ERROR;	
 	}
-	c.peekBuf((char*)&h, sizeof(h));
-	h.magic = htonl(h.magic);
-	h.len = htonl(h.len);
-	if(h.len < (int)sizeof(h) 
-		|| h.len > 1024 * 1024){
-		return -1;
+
+	m_from_sessid = svreq.from_sessid();
+	m_cur_pack_sn = svreq.sn();
+	m_cur_pack_key = svreq.key();
+	m_packsvtype = svreq.svtype();
+	m_callback = svreq.callback();	
+	
+	
+	if(svreq.svtype() != m_service_type){
+		
+		ALogError(m_serv->getLogName()) << "<action:handle_cmd> <status:"
+			<< (int)INPUT_FORMAT_ERROR
+			<< "> <errstr:SERVICE_TYPE_ERROR>";
+		return SERVICE_TYPE_ERROR;
 	}
-	if(h.len <= c.bufLen()){
-		return h.len;
+
+	ret = handleServiceRequest(svreq.payload());
+
+	return ret; 
+	
+}
+
+int SvCon::processServiceResponse(const char* respbody, int len){
+	int ret = 0;
+	ServiceResponse svreq;
+
+	if(!svreq.ParseFromArray(respbody, len)){
+		ALogError(m_serv->getLogName()) << "<action:handle_cmd> <status:"
+			<< (int)INPUT_FORMAT_ERROR
+			<< "> <errstr:INPUT_FORMAT_ERROR>";
+		return INPUT_FORMAT_ERROR;	
 	}
-	return 0;
+
+	m_cur_pack_sn = svreq.sn();
+	m_packsvtype = svreq.svtype();
+	m_callback = svreq.callback();	
+
+	ret = handleServiceResponse(svreq.svtype(), svreq.status(), 
+		svreq.payload(), m_callback);
+
+	return ret; 
+
+}
+
+int SvCon::sendServiceResponse(int status, const std::string& payload){
+	int ret = 0;
+	ServiceResponse svresp;
+
+	svresp.set_sn(getPackSN());
+	svresp.set_svtype(m_service_type);
+	svresp.set_from_sessid(m_sessid);	
+	svresp.set_to_sessid(m_from_sessid);
+	svresp.set_payload(payload);
+	svresp.set_callback(getPackCallBack());
+	svresp.set_status(status);
+
+	std::string body;
+	
+	svresp.SerializeToString(&body);
+	
+	head resph;
+	resph.cmd = SERVICE_RESP;
+	resph.magic = MAGIC_NUMBER;
+
+	std::string msg;
+	constructPacket(resph, body, msg);
+	
+	ret = sendMessage(msg);
+
+	return ret;
+}
+
+
+int SvCon::sendServiceRequest(int svtype, const std::string& key,
+	const std::string& payload, const std::string& callback){
+	int ret = 0;
+	
+	ServiceRequest svresp; 
+	svresp.set_sn(getPackSN());
+	svresp.set_svtype(svtype);
+	svresp.set_from_sessid(m_sessid);
+	svresp.set_key(key);
+	svresp.set_payload(payload);
+	svresp.set_callback(callback);
+
+
+	std::string body;
+	svresp.SerializeToString(&body);
+
+	head resph;
+	resph.cmd = SERVICE_REQ;
+	resph.magic = MAGIC_NUMBER;	
+
+	std::string msg;
+	constructPacket(resph, body, msg);
+
+	ret = sendMessage(msg);
+
+	return ret;
+
+}
+
+int SvCon::sendServiceRequestToClient(const string& cid, const string& sn,
+	const string& payload, const std::string& callback){
+
+	Dispatcher* d = getDispatcher();	
+
+	if(!d){
+		return INNER_ERROR;
+	}
+
+	int ret = d->sendServiceRequestToClient(cid, m_service_type,
+		sn, payload, callback);
+
+	return ret;
+	
+}
+
+int SvCon::sendServiceResponseToClient(const string& cid, const std::string& sn, int status, 
+	const string& payload, const std::string& callback){
+
+	Dispatcher* d = getDispatcher(); 
+
+	if(!d){
+		return INNER_ERROR;
+	}
+
+	int ret = d->sendServiceResponseToClient(cid, m_service_type,
+		sn, status, payload, callback);
+
+	return ret;
 }
 
 int SvCon::checkPackLen(){
 	int ret = 0;
-	ret = checkLen(*this);
+
+	head h;
+
+	if(bufLen() < (int)sizeof(head)){
+		return 0;
+	}
+
+	peekBuf((char*)&h, sizeof(head));
+	h.magic = htonl(h.magic);
+	h.len = htonl(h.len);
+
+	if(h.len < (int)sizeof(h) 
+		|| h.len > 1024 * 1024){
+		ret = -1;
+	} else if(h.len <= bufLen()){
+		ret = h.len;
+	}
+
 	if(ret <= 0 && bufLen() > 0){
 		ALogError(m_serv->getLogName()) << "<action:client_check_pack> " 
 			"<event_loop:" << getEventLoop() << "> <conid:" 

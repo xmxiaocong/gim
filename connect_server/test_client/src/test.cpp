@@ -414,7 +414,7 @@ public:
 				<< " handle_service_request ParseFromString fail\n";
 			return -1;
 		}
-		if(svreq.from_sessid() != m_sessid){
+		if(svreq.to_sessid() != m_sessid){
 			LOG_OUT << "cid:" << m_cid
 				<< " handle_service_request,ret sessid:" 
 				<< svreq.from_sessid()

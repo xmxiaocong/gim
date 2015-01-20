@@ -11,25 +11,24 @@ class PeerPacket;
 
 class PeerCon:public SvCon{
 public:
-	virtual int32 handleServiceRequest(const char* reqbody, 
-		int32 len, std::string& respbody);
-	virtual int32 handleServiceResponse(const char* respbody, 
-		int32 len);
+	virtual int handleServiceRequest(const std::string& payload);
+	virtual int handleServiceResponse(int svtype, int status,
+		 const std::string& payload, const std::string&);
 private:
-	int32 handlePeerCmd(const ServiceRequest& svreq, 
-		std::string& resppayload);
-
-	int32 handleGetPeerMessage(const ServiceRequest& svreq,
-		const PeerPacket& reqpk, PeerPacket& resppk);
+	int handleGetPeerMessage(const PeerPacket& reqpk);
 	
-	int32 handleSendPeerMessage(const ServiceRequest& svreq,
-		const PeerPacket& reqpk, PeerPacket& resppk); 
+	int handleSendPeerMessage(const PeerPacket& reqpk); 
 
-	int32 handleRecvPeerMessage(const ServiceResponse& svresp,
-		const PeerPacket& reqpk); 
+	int handleRecvPeerMessage(const PeerPacket& reqpk); 
 
 	
 };
+
+int getPeerMsg(const std::string& cid, int64 startid, 
+	int64 cnt, vector<Message>& msg, int64& last_msg_id);
+int sendPeerMsg(const std::string& sn, const Message& cid, 
+	int64& msgid);
+
 
 class PeerConFac:public SvConFactory{
 public:

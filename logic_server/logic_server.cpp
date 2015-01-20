@@ -1,26 +1,29 @@
 #include "logic_server.h"
 #include "base/ef_utility.h"
-#include "base/ef_tsd_ptr.h"
 
 namespace gim{
 
-TSDPtr<Dispatcher> g_Diss;
+static int deleteDispatcher(void* obj){
+	delete (Dispatcher*)obj;
+	return 0;
+}
 
-Dispatcher* LogicServer::getDispatcher(){	
-	Dispatcher *pDBC = g_Diss.get();
+int LogicServer::initDispatcher(const Json::Value& v){	
+	
+	for(int i = 0; i< m_thread_cnt; ++i){
 
-	if (!pDBC) {
-		pDBC = new Dispatcher();
+		EventLoop& l = m_cliset.getEventLoop(i);
+		Dispatcher* pDBC = new Dispatcher(&l);
 
-		if(pDBC->init(m_ssch_conf) < 0){
+		if(pDBC->init(v) < 0){
 			delete pDBC;
-			return NULL;
+			return -1;
 		}
-
-		g_Diss.set(pDBC);
+		l.setObj(pDBC, deleteDispatcher);
 	}
 
-	return  pDBC;
+
+	return  0;
 
 }
 
@@ -37,8 +40,9 @@ LogicServer::~LogicServer(){
 }
 
 
-int LogicServer::startListen(int port, ConnectionFactory* cfac, 
+int LogicServer::startListen(int port, LogicConFactory* cfac, 
 		ConnectionDispatcher* d){
+	cfac->setLogicServer(this);
 	return m_cliset.startListen(port, cfac, d);
 }
 
@@ -157,12 +161,22 @@ int LogicServer::stop(){
 
 int LogicServer::init(int threadcnt, const Json::Value& svlstconf,
 	const Json::Value& sschconf){
+
+	int ret = 0;
 	m_thread_cnt = threadcnt;
+
 	m_cliset.setEventLoopCount(threadcnt);
 	m_cliset.init();
-	initServerListCache(svlstconf);
-	initSessCacheConfig(sschconf);
-	return 0;
+
+	ret = initServerListCache(svlstconf);
+	
+	if(ret < 0)
+		return ret;	
+
+	ret = initDispatcher(sschconf);
+
+	return ret;
 }
+
 
 };

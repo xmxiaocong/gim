@@ -23,6 +23,7 @@ namespace gim{
 		int32 service_type,
 		const std::string& sn,
 		const std::string& payload,
+		const std::string& callback,
 		std::string& req);
 
 	int32 constructServiceResponse(const std::string& sessid,
@@ -31,6 +32,7 @@ namespace gim{
 		int32 service_type,
 		const std::string& sn,
 		const std::string& payload,
+		const std::string& callback,
 		std::string& req);
 	
 
@@ -41,8 +43,8 @@ namespace gim{
 		<< "] addr[" << getIp() << ":"\
 		<< getPort() << "] <timestamp:" << gettime_ms() << "> " 
 
-	#define PLogError(a) ALogError(a) << "<sn:" << svreq.sn() << "> "
-	#define PLogTrace(a) ALogTrace(a) << "<sn:" << svreq.sn() << "> "
+	#define PLogError(a) ALogError(a) << "<sn:" << getPackSN() << "> "
+	#define PLogTrace(a) ALogTrace(a) << "<sn:" << getPackSN() << "> "
 
 };
 

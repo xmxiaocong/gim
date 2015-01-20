@@ -28,6 +28,7 @@ namespace gim{
 		int32 service_type,
 		const std::string& sn,
 		const std::string& payload,
+		const std::string& callback,
 		std::string& req){
 		ServiceRequest sreq;
 		sreq.set_from_sessid(sessid);
@@ -35,6 +36,7 @@ namespace gim{
 		sreq.set_svtype(service_type);
 		sreq.set_sn(sn);
 		sreq.set_payload(payload);
+		sreq.set_callback(callback);
 		if(!sreq.SerializeToString(&req))
 			return -1;
 		return 0;		
@@ -46,6 +48,7 @@ namespace gim{
 		int32 service_type,
 		const std::string& sn,
 		const std::string& payload,
+		const std::string& callback,
 		std::string& req){
 		ServiceResponse sreq;
 		sreq.set_from_sessid(sessid);
@@ -54,6 +57,7 @@ namespace gim{
 		sreq.set_svtype(service_type);
 		sreq.set_sn(sn);
 		sreq.set_payload(payload);
+		sreq.set_callback(callback);
 		if(!sreq.SerializeToString(&req))
 			return -1;
 		return 0;		

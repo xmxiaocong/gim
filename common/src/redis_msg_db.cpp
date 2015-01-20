@@ -51,7 +51,7 @@ int RedisMI::count(const string &mbName, int64 lbId, int64 ubId)
 	return ret >= 0 ? count : -1;
 }
 
-int RedisMI::addMsg(const string &mbName, Message &message)
+int RedisMI::addMsg(const string &mbName, const Message &message)
 {
         DBHandle hndl = m_cg->getHndl(mbName);
         if (hndl == NULL) return CONNECT_CACHE_FAILED;
@@ -60,7 +60,6 @@ int RedisMI::addMsg(const string &mbName, Message &message)
         stringstream ss;
         map<string, string> m;
 
-        message.set_time(gettime_ms());
         ss << message.id();
         message.SerializeToString(&str);
         m.insert(pair<string, string>(ss.str(), str));

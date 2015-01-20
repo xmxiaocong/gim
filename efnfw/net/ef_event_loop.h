@@ -49,6 +49,10 @@ namespace ef{
 			return ret;
 		}
 
+		void* getObj(){
+			return m_obj;
+		}
+
 		int32 getConId();
 
 		int32 getId(){

@@ -20,13 +20,10 @@ enum{
 	SEND_FAIL = -20201,	
 };
 
-typedef string (*ConstructPack)(const string& sessid, int svtype, const string& sn, int status,
-	const string& payload);
-
 class Dispatcher{
 public:
-	Dispatcher():
-		m_sesscache(NULL){
+	Dispatcher(EventLoop* l):
+		m_evlp(l), m_sesscache(NULL){
 	}
 
 	int init(const Json::Value& v){
@@ -44,43 +41,38 @@ public:
 		delete m_sesscache;
 	}
 
-	int addConnectServer(int svid, EventLoop* l, int conid);
+	int addConnectServer(int svid, int conid);
 	int delConnectServer(int svid);
-	int getConnectServer(int svid, EventLoop*& l, int& conid);
+	int getConnectServer(int svid, int& conid);
 
-	int sendServiceRequest(EventLoop* l, const string& cid, int svtype,
-		const string& sn, const string& payload); 
-	int sendServiceResponse(EventLoop* l, const string& cid, int svtype,
-		const string& sn, int status, const string& payload); 
+	int sendServiceRequestToClient(const string& cid, int svtype,
+		const string& sn, const string& payload, 
+		const string& callback); 
+	int sendServiceResponseToClient(const string& cid, int svtype,
+		const string& sn, int status, const string& payload,
+		const string& callback); 
 private:
 	
-	int sendServicePacket(EventLoop* l, const string& cid, int service_type, 
-		const string& sn, int status, const string& payload, ConstructPack cp);
+	typedef string (*ConstructPack)(const string& sessid, 
+		int svtype, const string& sn, int status,
+		const string& payload, const string& callback);
+
+	int sendServicePacket(const string& cid, int service_type, 
+		const string& sn, int status, const string& payload, 
+		const string& callback, ConstructPack cp);
 
 	int constructRequest(const string& sessid,
 		int service_type,
 		const string& sn,
 		const string& payload,
+		const string& callback,
 		string& pack);
-	struct con_srv_t{
-		con_srv_t()
-			:l(NULL),conid(0){
-		}
 
-		EventLoop* l;
-		int conid;
-	};
-	map<int, con_srv_t> m_con_srv_map;	
-	string m_last_error;
+	map<int, int> m_con_srv_map;	
+	EventLoop* m_evlp;
 	SessCache* m_sesscache;
 };
 
-
-class DispatcherPool{
-public:
-	static Dispatcher* getDispatcher(const Json::Value& conf);
-private:
-};
 
 };
 
