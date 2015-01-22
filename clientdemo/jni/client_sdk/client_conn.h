@@ -1,5 +1,6 @@
 #ifndef _CONNECTION_H_
 #define _CONNECTION_H_
+
 #include "common/ef_btype.h"
 #include <string>
 #include <set>
@@ -10,8 +11,6 @@
 #include "common/ef_utility.h"
 #include "proto/connect_server.pb.h"
 #include "opbase.h"
-
-using namespace ef;
 
 namespace gim
 {

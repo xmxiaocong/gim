@@ -1,13 +1,8 @@
 #ifndef CLIENT_DEF_H
 #define CLIENT_DEF_H
 
-#include "common/ef_btype.h"
-#include <string>
-#include <vector>
-
 namespace gim
 {
-	using namespace ef;
 	typedef enum _LoginStatus
 	{
 		STATUS_DO_LOGIN = 1,
@@ -30,24 +25,13 @@ namespace gim
 		MY_TIMEOUT	= -9992
 	}GResult;
 
-
-	typedef enum _MsgType
+	typedef enum _NotifyType
 	{
 		NOTIFY_TYPE_LOGIN_STATUS_CHANGE = 0,
 		NOTIFY_TYPE_PEER_MSG = 200,
 		NOTIFY_TYPE_PEER_SEND_RESP = 201,
 		NOTIFY_TYPE_PEER_OFFLINE_MSG = 202
-	}MsgType;
-
-
-	typedef struct _GPeerMessage
-	{
-		int64 id;
-		int64 time;
-		std::string from;
-		std::string to;
-		std::string data;
-	}GPeerMessage;
+	}NotifyType;
 
 };
 

@@ -86,16 +86,18 @@ namespace gim
 		{
 		}
 		~SendPeerMessageOp(){};
-		int32 init(const GPeerMessage& msg)
+		int32 init(const std::string& peercid, const std::string& data)
 		{
-			m_msg = msg;
+			m_peerid = peercid;
+			m_data = data;
 			return 0;
 		}
 		virtual int32 process(CliConn* conn);
 		virtual int32 onRespone(CliConn* conn, int32 status, const std::string& payload);
 		virtual int32 OnTimeout(CliConn* conn);
 	private:
-		GPeerMessage m_msg;
+		std::string m_peerid;
+		std::string m_data;
 	};
 
 	class GetOfflinePeerMsgOp

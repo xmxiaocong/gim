@@ -8,7 +8,6 @@
 
 namespace gim
 {
-
 	typedef enum _LogLevel
 	{
 		LOG_LEVEL_TRACE = 1,
@@ -17,7 +16,7 @@ namespace gim
 		LOG_LEVEL_ERROR
 	}LogLevel;
 
-	int32 logprint(LogLevel level, const char* logbuf);
+	void logprint(LogLevel level, const char* logbuf);
 
 #ifdef _DEBUG
 #define SDK_LOG(lvl, format, ...)\
@@ -32,11 +31,12 @@ namespace gim
 				if(lvl >= LOG_LEVEL_ERROR)\
 				{\
 					char buf[1024];\
-					snprintf(buf, sizeof(buf), "[lvl:%d] " format"\        [src=%s:%d]\n", (int32)lvl, ##__VA_ARGS__, __FILE__, __LINE__ );\
+					snprintf(buf, sizeof(buf), "[lvl:%d] " format"     [src=%s:%d]\n", (int32)lvl, ##__VA_ARGS__, __FILE__, __LINE__ );\
 					logprint(lvl, buf); \
 				}\
 			}
 #endif
+
 }
 
 

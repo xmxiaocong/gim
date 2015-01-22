@@ -17,8 +17,8 @@ extern "C" {
 	JNIEXPORT jint JNICALL Java_com_gim_client_disconnect
 		(JNIEnv *, jobject, jstring);
 
-	JNIEXPORT jint JNICALL Java_com_gim_client_sendMessage
-		(JNIEnv *, jobject, jstring);
+	JNIEXPORT jint JNICALL Java_com_gim_client_sendPeerMessage
+		(JNIEnv *env, jobject, jstring jcid, jstring sn, jstring peercid, jstring data);
 
 #ifdef __cplusplus
 }

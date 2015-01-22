@@ -3,7 +3,10 @@
 #include "common/ef_utility.h"
 namespace gim
 {
-
+	std::string Client::getSN()
+	{
+		return itostr(m_sn++);
+	}
 	int32 Client::init()
 	{
 		m_sn = gettime_ms();
@@ -28,10 +31,10 @@ namespace gim
 		DisconnectOp* op = new DisconnectOp(cid);
 		return m_evlp.asynAddOp((Op*)op);
 	}
-	int32 Client::sendPeerMessage(const std::string& cid, const std::string& sn, const GPeerMessage& msg)
+	int32 Client::sendPeerMessage(const std::string& cid, const std::string& sn, const std::string& peercid, const std::string& data)
 	{
 		SendPeerMessageOp* op = new SendPeerMessageOp(sn, cid);
-		op->init(msg);
+		op->init(peercid, data);
 		return m_evlp.asynAddOp((Op*)op);
 	}
 	int Client::eventLoopMsgRoutine(void* cli, const std::string& msg)

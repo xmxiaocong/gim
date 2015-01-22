@@ -1,6 +1,7 @@
 #include "client_jni.h"
-#include "../client_sdk/client_log.h"
-#include "../android/androidclient.h"
+#include "androidclient.h"
+
+#define C_STR(x) (gim::JstringToString(env, x).c_str())
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,42 +21,15 @@ extern "C" {
 	JNIEXPORT jint JNICALL Java_com_gim_client_login(JNIEnv* env, jobject job, jstring jsrvip, jint srvport, 
 		jstring jcliver, jint enc,jstring jcid, jstring jpwd)
 	{
-		int ret = -1;
-		const char* ip = env->GetStringUTFChars(jsrvip, NULL);
-		const char* version = env->GetStringUTFChars(jcliver, NULL);
-		const char* cid = env->GetStringUTFChars(jcid, NULL);
-		const char* pwd = env->GetStringUTFChars(jpwd, NULL);
-		if (ip && version && cid && pwd)
-		{
-			ret = s_cli.login(ip, srvport, cid, pwd, enc, version);
-		}
-		env->ReleaseStringUTFChars(jsrvip, ip);
-		env->ReleaseStringUTFChars(jcliver, version);
-		env->ReleaseStringUTFChars(jcid, cid);
-		env->ReleaseStringUTFChars(jpwd, pwd);
-		return 0;
+		return s_cli.login(C_STR(jsrvip), srvport, C_STR(jcid), C_STR(jpwd), enc, C_STR(jcliver));
 	}
 	JNIEXPORT jint JNICALL Java_com_gim_client_disconnect(JNIEnv *env, jobject job, jstring jcid)
 	{
-		int ret = -1;
-		const char* cid = env->GetStringUTFChars(jcid, NULL);
-		if (cid)
-		{
-			ret = s_cli.disconnect(cid);
-			env->ReleaseStringUTFChars(jcid, cid);
-		}
-		return 0;
+		return s_cli.disconnect(C_STR(jcid));
 	}
-	JNIEXPORT jint JNICALL Java_com_gim_client_sendMessage(JNIEnv *env, jobject, jstring jjson)
+	JNIEXPORT jint JNICALL Java_com_gim_client_sendPeerMessage(JNIEnv *env, jobject, jstring jcid, jstring sn, jstring peercid, jstring data)
 	{
-		int ret = -1;
-		const char* json = env->GetStringUTFChars(jjson, NULL);
-		if (json)
-		{
-			ret = s_cli.sendMessageWithJson(json);
-			env->ReleaseStringUTFChars(jjson, json);
-		}
-		return 0;
+		return s_cli.sendPeerMessage(C_STR(jcid), C_STR(sn), C_STR(peercid), C_STR(data));
 	}
 
 #ifdef __cplusplus

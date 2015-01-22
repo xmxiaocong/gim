@@ -8,7 +8,6 @@ namespace gim
 		SERVICE_PUSH = 100,
 		SERVICE_PEER = 200,
 		SERVICE_GROUP = 300,
-
 		SERVICE_VERIFY = 500,
 		SERVICE_TOPIC	= 600
 	}ServiceType;

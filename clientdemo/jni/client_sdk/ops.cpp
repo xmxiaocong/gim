@@ -113,9 +113,9 @@ namespace gim
 			peerpack.set_cmd(110);
 			SendPeerMessageRequest* spreq = peerpack.mutable_send_peer_msg_req();
 			Message* pm = spreq->mutable_msg();
-			pm->set_to(m_msg.to);
-			pm->set_from(m_msg.from);
-			pm->set_data(m_msg.data);
+			pm->set_to(m_peerid);
+			pm->set_from(getCid());
+			pm->set_data(m_data);
 			std::string payload;
 			peerpack.SerializeToString(&payload);
 			int32 ret = conn->sendRequest(getSN(), SERVICE_CMD_REQ, SERVICE_PEER, payload);
@@ -285,7 +285,7 @@ parse_end:
 			}
 			int64 lastmsgid = pcresp.last_msgid();
 			int32 leftsize = (max_msg_id == 0) ? 0 : (lastmsgid - max_msg_id);
-			if (max_msg_id > 0)
+			if (max_msg_id > 0 && leftsize > 0)
 			{
 				sendRequest_(conn, max_msg_id+1, GET_OFFLINE_PEER_MSG_SIZE_EACH);
 			}

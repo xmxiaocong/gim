@@ -105,20 +105,7 @@ public class MainActivity extends Activity {
 				String strData = editDataA.getText().toString();
 				
 				String strTo = editToA.getText().toString();
-				
-				try
-				{
-					JSONObject json = new JSONObject();
-					json.put("cid", cidA);
-					json.put("to", strTo);
-					json.put("data", strData);
-					json.put("sn", String.valueOf(++sn));
-					cli.sendMessage(json.toString());
-				}
-				catch(JSONException e)
-				{
-					System.out.println("JSONException");
-				}
+				cli.sendPeerMessage(cidA, "2001", strTo, strData);
 			}
 		});
 		
@@ -163,19 +150,7 @@ public class MainActivity extends Activity {
 				
 				String strTo = editToB.getText().toString();
 				
-				try
-				{
-					JSONObject json = new JSONObject();
-					json.put("cid", cidB);
-					json.put("to", strTo);
-					json.put("data", strData);
-					json.put("sn", String.valueOf(++sn));
-					cli.sendMessage(json.toString());
-				}
-				catch(JSONException e)
-				{
-					System.out.println("JSONException");
-				}
+				cli.sendPeerMessage(cidB, "2001", strTo, strData);
 			}
 		});
 		
@@ -185,7 +160,13 @@ public class MainActivity extends Activity {
         public void handleMessage(Message msg) { /* 这里是处理信息的方法 */
             switch (msg.what) {
             case 123: /* 在这处理要TextView对象Show时间的事件 */
-            	tvMsgA.setText(tvMsgA.getText() + (String)msg.obj);
+            	String his = tvMsgA.getText().toString();
+            	if(tvMsgA.getTextSize() > 200)
+            	{
+            		his = "";
+            	}
+            		
+            	tvMsgA.setText((String)msg.obj);
                 break;
             }
             super.handleMessage(msg);

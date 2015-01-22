@@ -5,13 +5,12 @@
 #include "common/ef_loop_buf.h"
 #include "opbase.h"
 #include <string>
-#include <vector>
 #include <map>
 
 using namespace ef;
 namespace gim
 {
-	typedef int (*MSG_HANDLE_CB)(void* context, const std::string& msg);
+	typedef int32 (*MSG_HANDLE_CB)(void* context, const std::string& msg);
 
 	class EventLoop
 	{

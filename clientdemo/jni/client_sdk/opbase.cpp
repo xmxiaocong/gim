@@ -52,14 +52,12 @@ namespace gim
 	int32 Op::increase_()
 	{
 		++m_ref;
-		//SDK_LOG(LOG_LEVEL_TRACE, "sn:%s, cid:%s increase ref=%d", getSN().c_str(), getCid().c_str(), m_ref);
 		return m_ref;
 	}
 
 	int32 Op::decrease_()
 	{
 		--m_ref;
-		//SDK_LOG(LOG_LEVEL_TRACE, "sn:%s, cid:%s decrease ref=%d", sn().c_str(), cid().c_str(), m_ref);
 		return m_ref;
 	}
 

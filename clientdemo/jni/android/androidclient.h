@@ -1,12 +1,39 @@
 #include "../client_sdk/client.h"
 #include "../client_sdk/err_no.h"
-#include <iostream>
-#include <sstream>
-#include <stdlib.h>
+#include <vector>
 #include <jni.h>
 
 namespace gim
 {
+	class JstringToString
+	{
+	public:
+		JstringToString(JNIEnv* env, jstring jstr)
+			:m_env(env), m_jstr(jstr), m_str(NULL)
+		{
+			if (env && jstr)
+			{
+				m_str = m_env->GetStringUTFChars(jstr, NULL);
+			}
+		}
+		const char* c_str()
+		{
+			return m_str;
+		}
+		~JstringToString()
+		{
+			if (m_env && m_jstr && m_str)
+			{
+				m_env->ReleaseStringUTFChars(m_jstr, m_str);
+			}
+		}
+
+	private:
+		const char* m_str;
+		jstring m_jstr;
+		JNIEnv* m_env;
+	};
+
 	class JObjGarbage
 	{
 	public:
@@ -65,7 +92,6 @@ namespace gim
 				delete m_pGarbage;
 			}
 		}
-		int sendMessageWithJson(const char* json);
 		int initJniEnv(JNIEnv* env, jobject objLstn);
 		virtual int handleMessage(const std::string& msg);
 	private:
