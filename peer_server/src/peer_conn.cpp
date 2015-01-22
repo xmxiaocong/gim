@@ -247,6 +247,8 @@ exit:
 			goto exit;
 		}		
 
+		resppm->set_id(msgid);
+
 	exit:
 		if(ret >= 0){
 			msgpk.SerializeToString(&payload);
