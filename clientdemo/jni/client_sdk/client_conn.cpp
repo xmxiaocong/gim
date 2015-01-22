@@ -141,10 +141,10 @@ namespace gim
 			{
 				Json::FastWriter w;
 				Json::Value v;
-				v[JKEY_CID] = getCid();
-				v[JKEY_MSG_TYPE] = MSG_TYPE_LOGIN_STATUS_CHANGE;
-				v[JKEY_MSG_STATUS] = code;
-				v[JKEY_MSG_LOGIN_STATUS] = status;
+				v["self_cid"] = getCid();
+				v["notify_type"] = NOTIFY_TYPE_LOGIN_STATUS_CHANGE;
+				v["stauts"] = code;
+				v["login_status"] = status;
 				publish(w.write(v).c_str());
 			}
 		}
@@ -380,21 +380,21 @@ namespace gim
 		switch (srvtype)
 		{
 		case SERVICE_PEER:
-			return  handlePeerPacket(svreq.sn(), svreq.payload());
+			return  handlePeerPacket(svreq.sn(), svreq.from_sessid(), svreq.payload());
 		default:
 			return MY_PROBUF_FORMAT_ERROR;
 		}
 	}
-	int32 CliConn::handlePeerPacket(const std::string& sn, const std::string& payload)
+	int32 CliConn::handlePeerPacket(const std::string& sn, const std::string& fromsession, const std::string& payload)
 	{
 		SDK_LOG(LOG_LEVEL_TRACE, "cid=%s, CliConn::handlePeerPacket sn=%s", m_cid.c_str(), sn.c_str());
 
 		Json::FastWriter w;
 		Json::Value v;
 
-		v[JKEY_CID] = getCid();
-		v[JKEY_MSG_TYPE] = MSG_TYPE_PEER;
-		v[JKEY_MSG_SN] = sn;
+		v["self_cid"] = getCid();
+		v["notify_type"] = NOTIFY_TYPE_PEER_MSG;
+		v["sn"] = sn;
 
 		PeerPacket peerpack;
 		int32 ret = MY_OK;
@@ -419,13 +419,13 @@ namespace gim
 		const SendPeerMessageRequest& preq = peerpack.send_peer_msg_req();
 		const Message& msg = preq.msg();
 
-		v[JKEY_MSG_STATUS] = STATUS_OK;
+		v["stauts"] = STATUS_OK;
 
-		v[JKEY_MSG_ID] = itostr(msg.id());
-		v[JKEY_MSG_TIME] = itostr(msg.time());
-		v[JKEY_MSG_FROM] = msg.from();
-		v[JKEY_MSG_TO] = msg.to();
-		v[JKEY_MSG_DATA] = msg.data();
+		v["msgid"] = itostr(msg.id());
+		v["time"] = itostr(msg.time());
+		v["from"] = msg.from();
+		v["to"] = msg.to();
+		v["data"] = msg.data();
 		publish(w.write(v).c_str());
 
 		// send respone
@@ -440,7 +440,7 @@ namespace gim
 			respmsg->set_id(msg.id());
 			std::string payload;
 			resppack.SerializeToString(&payload);
-			sendResponse(STATUS_OK, sn, SERVICE_PEER, payload);
+			sendResponse(STATUS_OK, sn, fromsession, SERVICE_PEER, payload);
 		}
 		return ret;
 	}
@@ -549,12 +549,12 @@ namespace gim
 		ret = sendPacket(cmd, body);
 		return ret;
 	}
-	int32 CliConn::sendResponse(int32 status, const std::string& sn, int32 type, const std::string& payload)
+	int32 CliConn::sendResponse(int32 status, const std::string& sn, const std::string& tosession, int32 type, const std::string& payload)
 	{
 		SDK_LOG(LOG_LEVEL_TRACE, "sendResponse sn=%s, type=%d", sn.c_str(), type);
 		int32 ret = 0;
 		std::string body;
-		constructServiceResponse(m_sessid, status, type, sn, payload, body);
+		constructServiceResponse(m_sessid, tosession, status, type, sn, payload, body);
 		std::string packet;
 		constructRespPacket(SERVICE_CMD_RESP, body, packet);
 		ret = send_(packet);

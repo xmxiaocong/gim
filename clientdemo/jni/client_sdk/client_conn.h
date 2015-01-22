@@ -68,7 +68,7 @@ namespace gim
 		int32 sendRequest(const std::string& sn, int32 cmd, int32 type, const std::string& payload);
 		int32 sendPacket(int32 cmd, const std::string& body);
 	private:
-		int32 sendResponse(int32 status, const std::string& sn, int32 type, const std::string& payload);
+		int32 sendResponse(int32 status, const std::string& sn, const std::string& tosession, int32 type, const std::string& payload);
 		int32 connectServer();
 		int32 login();
 		void setStatus(int32 status, int32 code = 0, bool notify=false);
@@ -84,7 +84,7 @@ namespace gim
 		int32 handleServiceRequest(const std::string& req);
 		int32 handleServiceResponse(const std::string& resp);
 		int32 handleKeepAliveResp();
-		int32 handlePeerPacket(const std::string& sn, const std::string& payload);
+		int32 handlePeerPacket(const std::string& sn, const std::string& fromsession, const std::string& payload);
 		int32 addKeepaliveTimer();
 	private:
 		SOCKET m_fd;

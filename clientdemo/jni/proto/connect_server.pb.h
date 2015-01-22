@@ -645,29 +645,41 @@ class ServiceRequest : public ::google::protobuf::MessageLite {
 
   // accessors -------------------------------------------------------
 
-  // required string sessid = 1;
-  inline bool has_sessid() const;
-  inline void clear_sessid();
-  static const int kSessidFieldNumber = 1;
-  inline const ::std::string& sessid() const;
-  inline void set_sessid(const ::std::string& value);
-  inline void set_sessid(const char* value);
-  inline void set_sessid(const char* value, size_t size);
-  inline ::std::string* mutable_sessid();
-  inline ::std::string* release_sessid();
-  inline void set_allocated_sessid(::std::string* sessid);
+  // required string from_sessid = 1;
+  inline bool has_from_sessid() const;
+  inline void clear_from_sessid();
+  static const int kFromSessidFieldNumber = 1;
+  inline const ::std::string& from_sessid() const;
+  inline void set_from_sessid(const ::std::string& value);
+  inline void set_from_sessid(const char* value);
+  inline void set_from_sessid(const char* value, size_t size);
+  inline ::std::string* mutable_from_sessid();
+  inline ::std::string* release_from_sessid();
+  inline void set_allocated_from_sessid(::std::string* from_sessid);
 
-  // required int32 svtype = 2;
+  // optional string to_sessid = 2;
+  inline bool has_to_sessid() const;
+  inline void clear_to_sessid();
+  static const int kToSessidFieldNumber = 2;
+  inline const ::std::string& to_sessid() const;
+  inline void set_to_sessid(const ::std::string& value);
+  inline void set_to_sessid(const char* value);
+  inline void set_to_sessid(const char* value, size_t size);
+  inline ::std::string* mutable_to_sessid();
+  inline ::std::string* release_to_sessid();
+  inline void set_allocated_to_sessid(::std::string* to_sessid);
+
+  // required int32 svtype = 3;
   inline bool has_svtype() const;
   inline void clear_svtype();
-  static const int kSvtypeFieldNumber = 2;
+  static const int kSvtypeFieldNumber = 3;
   inline ::google::protobuf::int32 svtype() const;
   inline void set_svtype(::google::protobuf::int32 value);
 
-  // required string sn = 3;
+  // required string sn = 4;
   inline bool has_sn() const;
   inline void clear_sn();
-  static const int kSnFieldNumber = 3;
+  static const int kSnFieldNumber = 4;
   inline const ::std::string& sn() const;
   inline void set_sn(const ::std::string& value);
   inline void set_sn(const char* value);
@@ -676,10 +688,10 @@ class ServiceRequest : public ::google::protobuf::MessageLite {
   inline ::std::string* release_sn();
   inline void set_allocated_sn(::std::string* sn);
 
-  // optional bytes payload = 4;
+  // optional bytes payload = 5;
   inline bool has_payload() const;
   inline void clear_payload();
-  static const int kPayloadFieldNumber = 4;
+  static const int kPayloadFieldNumber = 5;
   inline const ::std::string& payload() const;
   inline void set_payload(const ::std::string& value);
   inline void set_payload(const char* value);
@@ -688,24 +700,57 @@ class ServiceRequest : public ::google::protobuf::MessageLite {
   inline ::std::string* release_payload();
   inline void set_allocated_payload(::std::string* payload);
 
+  // optional string key = 6;
+  inline bool has_key() const;
+  inline void clear_key();
+  static const int kKeyFieldNumber = 6;
+  inline const ::std::string& key() const;
+  inline void set_key(const ::std::string& value);
+  inline void set_key(const char* value);
+  inline void set_key(const char* value, size_t size);
+  inline ::std::string* mutable_key();
+  inline ::std::string* release_key();
+  inline void set_allocated_key(::std::string* key);
+
+  // optional bytes callback = 7;
+  inline bool has_callback() const;
+  inline void clear_callback();
+  static const int kCallbackFieldNumber = 7;
+  inline const ::std::string& callback() const;
+  inline void set_callback(const ::std::string& value);
+  inline void set_callback(const char* value);
+  inline void set_callback(const void* value, size_t size);
+  inline ::std::string* mutable_callback();
+  inline ::std::string* release_callback();
+  inline void set_allocated_callback(::std::string* callback);
+
   // @@protoc_insertion_point(class_scope:gim.ServiceRequest)
  private:
-  inline void set_has_sessid();
-  inline void clear_has_sessid();
+  inline void set_has_from_sessid();
+  inline void clear_has_from_sessid();
+  inline void set_has_to_sessid();
+  inline void clear_has_to_sessid();
   inline void set_has_svtype();
   inline void clear_has_svtype();
   inline void set_has_sn();
   inline void clear_has_sn();
   inline void set_has_payload();
   inline void clear_has_payload();
+  inline void set_has_key();
+  inline void clear_has_key();
+  inline void set_has_callback();
+  inline void clear_has_callback();
 
-  ::std::string* sessid_;
+  ::std::string* from_sessid_;
+  ::std::string* to_sessid_;
   ::std::string* sn_;
   ::std::string* payload_;
+  ::std::string* key_;
+  ::std::string* callback_;
   ::google::protobuf::int32 svtype_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
 
   #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
   friend void  protobuf_AddDesc_connect_5fserver_2eproto_impl();
@@ -773,29 +818,41 @@ class ServiceResponse : public ::google::protobuf::MessageLite {
 
   // accessors -------------------------------------------------------
 
-  // required string sessid = 1;
-  inline bool has_sessid() const;
-  inline void clear_sessid();
-  static const int kSessidFieldNumber = 1;
-  inline const ::std::string& sessid() const;
-  inline void set_sessid(const ::std::string& value);
-  inline void set_sessid(const char* value);
-  inline void set_sessid(const char* value, size_t size);
-  inline ::std::string* mutable_sessid();
-  inline ::std::string* release_sessid();
-  inline void set_allocated_sessid(::std::string* sessid);
+  // optional string from_sessid = 1;
+  inline bool has_from_sessid() const;
+  inline void clear_from_sessid();
+  static const int kFromSessidFieldNumber = 1;
+  inline const ::std::string& from_sessid() const;
+  inline void set_from_sessid(const ::std::string& value);
+  inline void set_from_sessid(const char* value);
+  inline void set_from_sessid(const char* value, size_t size);
+  inline ::std::string* mutable_from_sessid();
+  inline ::std::string* release_from_sessid();
+  inline void set_allocated_from_sessid(::std::string* from_sessid);
 
-  // required int32 svtype = 2;
+  // required string to_sessid = 2;
+  inline bool has_to_sessid() const;
+  inline void clear_to_sessid();
+  static const int kToSessidFieldNumber = 2;
+  inline const ::std::string& to_sessid() const;
+  inline void set_to_sessid(const ::std::string& value);
+  inline void set_to_sessid(const char* value);
+  inline void set_to_sessid(const char* value, size_t size);
+  inline ::std::string* mutable_to_sessid();
+  inline ::std::string* release_to_sessid();
+  inline void set_allocated_to_sessid(::std::string* to_sessid);
+
+  // required int32 svtype = 3;
   inline bool has_svtype() const;
   inline void clear_svtype();
-  static const int kSvtypeFieldNumber = 2;
+  static const int kSvtypeFieldNumber = 3;
   inline ::google::protobuf::int32 svtype() const;
   inline void set_svtype(::google::protobuf::int32 value);
 
-  // required string sn = 3;
+  // required string sn = 4;
   inline bool has_sn() const;
   inline void clear_sn();
-  static const int kSnFieldNumber = 3;
+  static const int kSnFieldNumber = 4;
   inline const ::std::string& sn() const;
   inline void set_sn(const ::std::string& value);
   inline void set_sn(const char* value);
@@ -804,17 +861,17 @@ class ServiceResponse : public ::google::protobuf::MessageLite {
   inline ::std::string* release_sn();
   inline void set_allocated_sn(::std::string* sn);
 
-  // required int32 status = 4;
+  // required int32 status = 5;
   inline bool has_status() const;
   inline void clear_status();
-  static const int kStatusFieldNumber = 4;
+  static const int kStatusFieldNumber = 5;
   inline ::google::protobuf::int32 status() const;
   inline void set_status(::google::protobuf::int32 value);
 
-  // optional bytes payload = 5;
+  // optional bytes payload = 6;
   inline bool has_payload() const;
   inline void clear_payload();
-  static const int kPayloadFieldNumber = 5;
+  static const int kPayloadFieldNumber = 6;
   inline const ::std::string& payload() const;
   inline void set_payload(const ::std::string& value);
   inline void set_payload(const char* value);
@@ -823,10 +880,24 @@ class ServiceResponse : public ::google::protobuf::MessageLite {
   inline ::std::string* release_payload();
   inline void set_allocated_payload(::std::string* payload);
 
+  // optional bytes callback = 7;
+  inline bool has_callback() const;
+  inline void clear_callback();
+  static const int kCallbackFieldNumber = 7;
+  inline const ::std::string& callback() const;
+  inline void set_callback(const ::std::string& value);
+  inline void set_callback(const char* value);
+  inline void set_callback(const void* value, size_t size);
+  inline ::std::string* mutable_callback();
+  inline ::std::string* release_callback();
+  inline void set_allocated_callback(::std::string* callback);
+
   // @@protoc_insertion_point(class_scope:gim.ServiceResponse)
  private:
-  inline void set_has_sessid();
-  inline void clear_has_sessid();
+  inline void set_has_from_sessid();
+  inline void clear_has_from_sessid();
+  inline void set_has_to_sessid();
+  inline void clear_has_to_sessid();
   inline void set_has_svtype();
   inline void clear_has_svtype();
   inline void set_has_sn();
@@ -835,15 +906,19 @@ class ServiceResponse : public ::google::protobuf::MessageLite {
   inline void clear_has_status();
   inline void set_has_payload();
   inline void clear_has_payload();
+  inline void set_has_callback();
+  inline void clear_has_callback();
 
-  ::std::string* sessid_;
+  ::std::string* from_sessid_;
+  ::std::string* to_sessid_;
   ::std::string* sn_;
   ::google::protobuf::int32 svtype_;
   ::google::protobuf::int32 status_;
   ::std::string* payload_;
+  ::std::string* callback_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
 
   #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
   friend void  protobuf_AddDesc_connect_5fserver_2eproto_impl();
@@ -918,15 +993,25 @@ class SvRegRequest : public ::google::protobuf::MessageLite {
   inline ::google::protobuf::int32 svtype() const;
   inline void set_svtype(::google::protobuf::int32 value);
 
+  // required int32 id = 2;
+  inline bool has_id() const;
+  inline void clear_id();
+  static const int kIdFieldNumber = 2;
+  inline ::google::protobuf::int32 id() const;
+  inline void set_id(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:gim.SvRegRequest)
  private:
   inline void set_has_svtype();
   inline void clear_has_svtype();
+  inline void set_has_id();
+  inline void clear_has_id();
 
   ::google::protobuf::int32 svtype_;
+  ::google::protobuf::int32 id_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
 
   #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
   friend void  protobuf_AddDesc_connect_5fserver_2eproto_impl();
@@ -1001,15 +1086,30 @@ class SvRegResponse : public ::google::protobuf::MessageLite {
   inline ::google::protobuf::int32 status() const;
   inline void set_status(::google::protobuf::int32 value);
 
+  // optional string sessid = 2;
+  inline bool has_sessid() const;
+  inline void clear_sessid();
+  static const int kSessidFieldNumber = 2;
+  inline const ::std::string& sessid() const;
+  inline void set_sessid(const ::std::string& value);
+  inline void set_sessid(const char* value);
+  inline void set_sessid(const char* value, size_t size);
+  inline ::std::string* mutable_sessid();
+  inline ::std::string* release_sessid();
+  inline void set_allocated_sessid(::std::string* sessid);
+
   // @@protoc_insertion_point(class_scope:gim.SvRegResponse)
  private:
   inline void set_has_status();
   inline void clear_has_status();
+  inline void set_has_sessid();
+  inline void clear_has_sessid();
 
+  ::std::string* sessid_;
   ::google::protobuf::int32 status_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
 
   #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
   friend void  protobuf_AddDesc_connect_5fserver_2eproto_impl();
@@ -1713,85 +1813,155 @@ inline void SetTimeResponse::set_server_time(::google::protobuf::int64 value) {
 
 // ServiceRequest
 
-// required string sessid = 1;
-inline bool ServiceRequest::has_sessid() const {
+// required string from_sessid = 1;
+inline bool ServiceRequest::has_from_sessid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void ServiceRequest::set_has_sessid() {
+inline void ServiceRequest::set_has_from_sessid() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void ServiceRequest::clear_has_sessid() {
+inline void ServiceRequest::clear_has_from_sessid() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void ServiceRequest::clear_sessid() {
-  if (sessid_ != &::google::protobuf::internal::kEmptyString) {
-    sessid_->clear();
+inline void ServiceRequest::clear_from_sessid() {
+  if (from_sessid_ != &::google::protobuf::internal::kEmptyString) {
+    from_sessid_->clear();
   }
-  clear_has_sessid();
+  clear_has_from_sessid();
 }
-inline const ::std::string& ServiceRequest::sessid() const {
-  return *sessid_;
+inline const ::std::string& ServiceRequest::from_sessid() const {
+  return *from_sessid_;
 }
-inline void ServiceRequest::set_sessid(const ::std::string& value) {
-  set_has_sessid();
-  if (sessid_ == &::google::protobuf::internal::kEmptyString) {
-    sessid_ = new ::std::string;
+inline void ServiceRequest::set_from_sessid(const ::std::string& value) {
+  set_has_from_sessid();
+  if (from_sessid_ == &::google::protobuf::internal::kEmptyString) {
+    from_sessid_ = new ::std::string;
   }
-  sessid_->assign(value);
+  from_sessid_->assign(value);
 }
-inline void ServiceRequest::set_sessid(const char* value) {
-  set_has_sessid();
-  if (sessid_ == &::google::protobuf::internal::kEmptyString) {
-    sessid_ = new ::std::string;
+inline void ServiceRequest::set_from_sessid(const char* value) {
+  set_has_from_sessid();
+  if (from_sessid_ == &::google::protobuf::internal::kEmptyString) {
+    from_sessid_ = new ::std::string;
   }
-  sessid_->assign(value);
+  from_sessid_->assign(value);
 }
-inline void ServiceRequest::set_sessid(const char* value, size_t size) {
-  set_has_sessid();
-  if (sessid_ == &::google::protobuf::internal::kEmptyString) {
-    sessid_ = new ::std::string;
+inline void ServiceRequest::set_from_sessid(const char* value, size_t size) {
+  set_has_from_sessid();
+  if (from_sessid_ == &::google::protobuf::internal::kEmptyString) {
+    from_sessid_ = new ::std::string;
   }
-  sessid_->assign(reinterpret_cast<const char*>(value), size);
+  from_sessid_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* ServiceRequest::mutable_sessid() {
-  set_has_sessid();
-  if (sessid_ == &::google::protobuf::internal::kEmptyString) {
-    sessid_ = new ::std::string;
+inline ::std::string* ServiceRequest::mutable_from_sessid() {
+  set_has_from_sessid();
+  if (from_sessid_ == &::google::protobuf::internal::kEmptyString) {
+    from_sessid_ = new ::std::string;
   }
-  return sessid_;
+  return from_sessid_;
 }
-inline ::std::string* ServiceRequest::release_sessid() {
-  clear_has_sessid();
-  if (sessid_ == &::google::protobuf::internal::kEmptyString) {
+inline ::std::string* ServiceRequest::release_from_sessid() {
+  clear_has_from_sessid();
+  if (from_sessid_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
   } else {
-    ::std::string* temp = sessid_;
-    sessid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    ::std::string* temp = from_sessid_;
+    from_sessid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
 }
-inline void ServiceRequest::set_allocated_sessid(::std::string* sessid) {
-  if (sessid_ != &::google::protobuf::internal::kEmptyString) {
-    delete sessid_;
+inline void ServiceRequest::set_allocated_from_sessid(::std::string* from_sessid) {
+  if (from_sessid_ != &::google::protobuf::internal::kEmptyString) {
+    delete from_sessid_;
   }
-  if (sessid) {
-    set_has_sessid();
-    sessid_ = sessid;
+  if (from_sessid) {
+    set_has_from_sessid();
+    from_sessid_ = from_sessid;
   } else {
-    clear_has_sessid();
-    sessid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_from_sessid();
+    from_sessid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 
-// required int32 svtype = 2;
-inline bool ServiceRequest::has_svtype() const {
+// optional string to_sessid = 2;
+inline bool ServiceRequest::has_to_sessid() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void ServiceRequest::set_has_svtype() {
+inline void ServiceRequest::set_has_to_sessid() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void ServiceRequest::clear_has_svtype() {
+inline void ServiceRequest::clear_has_to_sessid() {
   _has_bits_[0] &= ~0x00000002u;
+}
+inline void ServiceRequest::clear_to_sessid() {
+  if (to_sessid_ != &::google::protobuf::internal::kEmptyString) {
+    to_sessid_->clear();
+  }
+  clear_has_to_sessid();
+}
+inline const ::std::string& ServiceRequest::to_sessid() const {
+  return *to_sessid_;
+}
+inline void ServiceRequest::set_to_sessid(const ::std::string& value) {
+  set_has_to_sessid();
+  if (to_sessid_ == &::google::protobuf::internal::kEmptyString) {
+    to_sessid_ = new ::std::string;
+  }
+  to_sessid_->assign(value);
+}
+inline void ServiceRequest::set_to_sessid(const char* value) {
+  set_has_to_sessid();
+  if (to_sessid_ == &::google::protobuf::internal::kEmptyString) {
+    to_sessid_ = new ::std::string;
+  }
+  to_sessid_->assign(value);
+}
+inline void ServiceRequest::set_to_sessid(const char* value, size_t size) {
+  set_has_to_sessid();
+  if (to_sessid_ == &::google::protobuf::internal::kEmptyString) {
+    to_sessid_ = new ::std::string;
+  }
+  to_sessid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ServiceRequest::mutable_to_sessid() {
+  set_has_to_sessid();
+  if (to_sessid_ == &::google::protobuf::internal::kEmptyString) {
+    to_sessid_ = new ::std::string;
+  }
+  return to_sessid_;
+}
+inline ::std::string* ServiceRequest::release_to_sessid() {
+  clear_has_to_sessid();
+  if (to_sessid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = to_sessid_;
+    to_sessid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ServiceRequest::set_allocated_to_sessid(::std::string* to_sessid) {
+  if (to_sessid_ != &::google::protobuf::internal::kEmptyString) {
+    delete to_sessid_;
+  }
+  if (to_sessid) {
+    set_has_to_sessid();
+    to_sessid_ = to_sessid;
+  } else {
+    clear_has_to_sessid();
+    to_sessid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required int32 svtype = 3;
+inline bool ServiceRequest::has_svtype() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void ServiceRequest::set_has_svtype() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void ServiceRequest::clear_has_svtype() {
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void ServiceRequest::clear_svtype() {
   svtype_ = 0;
@@ -1805,15 +1975,15 @@ inline void ServiceRequest::set_svtype(::google::protobuf::int32 value) {
   svtype_ = value;
 }
 
-// required string sn = 3;
+// required string sn = 4;
 inline bool ServiceRequest::has_sn() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+  return (_has_bits_[0] & 0x00000008u) != 0;
 }
 inline void ServiceRequest::set_has_sn() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000008u;
 }
 inline void ServiceRequest::clear_has_sn() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void ServiceRequest::clear_sn() {
   if (sn_ != &::google::protobuf::internal::kEmptyString) {
@@ -1875,15 +2045,15 @@ inline void ServiceRequest::set_allocated_sn(::std::string* sn) {
   }
 }
 
-// optional bytes payload = 4;
+// optional bytes payload = 5;
 inline bool ServiceRequest::has_payload() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+  return (_has_bits_[0] & 0x00000010u) != 0;
 }
 inline void ServiceRequest::set_has_payload() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000010u;
 }
 inline void ServiceRequest::clear_has_payload() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void ServiceRequest::clear_payload() {
   if (payload_ != &::google::protobuf::internal::kEmptyString) {
@@ -1945,89 +2115,299 @@ inline void ServiceRequest::set_allocated_payload(::std::string* payload) {
   }
 }
 
+// optional string key = 6;
+inline bool ServiceRequest::has_key() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void ServiceRequest::set_has_key() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void ServiceRequest::clear_has_key() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void ServiceRequest::clear_key() {
+  if (key_ != &::google::protobuf::internal::kEmptyString) {
+    key_->clear();
+  }
+  clear_has_key();
+}
+inline const ::std::string& ServiceRequest::key() const {
+  return *key_;
+}
+inline void ServiceRequest::set_key(const ::std::string& value) {
+  set_has_key();
+  if (key_ == &::google::protobuf::internal::kEmptyString) {
+    key_ = new ::std::string;
+  }
+  key_->assign(value);
+}
+inline void ServiceRequest::set_key(const char* value) {
+  set_has_key();
+  if (key_ == &::google::protobuf::internal::kEmptyString) {
+    key_ = new ::std::string;
+  }
+  key_->assign(value);
+}
+inline void ServiceRequest::set_key(const char* value, size_t size) {
+  set_has_key();
+  if (key_ == &::google::protobuf::internal::kEmptyString) {
+    key_ = new ::std::string;
+  }
+  key_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ServiceRequest::mutable_key() {
+  set_has_key();
+  if (key_ == &::google::protobuf::internal::kEmptyString) {
+    key_ = new ::std::string;
+  }
+  return key_;
+}
+inline ::std::string* ServiceRequest::release_key() {
+  clear_has_key();
+  if (key_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = key_;
+    key_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ServiceRequest::set_allocated_key(::std::string* key) {
+  if (key_ != &::google::protobuf::internal::kEmptyString) {
+    delete key_;
+  }
+  if (key) {
+    set_has_key();
+    key_ = key;
+  } else {
+    clear_has_key();
+    key_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional bytes callback = 7;
+inline bool ServiceRequest::has_callback() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void ServiceRequest::set_has_callback() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void ServiceRequest::clear_has_callback() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void ServiceRequest::clear_callback() {
+  if (callback_ != &::google::protobuf::internal::kEmptyString) {
+    callback_->clear();
+  }
+  clear_has_callback();
+}
+inline const ::std::string& ServiceRequest::callback() const {
+  return *callback_;
+}
+inline void ServiceRequest::set_callback(const ::std::string& value) {
+  set_has_callback();
+  if (callback_ == &::google::protobuf::internal::kEmptyString) {
+    callback_ = new ::std::string;
+  }
+  callback_->assign(value);
+}
+inline void ServiceRequest::set_callback(const char* value) {
+  set_has_callback();
+  if (callback_ == &::google::protobuf::internal::kEmptyString) {
+    callback_ = new ::std::string;
+  }
+  callback_->assign(value);
+}
+inline void ServiceRequest::set_callback(const void* value, size_t size) {
+  set_has_callback();
+  if (callback_ == &::google::protobuf::internal::kEmptyString) {
+    callback_ = new ::std::string;
+  }
+  callback_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ServiceRequest::mutable_callback() {
+  set_has_callback();
+  if (callback_ == &::google::protobuf::internal::kEmptyString) {
+    callback_ = new ::std::string;
+  }
+  return callback_;
+}
+inline ::std::string* ServiceRequest::release_callback() {
+  clear_has_callback();
+  if (callback_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = callback_;
+    callback_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ServiceRequest::set_allocated_callback(::std::string* callback) {
+  if (callback_ != &::google::protobuf::internal::kEmptyString) {
+    delete callback_;
+  }
+  if (callback) {
+    set_has_callback();
+    callback_ = callback;
+  } else {
+    clear_has_callback();
+    callback_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
 // -------------------------------------------------------------------
 
 // ServiceResponse
 
-// required string sessid = 1;
-inline bool ServiceResponse::has_sessid() const {
+// optional string from_sessid = 1;
+inline bool ServiceResponse::has_from_sessid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void ServiceResponse::set_has_sessid() {
+inline void ServiceResponse::set_has_from_sessid() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void ServiceResponse::clear_has_sessid() {
+inline void ServiceResponse::clear_has_from_sessid() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void ServiceResponse::clear_sessid() {
-  if (sessid_ != &::google::protobuf::internal::kEmptyString) {
-    sessid_->clear();
+inline void ServiceResponse::clear_from_sessid() {
+  if (from_sessid_ != &::google::protobuf::internal::kEmptyString) {
+    from_sessid_->clear();
   }
-  clear_has_sessid();
+  clear_has_from_sessid();
 }
-inline const ::std::string& ServiceResponse::sessid() const {
-  return *sessid_;
+inline const ::std::string& ServiceResponse::from_sessid() const {
+  return *from_sessid_;
 }
-inline void ServiceResponse::set_sessid(const ::std::string& value) {
-  set_has_sessid();
-  if (sessid_ == &::google::protobuf::internal::kEmptyString) {
-    sessid_ = new ::std::string;
+inline void ServiceResponse::set_from_sessid(const ::std::string& value) {
+  set_has_from_sessid();
+  if (from_sessid_ == &::google::protobuf::internal::kEmptyString) {
+    from_sessid_ = new ::std::string;
   }
-  sessid_->assign(value);
+  from_sessid_->assign(value);
 }
-inline void ServiceResponse::set_sessid(const char* value) {
-  set_has_sessid();
-  if (sessid_ == &::google::protobuf::internal::kEmptyString) {
-    sessid_ = new ::std::string;
+inline void ServiceResponse::set_from_sessid(const char* value) {
+  set_has_from_sessid();
+  if (from_sessid_ == &::google::protobuf::internal::kEmptyString) {
+    from_sessid_ = new ::std::string;
   }
-  sessid_->assign(value);
+  from_sessid_->assign(value);
 }
-inline void ServiceResponse::set_sessid(const char* value, size_t size) {
-  set_has_sessid();
-  if (sessid_ == &::google::protobuf::internal::kEmptyString) {
-    sessid_ = new ::std::string;
+inline void ServiceResponse::set_from_sessid(const char* value, size_t size) {
+  set_has_from_sessid();
+  if (from_sessid_ == &::google::protobuf::internal::kEmptyString) {
+    from_sessid_ = new ::std::string;
   }
-  sessid_->assign(reinterpret_cast<const char*>(value), size);
+  from_sessid_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* ServiceResponse::mutable_sessid() {
-  set_has_sessid();
-  if (sessid_ == &::google::protobuf::internal::kEmptyString) {
-    sessid_ = new ::std::string;
+inline ::std::string* ServiceResponse::mutable_from_sessid() {
+  set_has_from_sessid();
+  if (from_sessid_ == &::google::protobuf::internal::kEmptyString) {
+    from_sessid_ = new ::std::string;
   }
-  return sessid_;
+  return from_sessid_;
 }
-inline ::std::string* ServiceResponse::release_sessid() {
-  clear_has_sessid();
-  if (sessid_ == &::google::protobuf::internal::kEmptyString) {
+inline ::std::string* ServiceResponse::release_from_sessid() {
+  clear_has_from_sessid();
+  if (from_sessid_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
   } else {
-    ::std::string* temp = sessid_;
-    sessid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    ::std::string* temp = from_sessid_;
+    from_sessid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
 }
-inline void ServiceResponse::set_allocated_sessid(::std::string* sessid) {
-  if (sessid_ != &::google::protobuf::internal::kEmptyString) {
-    delete sessid_;
+inline void ServiceResponse::set_allocated_from_sessid(::std::string* from_sessid) {
+  if (from_sessid_ != &::google::protobuf::internal::kEmptyString) {
+    delete from_sessid_;
   }
-  if (sessid) {
-    set_has_sessid();
-    sessid_ = sessid;
+  if (from_sessid) {
+    set_has_from_sessid();
+    from_sessid_ = from_sessid;
   } else {
-    clear_has_sessid();
-    sessid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_from_sessid();
+    from_sessid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 
-// required int32 svtype = 2;
-inline bool ServiceResponse::has_svtype() const {
+// required string to_sessid = 2;
+inline bool ServiceResponse::has_to_sessid() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void ServiceResponse::set_has_svtype() {
+inline void ServiceResponse::set_has_to_sessid() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void ServiceResponse::clear_has_svtype() {
+inline void ServiceResponse::clear_has_to_sessid() {
   _has_bits_[0] &= ~0x00000002u;
+}
+inline void ServiceResponse::clear_to_sessid() {
+  if (to_sessid_ != &::google::protobuf::internal::kEmptyString) {
+    to_sessid_->clear();
+  }
+  clear_has_to_sessid();
+}
+inline const ::std::string& ServiceResponse::to_sessid() const {
+  return *to_sessid_;
+}
+inline void ServiceResponse::set_to_sessid(const ::std::string& value) {
+  set_has_to_sessid();
+  if (to_sessid_ == &::google::protobuf::internal::kEmptyString) {
+    to_sessid_ = new ::std::string;
+  }
+  to_sessid_->assign(value);
+}
+inline void ServiceResponse::set_to_sessid(const char* value) {
+  set_has_to_sessid();
+  if (to_sessid_ == &::google::protobuf::internal::kEmptyString) {
+    to_sessid_ = new ::std::string;
+  }
+  to_sessid_->assign(value);
+}
+inline void ServiceResponse::set_to_sessid(const char* value, size_t size) {
+  set_has_to_sessid();
+  if (to_sessid_ == &::google::protobuf::internal::kEmptyString) {
+    to_sessid_ = new ::std::string;
+  }
+  to_sessid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ServiceResponse::mutable_to_sessid() {
+  set_has_to_sessid();
+  if (to_sessid_ == &::google::protobuf::internal::kEmptyString) {
+    to_sessid_ = new ::std::string;
+  }
+  return to_sessid_;
+}
+inline ::std::string* ServiceResponse::release_to_sessid() {
+  clear_has_to_sessid();
+  if (to_sessid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = to_sessid_;
+    to_sessid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ServiceResponse::set_allocated_to_sessid(::std::string* to_sessid) {
+  if (to_sessid_ != &::google::protobuf::internal::kEmptyString) {
+    delete to_sessid_;
+  }
+  if (to_sessid) {
+    set_has_to_sessid();
+    to_sessid_ = to_sessid;
+  } else {
+    clear_has_to_sessid();
+    to_sessid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// required int32 svtype = 3;
+inline bool ServiceResponse::has_svtype() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void ServiceResponse::set_has_svtype() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void ServiceResponse::clear_has_svtype() {
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void ServiceResponse::clear_svtype() {
   svtype_ = 0;
@@ -2041,15 +2421,15 @@ inline void ServiceResponse::set_svtype(::google::protobuf::int32 value) {
   svtype_ = value;
 }
 
-// required string sn = 3;
+// required string sn = 4;
 inline bool ServiceResponse::has_sn() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+  return (_has_bits_[0] & 0x00000008u) != 0;
 }
 inline void ServiceResponse::set_has_sn() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000008u;
 }
 inline void ServiceResponse::clear_has_sn() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void ServiceResponse::clear_sn() {
   if (sn_ != &::google::protobuf::internal::kEmptyString) {
@@ -2111,15 +2491,15 @@ inline void ServiceResponse::set_allocated_sn(::std::string* sn) {
   }
 }
 
-// required int32 status = 4;
+// required int32 status = 5;
 inline bool ServiceResponse::has_status() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+  return (_has_bits_[0] & 0x00000010u) != 0;
 }
 inline void ServiceResponse::set_has_status() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000010u;
 }
 inline void ServiceResponse::clear_has_status() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void ServiceResponse::clear_status() {
   status_ = 0;
@@ -2133,15 +2513,15 @@ inline void ServiceResponse::set_status(::google::protobuf::int32 value) {
   status_ = value;
 }
 
-// optional bytes payload = 5;
+// optional bytes payload = 6;
 inline bool ServiceResponse::has_payload() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
+  return (_has_bits_[0] & 0x00000020u) != 0;
 }
 inline void ServiceResponse::set_has_payload() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000020u;
 }
 inline void ServiceResponse::clear_has_payload() {
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline void ServiceResponse::clear_payload() {
   if (payload_ != &::google::protobuf::internal::kEmptyString) {
@@ -2203,6 +2583,76 @@ inline void ServiceResponse::set_allocated_payload(::std::string* payload) {
   }
 }
 
+// optional bytes callback = 7;
+inline bool ServiceResponse::has_callback() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void ServiceResponse::set_has_callback() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void ServiceResponse::clear_has_callback() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void ServiceResponse::clear_callback() {
+  if (callback_ != &::google::protobuf::internal::kEmptyString) {
+    callback_->clear();
+  }
+  clear_has_callback();
+}
+inline const ::std::string& ServiceResponse::callback() const {
+  return *callback_;
+}
+inline void ServiceResponse::set_callback(const ::std::string& value) {
+  set_has_callback();
+  if (callback_ == &::google::protobuf::internal::kEmptyString) {
+    callback_ = new ::std::string;
+  }
+  callback_->assign(value);
+}
+inline void ServiceResponse::set_callback(const char* value) {
+  set_has_callback();
+  if (callback_ == &::google::protobuf::internal::kEmptyString) {
+    callback_ = new ::std::string;
+  }
+  callback_->assign(value);
+}
+inline void ServiceResponse::set_callback(const void* value, size_t size) {
+  set_has_callback();
+  if (callback_ == &::google::protobuf::internal::kEmptyString) {
+    callback_ = new ::std::string;
+  }
+  callback_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ServiceResponse::mutable_callback() {
+  set_has_callback();
+  if (callback_ == &::google::protobuf::internal::kEmptyString) {
+    callback_ = new ::std::string;
+  }
+  return callback_;
+}
+inline ::std::string* ServiceResponse::release_callback() {
+  clear_has_callback();
+  if (callback_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = callback_;
+    callback_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ServiceResponse::set_allocated_callback(::std::string* callback) {
+  if (callback_ != &::google::protobuf::internal::kEmptyString) {
+    delete callback_;
+  }
+  if (callback) {
+    set_has_callback();
+    callback_ = callback;
+  } else {
+    clear_has_callback();
+    callback_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
 // -------------------------------------------------------------------
 
 // SvRegRequest
@@ -2229,6 +2679,28 @@ inline void SvRegRequest::set_svtype(::google::protobuf::int32 value) {
   svtype_ = value;
 }
 
+// required int32 id = 2;
+inline bool SvRegRequest::has_id() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void SvRegRequest::set_has_id() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void SvRegRequest::clear_has_id() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void SvRegRequest::clear_id() {
+  id_ = 0;
+  clear_has_id();
+}
+inline ::google::protobuf::int32 SvRegRequest::id() const {
+  return id_;
+}
+inline void SvRegRequest::set_id(::google::protobuf::int32 value) {
+  set_has_id();
+  id_ = value;
+}
+
 // -------------------------------------------------------------------
 
 // SvRegResponse
@@ -2253,6 +2725,76 @@ inline ::google::protobuf::int32 SvRegResponse::status() const {
 inline void SvRegResponse::set_status(::google::protobuf::int32 value) {
   set_has_status();
   status_ = value;
+}
+
+// optional string sessid = 2;
+inline bool SvRegResponse::has_sessid() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void SvRegResponse::set_has_sessid() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void SvRegResponse::clear_has_sessid() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void SvRegResponse::clear_sessid() {
+  if (sessid_ != &::google::protobuf::internal::kEmptyString) {
+    sessid_->clear();
+  }
+  clear_has_sessid();
+}
+inline const ::std::string& SvRegResponse::sessid() const {
+  return *sessid_;
+}
+inline void SvRegResponse::set_sessid(const ::std::string& value) {
+  set_has_sessid();
+  if (sessid_ == &::google::protobuf::internal::kEmptyString) {
+    sessid_ = new ::std::string;
+  }
+  sessid_->assign(value);
+}
+inline void SvRegResponse::set_sessid(const char* value) {
+  set_has_sessid();
+  if (sessid_ == &::google::protobuf::internal::kEmptyString) {
+    sessid_ = new ::std::string;
+  }
+  sessid_->assign(value);
+}
+inline void SvRegResponse::set_sessid(const char* value, size_t size) {
+  set_has_sessid();
+  if (sessid_ == &::google::protobuf::internal::kEmptyString) {
+    sessid_ = new ::std::string;
+  }
+  sessid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SvRegResponse::mutable_sessid() {
+  set_has_sessid();
+  if (sessid_ == &::google::protobuf::internal::kEmptyString) {
+    sessid_ = new ::std::string;
+  }
+  return sessid_;
+}
+inline ::std::string* SvRegResponse::release_sessid() {
+  clear_has_sessid();
+  if (sessid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = sessid_;
+    sessid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SvRegResponse::set_allocated_sessid(::std::string* sessid) {
+  if (sessid_ != &::google::protobuf::internal::kEmptyString) {
+    delete sessid_;
+  }
+  if (sessid) {
+    set_has_sessid();
+    sessid_ = sessid;
+  } else {
+    clear_has_sessid();
+    sessid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
 }
 
 // -------------------------------------------------------------------

@@ -21,7 +21,7 @@ namespace gim
 	int32 constructServiceRequest(const std::string& sessid, int32 service_type,
 		const std::string& sn, const std::string& payload, std::string& req);
 
-	int32 constructServiceResponse(const std::string& sessid, int32 status, int32 service_type,
+	int32 constructServiceResponse(const std::string& fromsession, const std::string& tosession, int32 status, int32 service_type,
 		const std::string& sn, const std::string& payload, std::string& req);
 
 };

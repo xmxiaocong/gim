@@ -1299,10 +1299,13 @@ void SetTimeResponse::Swap(SetTimeResponse* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int ServiceRequest::kSessidFieldNumber;
+const int ServiceRequest::kFromSessidFieldNumber;
+const int ServiceRequest::kToSessidFieldNumber;
 const int ServiceRequest::kSvtypeFieldNumber;
 const int ServiceRequest::kSnFieldNumber;
 const int ServiceRequest::kPayloadFieldNumber;
+const int ServiceRequest::kKeyFieldNumber;
+const int ServiceRequest::kCallbackFieldNumber;
 #endif  // !_MSC_VER
 
 ServiceRequest::ServiceRequest()
@@ -1321,10 +1324,13 @@ ServiceRequest::ServiceRequest(const ServiceRequest& from)
 
 void ServiceRequest::SharedCtor() {
   _cached_size_ = 0;
-  sessid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  from_sessid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  to_sessid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   svtype_ = 0;
   sn_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   payload_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  key_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  callback_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -1333,14 +1339,23 @@ ServiceRequest::~ServiceRequest() {
 }
 
 void ServiceRequest::SharedDtor() {
-  if (sessid_ != &::google::protobuf::internal::kEmptyString) {
-    delete sessid_;
+  if (from_sessid_ != &::google::protobuf::internal::kEmptyString) {
+    delete from_sessid_;
+  }
+  if (to_sessid_ != &::google::protobuf::internal::kEmptyString) {
+    delete to_sessid_;
   }
   if (sn_ != &::google::protobuf::internal::kEmptyString) {
     delete sn_;
   }
   if (payload_ != &::google::protobuf::internal::kEmptyString) {
     delete payload_;
+  }
+  if (key_ != &::google::protobuf::internal::kEmptyString) {
+    delete key_;
+  }
+  if (callback_ != &::google::protobuf::internal::kEmptyString) {
+    delete callback_;
   }
   #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
   if (this != &default_instance()) {
@@ -1372,9 +1387,14 @@ ServiceRequest* ServiceRequest::New() const {
 
 void ServiceRequest::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (has_sessid()) {
-      if (sessid_ != &::google::protobuf::internal::kEmptyString) {
-        sessid_->clear();
+    if (has_from_sessid()) {
+      if (from_sessid_ != &::google::protobuf::internal::kEmptyString) {
+        from_sessid_->clear();
+      }
+    }
+    if (has_to_sessid()) {
+      if (to_sessid_ != &::google::protobuf::internal::kEmptyString) {
+        to_sessid_->clear();
       }
     }
     svtype_ = 0;
@@ -1388,6 +1408,16 @@ void ServiceRequest::Clear() {
         payload_->clear();
       }
     }
+    if (has_key()) {
+      if (key_ != &::google::protobuf::internal::kEmptyString) {
+        key_->clear();
+      }
+    }
+    if (has_callback()) {
+      if (callback_ != &::google::protobuf::internal::kEmptyString) {
+        callback_->clear();
+      }
+    }
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
@@ -1398,21 +1428,35 @@ bool ServiceRequest::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // required string sessid = 1;
+      // required string from_sessid = 1;
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_sessid()));
+                input, this->mutable_from_sessid()));
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(16)) goto parse_svtype;
+        if (input->ExpectTag(18)) goto parse_to_sessid;
         break;
       }
 
-      // required int32 svtype = 2;
+      // optional string to_sessid = 2;
       case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_to_sessid:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_to_sessid()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(24)) goto parse_svtype;
+        break;
+      }
+
+      // required int32 svtype = 3;
+      case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_svtype:
@@ -1423,12 +1467,12 @@ bool ServiceRequest::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(26)) goto parse_sn;
+        if (input->ExpectTag(34)) goto parse_sn;
         break;
       }
 
-      // required string sn = 3;
-      case 3: {
+      // required string sn = 4;
+      case 4: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_sn:
@@ -1437,17 +1481,45 @@ bool ServiceRequest::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(34)) goto parse_payload;
+        if (input->ExpectTag(42)) goto parse_payload;
         break;
       }
 
-      // optional bytes payload = 4;
-      case 4: {
+      // optional bytes payload = 5;
+      case 5: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_payload:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_payload()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(50)) goto parse_key;
+        break;
+      }
+
+      // optional string key = 6;
+      case 6: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_key:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_key()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(58)) goto parse_callback;
+        break;
+      }
+
+      // optional bytes callback = 7;
+      case 7: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_callback:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
+                input, this->mutable_callback()));
         } else {
           goto handle_uninterpreted;
         }
@@ -1472,27 +1544,45 @@ bool ServiceRequest::MergePartialFromCodedStream(
 
 void ServiceRequest::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // required string sessid = 1;
-  if (has_sessid()) {
+  // required string from_sessid = 1;
+  if (has_from_sessid()) {
     ::google::protobuf::internal::WireFormatLite::WriteString(
-      1, this->sessid(), output);
+      1, this->from_sessid(), output);
   }
 
-  // required int32 svtype = 2;
+  // optional string to_sessid = 2;
+  if (has_to_sessid()) {
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      2, this->to_sessid(), output);
+  }
+
+  // required int32 svtype = 3;
   if (has_svtype()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->svtype(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->svtype(), output);
   }
 
-  // required string sn = 3;
+  // required string sn = 4;
   if (has_sn()) {
     ::google::protobuf::internal::WireFormatLite::WriteString(
-      3, this->sn(), output);
+      4, this->sn(), output);
   }
 
-  // optional bytes payload = 4;
+  // optional bytes payload = 5;
   if (has_payload()) {
     ::google::protobuf::internal::WireFormatLite::WriteBytes(
-      4, this->payload(), output);
+      5, this->payload(), output);
+  }
+
+  // optional string key = 6;
+  if (has_key()) {
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      6, this->key(), output);
+  }
+
+  // optional bytes callback = 7;
+  if (has_callback()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+      7, this->callback(), output);
   }
 
 }
@@ -1501,32 +1591,53 @@ int ServiceRequest::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // required string sessid = 1;
-    if (has_sessid()) {
+    // required string from_sessid = 1;
+    if (has_from_sessid()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->sessid());
+          this->from_sessid());
     }
 
-    // required int32 svtype = 2;
+    // optional string to_sessid = 2;
+    if (has_to_sessid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->to_sessid());
+    }
+
+    // required int32 svtype = 3;
     if (has_svtype()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->svtype());
     }
 
-    // required string sn = 3;
+    // required string sn = 4;
     if (has_sn()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
           this->sn());
     }
 
-    // optional bytes payload = 4;
+    // optional bytes payload = 5;
     if (has_payload()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::BytesSize(
           this->payload());
+    }
+
+    // optional string key = 6;
+    if (has_key()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->key());
+    }
+
+    // optional bytes callback = 7;
+    if (has_callback()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::BytesSize(
+          this->callback());
     }
 
   }
@@ -1544,8 +1655,11 @@ void ServiceRequest::CheckTypeAndMergeFrom(
 void ServiceRequest::MergeFrom(const ServiceRequest& from) {
   GOOGLE_CHECK_NE(&from, this);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (from.has_sessid()) {
-      set_sessid(from.sessid());
+    if (from.has_from_sessid()) {
+      set_from_sessid(from.from_sessid());
+    }
+    if (from.has_to_sessid()) {
+      set_to_sessid(from.to_sessid());
     }
     if (from.has_svtype()) {
       set_svtype(from.svtype());
@@ -1555,6 +1669,12 @@ void ServiceRequest::MergeFrom(const ServiceRequest& from) {
     }
     if (from.has_payload()) {
       set_payload(from.payload());
+    }
+    if (from.has_key()) {
+      set_key(from.key());
+    }
+    if (from.has_callback()) {
+      set_callback(from.callback());
     }
   }
 }
@@ -1566,17 +1686,20 @@ void ServiceRequest::CopyFrom(const ServiceRequest& from) {
 }
 
 bool ServiceRequest::IsInitialized() const {
-  if ((_has_bits_[0] & 0x00000007) != 0x00000007) return false;
+  if ((_has_bits_[0] & 0x0000000d) != 0x0000000d) return false;
 
   return true;
 }
 
 void ServiceRequest::Swap(ServiceRequest* other) {
   if (other != this) {
-    std::swap(sessid_, other->sessid_);
+    std::swap(from_sessid_, other->from_sessid_);
+    std::swap(to_sessid_, other->to_sessid_);
     std::swap(svtype_, other->svtype_);
     std::swap(sn_, other->sn_);
     std::swap(payload_, other->payload_);
+    std::swap(key_, other->key_);
+    std::swap(callback_, other->callback_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     std::swap(_cached_size_, other->_cached_size_);
   }
@@ -1590,11 +1713,13 @@ void ServiceRequest::Swap(ServiceRequest* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int ServiceResponse::kSessidFieldNumber;
+const int ServiceResponse::kFromSessidFieldNumber;
+const int ServiceResponse::kToSessidFieldNumber;
 const int ServiceResponse::kSvtypeFieldNumber;
 const int ServiceResponse::kSnFieldNumber;
 const int ServiceResponse::kStatusFieldNumber;
 const int ServiceResponse::kPayloadFieldNumber;
+const int ServiceResponse::kCallbackFieldNumber;
 #endif  // !_MSC_VER
 
 ServiceResponse::ServiceResponse()
@@ -1613,11 +1738,13 @@ ServiceResponse::ServiceResponse(const ServiceResponse& from)
 
 void ServiceResponse::SharedCtor() {
   _cached_size_ = 0;
-  sessid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  from_sessid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  to_sessid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   svtype_ = 0;
   sn_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   status_ = 0;
   payload_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  callback_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -1626,14 +1753,20 @@ ServiceResponse::~ServiceResponse() {
 }
 
 void ServiceResponse::SharedDtor() {
-  if (sessid_ != &::google::protobuf::internal::kEmptyString) {
-    delete sessid_;
+  if (from_sessid_ != &::google::protobuf::internal::kEmptyString) {
+    delete from_sessid_;
+  }
+  if (to_sessid_ != &::google::protobuf::internal::kEmptyString) {
+    delete to_sessid_;
   }
   if (sn_ != &::google::protobuf::internal::kEmptyString) {
     delete sn_;
   }
   if (payload_ != &::google::protobuf::internal::kEmptyString) {
     delete payload_;
+  }
+  if (callback_ != &::google::protobuf::internal::kEmptyString) {
+    delete callback_;
   }
   #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
   if (this != &default_instance()) {
@@ -1665,9 +1798,14 @@ ServiceResponse* ServiceResponse::New() const {
 
 void ServiceResponse::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (has_sessid()) {
-      if (sessid_ != &::google::protobuf::internal::kEmptyString) {
-        sessid_->clear();
+    if (has_from_sessid()) {
+      if (from_sessid_ != &::google::protobuf::internal::kEmptyString) {
+        from_sessid_->clear();
+      }
+    }
+    if (has_to_sessid()) {
+      if (to_sessid_ != &::google::protobuf::internal::kEmptyString) {
+        to_sessid_->clear();
       }
     }
     svtype_ = 0;
@@ -1682,6 +1820,11 @@ void ServiceResponse::Clear() {
         payload_->clear();
       }
     }
+    if (has_callback()) {
+      if (callback_ != &::google::protobuf::internal::kEmptyString) {
+        callback_->clear();
+      }
+    }
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
@@ -1692,21 +1835,35 @@ bool ServiceResponse::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // required string sessid = 1;
+      // optional string from_sessid = 1;
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_sessid()));
+                input, this->mutable_from_sessid()));
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(16)) goto parse_svtype;
+        if (input->ExpectTag(18)) goto parse_to_sessid;
         break;
       }
 
-      // required int32 svtype = 2;
+      // required string to_sessid = 2;
       case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_to_sessid:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_to_sessid()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(24)) goto parse_svtype;
+        break;
+      }
+
+      // required int32 svtype = 3;
+      case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_svtype:
@@ -1717,12 +1874,12 @@ bool ServiceResponse::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(26)) goto parse_sn;
+        if (input->ExpectTag(34)) goto parse_sn;
         break;
       }
 
-      // required string sn = 3;
-      case 3: {
+      // required string sn = 4;
+      case 4: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_sn:
@@ -1731,12 +1888,12 @@ bool ServiceResponse::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(32)) goto parse_status;
+        if (input->ExpectTag(40)) goto parse_status;
         break;
       }
 
-      // required int32 status = 4;
-      case 4: {
+      // required int32 status = 5;
+      case 5: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_status:
@@ -1747,17 +1904,31 @@ bool ServiceResponse::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(42)) goto parse_payload;
+        if (input->ExpectTag(50)) goto parse_payload;
         break;
       }
 
-      // optional bytes payload = 5;
-      case 5: {
+      // optional bytes payload = 6;
+      case 6: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_payload:
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_payload()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(58)) goto parse_callback;
+        break;
+      }
+
+      // optional bytes callback = 7;
+      case 7: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_callback:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
+                input, this->mutable_callback()));
         } else {
           goto handle_uninterpreted;
         }
@@ -1782,32 +1953,44 @@ bool ServiceResponse::MergePartialFromCodedStream(
 
 void ServiceResponse::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // required string sessid = 1;
-  if (has_sessid()) {
+  // optional string from_sessid = 1;
+  if (has_from_sessid()) {
     ::google::protobuf::internal::WireFormatLite::WriteString(
-      1, this->sessid(), output);
+      1, this->from_sessid(), output);
   }
 
-  // required int32 svtype = 2;
+  // required string to_sessid = 2;
+  if (has_to_sessid()) {
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      2, this->to_sessid(), output);
+  }
+
+  // required int32 svtype = 3;
   if (has_svtype()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->svtype(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->svtype(), output);
   }
 
-  // required string sn = 3;
+  // required string sn = 4;
   if (has_sn()) {
     ::google::protobuf::internal::WireFormatLite::WriteString(
-      3, this->sn(), output);
+      4, this->sn(), output);
   }
 
-  // required int32 status = 4;
+  // required int32 status = 5;
   if (has_status()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->status(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->status(), output);
   }
 
-  // optional bytes payload = 5;
+  // optional bytes payload = 6;
   if (has_payload()) {
     ::google::protobuf::internal::WireFormatLite::WriteBytes(
-      5, this->payload(), output);
+      6, this->payload(), output);
+  }
+
+  // optional bytes callback = 7;
+  if (has_callback()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+      7, this->callback(), output);
   }
 
 }
@@ -1816,39 +1999,53 @@ int ServiceResponse::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // required string sessid = 1;
-    if (has_sessid()) {
+    // optional string from_sessid = 1;
+    if (has_from_sessid()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->sessid());
+          this->from_sessid());
     }
 
-    // required int32 svtype = 2;
+    // required string to_sessid = 2;
+    if (has_to_sessid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->to_sessid());
+    }
+
+    // required int32 svtype = 3;
     if (has_svtype()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->svtype());
     }
 
-    // required string sn = 3;
+    // required string sn = 4;
     if (has_sn()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
           this->sn());
     }
 
-    // required int32 status = 4;
+    // required int32 status = 5;
     if (has_status()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->status());
     }
 
-    // optional bytes payload = 5;
+    // optional bytes payload = 6;
     if (has_payload()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::BytesSize(
           this->payload());
+    }
+
+    // optional bytes callback = 7;
+    if (has_callback()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::BytesSize(
+          this->callback());
     }
 
   }
@@ -1866,8 +2063,11 @@ void ServiceResponse::CheckTypeAndMergeFrom(
 void ServiceResponse::MergeFrom(const ServiceResponse& from) {
   GOOGLE_CHECK_NE(&from, this);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (from.has_sessid()) {
-      set_sessid(from.sessid());
+    if (from.has_from_sessid()) {
+      set_from_sessid(from.from_sessid());
+    }
+    if (from.has_to_sessid()) {
+      set_to_sessid(from.to_sessid());
     }
     if (from.has_svtype()) {
       set_svtype(from.svtype());
@@ -1881,6 +2081,9 @@ void ServiceResponse::MergeFrom(const ServiceResponse& from) {
     if (from.has_payload()) {
       set_payload(from.payload());
     }
+    if (from.has_callback()) {
+      set_callback(from.callback());
+    }
   }
 }
 
@@ -1891,18 +2094,20 @@ void ServiceResponse::CopyFrom(const ServiceResponse& from) {
 }
 
 bool ServiceResponse::IsInitialized() const {
-  if ((_has_bits_[0] & 0x0000000f) != 0x0000000f) return false;
+  if ((_has_bits_[0] & 0x0000001e) != 0x0000001e) return false;
 
   return true;
 }
 
 void ServiceResponse::Swap(ServiceResponse* other) {
   if (other != this) {
-    std::swap(sessid_, other->sessid_);
+    std::swap(from_sessid_, other->from_sessid_);
+    std::swap(to_sessid_, other->to_sessid_);
     std::swap(svtype_, other->svtype_);
     std::swap(sn_, other->sn_);
     std::swap(status_, other->status_);
     std::swap(payload_, other->payload_);
+    std::swap(callback_, other->callback_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     std::swap(_cached_size_, other->_cached_size_);
   }
@@ -1917,6 +2122,7 @@ void ServiceResponse::Swap(ServiceResponse* other) {
 
 #ifndef _MSC_VER
 const int SvRegRequest::kSvtypeFieldNumber;
+const int SvRegRequest::kIdFieldNumber;
 #endif  // !_MSC_VER
 
 SvRegRequest::SvRegRequest()
@@ -1936,6 +2142,7 @@ SvRegRequest::SvRegRequest(const SvRegRequest& from)
 void SvRegRequest::SharedCtor() {
   _cached_size_ = 0;
   svtype_ = 0;
+  id_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -1975,6 +2182,7 @@ SvRegRequest* SvRegRequest::New() const {
 void SvRegRequest::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     svtype_ = 0;
+    id_ = 0;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
@@ -1993,6 +2201,22 @@ bool SvRegRequest::MergePartialFromCodedStream(
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
                  input, &svtype_)));
           set_has_svtype();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(16)) goto parse_id;
+        break;
+      }
+
+      // required int32 id = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_id:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &id_)));
+          set_has_id();
         } else {
           goto handle_uninterpreted;
         }
@@ -2022,6 +2246,11 @@ void SvRegRequest::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->svtype(), output);
   }
 
+  // required int32 id = 2;
+  if (has_id()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->id(), output);
+  }
+
 }
 
 int SvRegRequest::ByteSize() const {
@@ -2033,6 +2262,13 @@ int SvRegRequest::ByteSize() const {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->svtype());
+    }
+
+    // required int32 id = 2;
+    if (has_id()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->id());
     }
 
   }
@@ -2053,6 +2289,9 @@ void SvRegRequest::MergeFrom(const SvRegRequest& from) {
     if (from.has_svtype()) {
       set_svtype(from.svtype());
     }
+    if (from.has_id()) {
+      set_id(from.id());
+    }
   }
 }
 
@@ -2063,7 +2302,7 @@ void SvRegRequest::CopyFrom(const SvRegRequest& from) {
 }
 
 bool SvRegRequest::IsInitialized() const {
-  if ((_has_bits_[0] & 0x00000001) != 0x00000001) return false;
+  if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
 
   return true;
 }
@@ -2071,6 +2310,7 @@ bool SvRegRequest::IsInitialized() const {
 void SvRegRequest::Swap(SvRegRequest* other) {
   if (other != this) {
     std::swap(svtype_, other->svtype_);
+    std::swap(id_, other->id_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     std::swap(_cached_size_, other->_cached_size_);
   }
@@ -2085,6 +2325,7 @@ void SvRegRequest::Swap(SvRegRequest* other) {
 
 #ifndef _MSC_VER
 const int SvRegResponse::kStatusFieldNumber;
+const int SvRegResponse::kSessidFieldNumber;
 #endif  // !_MSC_VER
 
 SvRegResponse::SvRegResponse()
@@ -2104,6 +2345,7 @@ SvRegResponse::SvRegResponse(const SvRegResponse& from)
 void SvRegResponse::SharedCtor() {
   _cached_size_ = 0;
   status_ = 0;
+  sessid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -2112,6 +2354,9 @@ SvRegResponse::~SvRegResponse() {
 }
 
 void SvRegResponse::SharedDtor() {
+  if (sessid_ != &::google::protobuf::internal::kEmptyString) {
+    delete sessid_;
+  }
   #ifdef GOOGLE_PROTOBUF_NO_STATIC_INITIALIZER
   if (this != &default_instance()) {
   #else
@@ -2143,6 +2388,11 @@ SvRegResponse* SvRegResponse::New() const {
 void SvRegResponse::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     status_ = 0;
+    if (has_sessid()) {
+      if (sessid_ != &::google::protobuf::internal::kEmptyString) {
+        sessid_->clear();
+      }
+    }
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
@@ -2161,6 +2411,20 @@ bool SvRegResponse::MergePartialFromCodedStream(
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
                  input, &status_)));
           set_has_status();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(18)) goto parse_sessid;
+        break;
+      }
+
+      // optional string sessid = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_sessid:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_sessid()));
         } else {
           goto handle_uninterpreted;
         }
@@ -2190,6 +2454,12 @@ void SvRegResponse::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->status(), output);
   }
 
+  // optional string sessid = 2;
+  if (has_sessid()) {
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      2, this->sessid(), output);
+  }
+
 }
 
 int SvRegResponse::ByteSize() const {
@@ -2201,6 +2471,13 @@ int SvRegResponse::ByteSize() const {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->status());
+    }
+
+    // optional string sessid = 2;
+    if (has_sessid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->sessid());
     }
 
   }
@@ -2221,6 +2498,9 @@ void SvRegResponse::MergeFrom(const SvRegResponse& from) {
     if (from.has_status()) {
       set_status(from.status());
     }
+    if (from.has_sessid()) {
+      set_sessid(from.sessid());
+    }
   }
 }
 
@@ -2239,6 +2519,7 @@ bool SvRegResponse::IsInitialized() const {
 void SvRegResponse::Swap(SvRegResponse* other) {
   if (other != this) {
     std::swap(status_, other->status_);
+    std::swap(sessid_, other->sessid_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     std::swap(_cached_size_, other->_cached_size_);
   }

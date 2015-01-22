@@ -1,5 +1,4 @@
 option optimize_for = LITE_RUNTIME;
-
 package gim;
 
 import "pair.proto";
@@ -36,26 +35,33 @@ message SetTimeResponse{
 } 
 
 message ServiceRequest{
-	required string sessid = 1;
-	required int32 svtype = 2;// 100:push 200:peer
-	required string sn = 3;//each req has an unique sn
-	optional bytes payload = 4;// payload
+	required string from_sessid = 1;//from sessid
+	optional string to_sessid = 2;//to sessid
+	required int32 svtype = 3;// 100:push 200:peer
+	required string sn = 4;//each req has an unique sn
+	optional bytes payload = 5;// payload
+	optional string key = 6;//the keyword to dispatch
+	optional bytes callback = 7;//callback data
 }
 
 message ServiceResponse{
-	required string sessid = 1;
-	required int32 svtype = 2;
-	required string sn = 3;//each req has an unique sn
-	required int32 status = 4;// 0 success
-	optional bytes payload = 5;
+	optional string from_sessid = 1; //from sessid
+	required string to_sessid = 2; //to sessid
+	required int32 svtype = 3;
+	required string sn = 4;//each req has an unique sn
+	required int32 status = 5;// 0 success
+	optional bytes payload = 6;
+	optional bytes callback = 7;//callback data
 }
 
 message SvRegRequest{
 	required int32 svtype = 1;
+	required int32 id = 2;
 }
 
 message SvRegResponse{
 	required int32 status = 1;
+	optional string sessid = 2;//the session id,
 }
 
 message KickCliRequest{

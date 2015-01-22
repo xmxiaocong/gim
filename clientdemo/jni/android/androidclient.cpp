@@ -38,10 +38,10 @@ namespace gim
 		}
 
 		GPeerMessage msg;
-		std::string sn = root[JKEY_MSG_SN].asString();
-		msg.to = root[JKEY_MSG_TO].asString();
-		msg.data = root[JKEY_MSG_DATA].asString();
-		std::string cid = root[JKEY_CID].asString();
+		std::string sn = root["sn"].asString();
+		msg.to = root["to"].asString();
+		msg.data = root["data"].asString();
+		std::string cid = root["self_cid"].asString();
 		msg.from = cid;
 		int ret = sendPeerMessage(cid, sn, msg);
 

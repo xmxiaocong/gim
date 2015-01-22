@@ -139,10 +139,10 @@ namespace gim
 		Json::Value v;
 
 		int32 ret = 0;
-		v[JKEY_CID] = getCid();
-		v[JKEY_MSG_TYPE] = MSG_TYPE_SEND_PEER_RESP;
-		v[JKEY_MSG_STATUS] = status;
-		v[JKEY_MSG_SN] = getSN();
+		v["self_cid"] = getCid();
+		v["notify_type"] = NOTIFY_TYPE_PEER_SEND_RESP;
+		v["stauts"] = status;
+		v["sn"] = getSN();
 
 		if (status >= 0)
 		{
@@ -170,11 +170,11 @@ namespace gim
 			const SendPeerMessageResponse& pcresp = peerpacket.send_peer_msg_resp();
 			const Message& msg = pcresp.msg();
 
-			v[JKEY_MSG_ID] = itostr(msg.id());
-			v[JKEY_MSG_TIME] = itostr(msg.time());
-			v[JKEY_MSG_FROM] = msg.from();
-			v[JKEY_MSG_TO] = msg.to();
-			v[JKEY_MSG_DATA] = msg.data();
+			v["msgid"] = itostr(msg.id());
+			v["time"] = itostr(msg.time());
+			v["from"] = msg.from();
+			v["to"] = msg.to();
+			v["data"] = msg.data();
 		}
 
 parse_end:
@@ -188,10 +188,10 @@ parse_end:
 			Json::FastWriter w;
 			Json::Value v;
 
-			v[JKEY_CID] = getCid();
-			v[JKEY_MSG_TYPE] = MSG_TYPE_SEND_PEER_RESP;
-			v[JKEY_MSG_STATUS] = REQUEST_TIME_OUT;
-			v[JKEY_MSG_SN] = getSN();
+			v["self_cid"] = getCid();
+			v["notify_type"] = NOTIFY_TYPE_PEER_SEND_RESP;
+			v["stauts"] = REQUEST_TIME_OUT;
+			v["sn"] = getSN();
 			conn->publish(w.write(v).c_str());
 		}
 	}
@@ -236,10 +236,10 @@ parse_end:
 		Json::FastWriter w;
 		Json::Value v;
 
-		v[JKEY_CID] = getCid();
-		v[JKEY_MSG_TYPE] = MSG_TYPE_OFFLINE_PEER_RESP;
-		v[JKEY_MSG_SN] = getSN();
-		v[JKEY_MSG_STATUS] = status;
+		v["self_cid"] = getCid();
+		v["notify_type"] = NOTIFY_TYPE_PEER_OFFLINE_MSG;
+		v["sn"] = getSN();
+		v["stauts"] = status;
 		int32 ret = MY_OK;
 		if (status >= 0)
 		{
@@ -272,12 +272,12 @@ parse_end:
 			{
 				const Message& msg = pcresp.msgs(i);
 
-				vmsg[JKEY_MSG_ID] = itostr(msg.id());
-				vmsg[JKEY_MSG_TIME] = itostr(msg.time());
-				vmsg[JKEY_MSG_TO] = msg.to();
-				vmsg[JKEY_MSG_FROM] = msg.from();
-				vmsg[JKEY_MSG_DATA] = msg.data();
-				v[JKEY_MSG_ARRAY].append(vmsg);
+				vmsg["msgid"] = itostr(msg.id());
+				vmsg["time"] = itostr(msg.time());
+				vmsg["to"] = msg.to();
+				vmsg["from"] = msg.from();
+				vmsg["data"] = msg.data();
+				v["msgs"].append(vmsg);
 				if (msg.id() > max_msg_id)
 				{
 					max_msg_id = msg.id();
@@ -289,7 +289,7 @@ parse_end:
 			{
 				sendRequest_(conn, max_msg_id+1, GET_OFFLINE_PEER_MSG_SIZE_EACH);
 			}
-			v[JKEY_MSG_OFFLINE_LEFTSIZE] = leftsize;
+			v["leftsize"] = leftsize;
 		}
 	parse_end:
 		conn->publish(w.write(v).c_str());

@@ -38,7 +38,7 @@ namespace gim
 		const std::string& sn, const std::string& payload, std::string& req)
 	{
 		ServiceRequest sreq;
-		sreq.set_sessid(sessid);
+		sreq.set_from_sessid(sessid);
 		sreq.set_svtype(service_type);
 		sreq.set_sn(sn);
 		sreq.set_payload(payload);
@@ -47,11 +47,12 @@ namespace gim
 		return 0;		
 	}
 
-	int32 constructServiceResponse(const std::string& sessid,int32 status,int32 service_type,
+	int32 constructServiceResponse(const std::string& fromsession, const std::string& tosession, int32 status, int32 service_type,
 		const std::string& sn,const std::string& payload,std::string& req)
 	{
 		ServiceResponse sreq;
-		sreq.set_sessid(sessid);
+		sreq.set_from_sessid(fromsession);
+		sreq.set_to_sessid(tosession);
 		sreq.set_status(status);
 		sreq.set_svtype(service_type);
 		sreq.set_sn(sn);
