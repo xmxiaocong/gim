@@ -12,7 +12,7 @@ SessCache* SsChFactory::getSessCache(const Json::Value& config){
 	
 	const Json::Value& conf = config["Config"];
 
-	if(type.asString() == "DefaultType"){
+	if(type.asString() == "DefSessCache"){
 		DefSessCache* c = new DefSessCache();
 
 		if(c->init(conf) >= 0){

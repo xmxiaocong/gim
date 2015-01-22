@@ -1,10 +1,9 @@
-#include "svlist_cache.h"
-#include "def_svlist_cache.h"
+#include "cache_group.h"
+#include "def_cache_group.h"
 
 namespace gim{
 
-SvLstCache* SvLstChFactory::getSvLstCache(const Json::Value& config){
-
+CacheGroup* createCacheGroup(const Json::Value& config){
 	const Json::Value& type = config["Type"];
 	
 	if(!type.isString()){
@@ -13,8 +12,8 @@ SvLstCache* SvLstChFactory::getSvLstCache(const Json::Value& config){
 	
 	const Json::Value& conf = config["Config"];
 
-	if(type.asString() == "DefSvLstCache"){
-		DefSvLstCache* c = new DefSvLstCache();
+	if(type.asString() == "DefCacheGroup"){
+		DefCacheGroup* c = new DefCacheGroup();
 
 		if(c->init(conf) >= 0){
 			return c;
@@ -24,7 +23,7 @@ SvLstCache* SvLstChFactory::getSvLstCache(const Json::Value& config){
 	}
 
 	return NULL;
-} 
-
 }
 
+
+}

@@ -8,6 +8,7 @@ namespace gim{
 class ServiceRequest;
 class ServiceResponse;
 class PeerPacket;
+class Message;
 
 class PeerCon:public SvCon{
 public:
@@ -21,13 +22,12 @@ private:
 
 	int handleRecvPeerMessage(const PeerPacket& reqpk); 
 
-	
+	int getPeerMsg(const std::string& cid, int64 startid, 
+		int64 cnt, vector<Message>& msg, int64& last_msg_id);
+	int sendPeerMsg(const Message& m, 
+		int64& msgid);
 };
 
-int getPeerMsg(const std::string& cid, int64 startid, 
-	int64 cnt, vector<Message>& msg, int64& last_msg_id);
-int sendPeerMsg(const std::string& sn, const Message& cid, 
-	int64& msgid);
 
 
 class PeerConFac:public SvConFactory{

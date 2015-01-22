@@ -14,7 +14,7 @@
 namespace gim{
 
 
-	int getPeerMsg(const std::string& cid, int64 start_msgid,
+	int PeerCon::getPeerMsg(const std::string& cid, int64 start_msgid,
 		int64 count, vector<Message>& msgs, int64& msgid){
 
 		int ret= 0;
@@ -32,19 +32,17 @@ namespace gim{
 			return DB_ERROR;
 		}
 
-		int64 smsgid = 0;
 		int64 lastread = 0;
 
 		//get last read
 		if(start_msgid <= 0){
-			msgid = 0;
 			ret = c->getMsgId("peer_" + cid + "_last_read", lastread);
 
 			if(ret < 0){
 				return DB_ERROR;
 			}
 
-			if(smsgid)
+			if(lastread)
 				start_msgid = lastread;
 		}
 
@@ -76,7 +74,7 @@ namespace gim{
 
 	}
 
-	int sendPeerMsg(const Message& pm, int64& msgid){
+	int PeerCon::sendPeerMsg(const Message& pm, int64& msgid){
 
 		int ret = 0;
 
@@ -85,12 +83,18 @@ namespace gim{
 			return DB_ERROR;		
 		}
 
+		Message m = pm;
+
 		ret = c->incrId("peer_" + pm.to() + "_last_msgid", msgid);
 		if(ret < 0){
 			return DB_ERROR;
 		}
+
+		m.set_id(msgid);
+		m.set_time(gettime_ms());
+		m.set_sn(getPackSN());
 	
-		ret = c->addMsg("peer_" + pm.to(), pm);	
+		ret = c->addMsg("peer_" + m.to(), m);	
 
 		return ret; 
 
@@ -135,18 +139,13 @@ namespace gim{
 
 		for(size_t i = 0; i < msgs.size(); ++i){
 			Message* pm = gresp->add_msgs();	
-			pm->set_id(msgs[i].id());
-			pm->set_to(cid);
-			pm->set_time(msgs[i].time());
-			pm->set_from(msgs[i].from());
-			pm->set_data(msgs[i].data());
-			pm->set_sn(msgs[i].sn());
+			*pm = msgs[i];
 			os << "<action:get_peer_message> <to:"
 				<< cid << "> <from:" 
 				<< msgs[i].from() << "> <msgid:"
 				<< msgs[i].id() << "> <time:"
 				<< msgs[i].time() << "> <msg_sn:"
-				<< msgs[i].sn() << "\n";
+				<< msgs[i].sn() << ">\n";
 		}
 
 		PLogTrace("PeerServer")
