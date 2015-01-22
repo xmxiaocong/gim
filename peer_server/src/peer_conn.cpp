@@ -225,10 +225,9 @@ exit:
 		Settings *pSettings = Singleton<Settings>::instance();			
 		//send to reciver 
 		PeerPacket msgpk;
-		msgpk = reqpk;
+		msgpk.set_cmd(SEND_PEER_MESSAGE_REQ);
 		SendPeerMessageRequest* spreq = msgpk.mutable_send_peer_msg_req();
 		Message* pmsg = spreq->mutable_msg();
-		*pmsg = *resppm;
 
 		if(!reqpk.has_send_peer_msg_req()){
 			FormatErrorLog(getPackSN(), "send_peer_message");
@@ -248,6 +247,7 @@ exit:
 		}		
 
 		resppm->set_id(msgid);
+		*pmsg = *resppm;
 
 	exit:
 		if(ret >= 0){
