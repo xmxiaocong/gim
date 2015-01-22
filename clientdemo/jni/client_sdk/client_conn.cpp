@@ -509,6 +509,7 @@ namespace gim
 	}
 	int32 CliConn::processTimers(const struct timeval& tnow, struct timeval& tv)
 	{
+		SDK_LOG(LOG_LEVEL_TRACE, "cid=%s, CliConn::processTimers timer num=%d", m_cid.c_str(), m_timers.size());
 		std::vector<SmartOp> ops;
 		for (TimerList::iterator it = m_timers.begin(); it != m_timers.end();)
 		{
@@ -516,12 +517,11 @@ namespace gim
 			if (tv_cmp(key.deadline, tnow) > 0)
 			{
 				timeval tvtemp = tv_diff(key.deadline, tnow);
-				if ((tv.tv_sec == 0 && tv.tv_usec == 0)
-					|| tv_cmp(tv, tvtemp) > 0)
+				if (tv_cmp(tv, tvtemp) > 0)
 				{
 					tv = tvtemp;
 				}
-				it++;
+				break;
 			}
 			else
 			{

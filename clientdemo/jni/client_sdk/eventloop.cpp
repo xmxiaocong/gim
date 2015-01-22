@@ -65,14 +65,16 @@ namespace gim
 	int32 EventLoop::run()
 	{
 		SDK_LOG(LOG_LEVEL_TRACE, "eventloop run");
+		const struct timeval c_tvmax = { LONG_MAX, LONG_MAX };
 		struct timeval tv;
 		struct timeval* ptv;
 		fd_set fds;
 
 		while (m_run)
 		{
+			tv = c_tvmax;
 			processTimers(tv);
-			ptv = (tv.tv_sec == 0 && tv.tv_usec == 0) ? NULL : &tv;
+			ptv = (tv_cmp(c_tvmax, tv) == 0) ? NULL : &tv;
 			FD_ZERO(&fds);
 			SOCKET maxfd = m_ctlfdr;
 			FD_SET(m_ctlfdr, &fds);
@@ -183,8 +185,6 @@ namespace gim
 	{
 		timeval tnow;
 		gettimeofday(&tnow, NULL);
-		tv.tv_sec = 0;
-		tv.tv_usec = 0;
 		for (CliConnMap::iterator it = m_conns.begin(); it != m_conns.end();)
 		{
 			CliConn* pcon = it->second;
@@ -201,20 +201,13 @@ namespace gim
 				}
 				else
 				{
-					timeval tvtem;
-					tvtem.tv_sec = 0;
-					tvtem.tv_usec = 0;
-					pcon->processTimers(tnow, tvtem);
-					if (!(tvtem.tv_sec == 0 || tvtem.tv_usec == 0) && tv_cmp(tv, tvtem) < 0)
-					{
-						tv = tvtem;
-					}
+					pcon->processTimers(tnow, tv);
 					it++;
 				}
 			}
 		}
 
-		return 0;
+			return 0;
 	}
 	int32 EventLoop::asynAddOp(Op* op)
 	{
