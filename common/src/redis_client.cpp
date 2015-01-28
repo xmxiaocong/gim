@@ -749,7 +749,7 @@ int RedisCli::ssetRevRangeByScoreWithScoreLimit(const string &key, double maxSco
 int RedisCli::connAuth(const string &passWord)
 {
 	Replyer rpler;
-	string str("AUTH" + passWord);
+	string str("AUTH " + passWord);
 	return _doExeCmdNoReconnect(rpler, str.data(), NULL);
 }
 
