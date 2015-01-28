@@ -98,11 +98,12 @@ public:
 		return srresp.SerializeToString(&req);
 	}
 
-	int32	test_register(int32 type, SvRegResponse& lgresp){
+	int32	test_register(int32 type, int32 id, SvRegResponse& lgresp){
 		int32 ret = 0;
 
 		SvRegRequest lgr;
 		lgr.set_svtype(type);		
+		lgr.set_id(id);		
 	
 		std::string req;
 		lgr.SerializeToString(&req);	
@@ -305,7 +306,7 @@ private:
 
 int main(int argc, const char** argv){
 	if(argc < 4){
-		std::cout << "test <addr> <port> <service_type>"
+		std::cout << "test <addr> <port> <service_type> <id>"
 			<< std::endl;
 		return	0;
 	}
@@ -317,7 +318,7 @@ int main(int argc, const char** argv){
 		return	ret;
 	}
 	SvRegResponse lgresp;
-	ret = cli.test_register(atoi(argv[3]), lgresp);
+	ret = cli.test_register(atoi(argv[3]), atoi(argv[4]), lgresp);
 	if(ret >= 0)
 		cli.run();
 	return	0;
