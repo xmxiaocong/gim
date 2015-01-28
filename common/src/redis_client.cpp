@@ -188,27 +188,7 @@ int RedisCli::_doExeCmdNoReconnect(Replyer &rpler, const char *fmt, va_list ap)
 		tmpReply = (redisReply *)redisvCommand(m_c, fmt, ap);	
 	}
 	
-	if (m_cmdLog) {
-		stringstream ss;
-		if (ap == NULL) {
-			ss << m_addr << ":" << m_port << "    " << fmt;
-		} else {
-			redisvFormatCommand(&cmd, fmt, tmpap);
-			va_end(tmpap);
-			ss << m_addr << ":" << m_port << "    " << cmd;
-			free(cmd);
-		}
-		if (tmpReply == NULL || m_c->err) {
-			ss << "failed";
-		} else if (tmpReply->type == REDIS_REPLY_ERROR) {
-			ss << "failed, reason:" << tmpReply->str;
-		} else {
-			ss << "success";
-		}
-		m_cmdLog(ss.str());
-	}
 	if (tmpReply == NULL) {
-		m_cmdLog(fmt);
 		disconnect();
 		return -1;
 	}
@@ -230,22 +210,7 @@ int RedisCli::_doExeCmdNoReconnect(Replyer &rpler, int argc, const char **argv,
 		const size_t *argvLen)
 {
         redisReply *tmpReply = (redisReply *)redisCommandArgv(m_c, argc, argv, argvLen);
-	
-        if (m_cmdLog) {
-                stringstream ss;
-		char *cmd;
-		redisFormatCommandArgv(&cmd, argc, argv, argvLen);
-                ss << m_addr << ":" << m_port << "    " << cmd;
-                free(cmd);
-                if (tmpReply == NULL || m_c->err) {
-                        ss << "failed";
-                } else if (tmpReply->type == REDIS_REPLY_ERROR) {
-                        ss << "failed, reason:" << tmpReply->str;
-                } else {
-                        ss << "success";
-                }
-                m_cmdLog(ss.str());
-        }
+		
         if (tmpReply == NULL) {
                 disconnect();
                 return -1;
