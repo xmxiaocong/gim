@@ -61,6 +61,7 @@ namespace gim{
 
 		Message m;
 		int64 msgid = 0;
+		int64 tm = gettime_ms();
 
 		do{
 
@@ -72,37 +73,40 @@ namespace gim{
 			svresp.set_sn(svreq.sn());
 			const Message&  pm = svreq.msg();
 			const string& cid = pm.to();
-
-			MsgDB* c = DBConn::getMsgDB();
-
-			if(!c){
-				PeerErrorLog(svreq.sn(), "push_message", cid, DB_ERROR);
-				ret = DB_ERROR;
-				break;
-			}
-
-
-			ret = c->incrId("peer_" + cid + "_last_msgid", msgid);
-			if(ret < 0){
-				PeerErrorLog(svreq.sn(), "push_message", cid, DB_ERROR);
-				ret = DB_ERROR;
-				break;
-			}
-
-			int64 tm = gettime_ms();
-			m = pm;
-			m.set_time(tm);
-			m.set_sn(svreq.sn());
-
-
-			ret = c->addMsg("peer_" + pm.to(), m);
-
-			if(ret < 0){
-				PeerErrorLog(svreq.sn(), "push_message", cid, DB_ERROR);
-				ret = DB_ERROR;
-				break;
-			}
 			
+			if(pm.expire()){
+
+				MsgDB* c = DBConn::getMsgDB();
+
+				if(!c){
+					PeerErrorLog(svreq.sn(), "push_message", cid, DB_ERROR);
+					ret = DB_ERROR;
+					break;
+				}
+
+
+				ret = c->incrId("peer_" + cid + "_last_msgid", msgid);
+				if(ret < 0){
+					PeerErrorLog(svreq.sn(), "push_message", cid, DB_ERROR);
+					ret = DB_ERROR;
+					break;
+				}
+
+				m = pm;
+				m.set_time(tm);
+				m.set_sn(svreq.sn());
+
+
+				ret = c->addMsg("peer_" + pm.to(), m);
+
+				if(ret < 0){
+					PeerErrorLog(svreq.sn(), "push_message", cid, DB_ERROR);
+					ret = DB_ERROR;
+					break;
+				}
+				
+			}
+
 			//send to reciver 
 			PeerPacket msgpk;
 			msgpk.set_cmd(SEND_PEER_MESSAGE_REQ);
