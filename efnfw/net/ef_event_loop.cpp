@@ -49,7 +49,7 @@ namespace ef{
 	int32 EventLoop::getConId(){
 
 		int32 id = atomicIncrement32((volatile int32*)&m_cur_id);
-		id = atomicCompareExchange32((volatile int32*)&m_cur_id, 1, 0);
+		id = atomicCompareExchange32((volatile int32*)&m_cur_id, 1, 0x7FFFFFFF);
 		return id;
 	}
 
