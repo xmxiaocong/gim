@@ -6,6 +6,20 @@
 
 namespace gim{
 
+class DefUserDBFactory: public UserDBFactory{
+public:
+	DefUserDBFactory(const Json::Value& conf):
+		m_conf(conf){
+	}
+
+	virtual ~DefUserDBFactory(){}
+
+	virtual UserDB* newUserDB();
+
+private:
+	Json::Value m_conf;
+};
+
 class DefUserDB:public UserDB{
 public:
 	DefUserDB():m_dbg(NULL){};

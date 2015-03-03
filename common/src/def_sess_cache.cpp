@@ -4,6 +4,18 @@
 
 namespace gim{
 
+SessCache* DefSsChFactory::newSessCache(){
+	DefSessCache* c = new DefSessCache();
+
+	if(c->init(m_conf) >= 0){
+		return c;
+	}
+
+	delete c;
+
+	return NULL;
+}
+
 DefSessCache::~DefSessCache(){
 	if(m_dbg)
 		delete m_dbg;

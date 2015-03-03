@@ -9,6 +9,20 @@ namespace gim {
 using namespace std;
 using namespace ef;
 
+class RedisMIFactory: public MsgDBFactory{
+public:
+	RedisMIFactory(const Json::Value &conf):
+		m_conf(conf){
+	}
+
+	virtual ~RedisMIFactory(){}
+
+	virtual MsgDB* newMsgDB();
+
+private:
+	Json::Value m_conf;
+};
+
 #define DEFAULT_MSG_BOX_CAPACITY 100
 #define DEFAULT_MSG_EXPIRY_TIME  60 * 60 * 24 * 7 /* a week */
 

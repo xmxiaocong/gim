@@ -5,8 +5,8 @@
 #include "logic_server.h"
 #include "peer_conn.h"
 #include "push_conn.h"
-#include "dispatcher.h"
 #include "settings.h"
+#include "msg_db.h"
 #include "net/ef_net_log.h"
 #include "base/ef_deamonize.h"
 #include "base/ef_statistic.h"
@@ -81,7 +81,7 @@ int main(int argc, const char** argv){
 	initNetLog(pSettings->NLogLevel, pSettings->NLogPath, 3600, true);
 	logInit(pSettings->LogConfig);
 	initStatistic(output_statistic);
-
+	MsgDBFactory::init(pSettings->MsgDBConfig);
 
 	LogicServer s;
 
@@ -107,6 +107,7 @@ int main(int argc, const char** argv){
 
 	s.stopListen(pSettings->PushListenPort);
 	s.stop();
+	MsgDBFactory::free();
 
 	return 0;
 }

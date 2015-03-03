@@ -16,6 +16,18 @@ int printServerList(const vector<Serv>& svlst){
 	return 0;
 }
 
+class TestSvLstListener:public SvLstListener{
+public:
+	virtual int onListChange(int type, vector<Serv> &servlist){
+		printServerList(servlist);
+		return 0;
+	}
+	virtual int onDisableListChange(int type, vector<int> &servlist){
+		return 0;
+	}
+};
+
+
 int main(int argc, const char** argv){
 	if(argc < 2){
 		std::cout << "svlist_cache_test <config>\n";
@@ -24,7 +36,6 @@ int main(int argc, const char** argv){
 		
 
 	const char* config = argv[1];
-	SvLstChFactory sf;
 
 	Json::Reader reader;
 	Json::Value root;
@@ -37,16 +48,19 @@ int main(int argc, const char** argv){
 	}
 
 	Json::Value& svconf = root["ServerList"];
+	SvLstChFactory* sf = SvLstChFactory::create(svconf);
 
-	SvLstCache* c = sf.getSvLstCache(svconf);
+	SvLstCache* c = sf->newSvLstCache();
 
 	int ret = 0;
 
 	vector<Serv> servlist;
+	TestSvLstListener l;
 
-	ret = c->getEnableList(0, servlist);
+	c->setServerListListener(&l);
 
-	printServerList(servlist);
+	ret = c->watchServerList(0);
+
 
 	return 0;	
 }

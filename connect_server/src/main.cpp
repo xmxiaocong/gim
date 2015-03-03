@@ -9,7 +9,9 @@
 #include "log_init.h"
 #include "client_conn.h"
 #include "server_conn.h"
+#include "sess_cache.h"
 #include "svlist_cache.h"
+#include "user_db.h"
 #include "settings.h"
 
 using namespace ef;
@@ -80,10 +82,17 @@ int main(int argc, const char** argv){
 	signal(SIGQUIT,  SIG_IGN);
 	signal(SIGURG,  SIG_IGN);
 	signal(SIGTERM, signal_handler);
+	
+	initNetLog(pSettings->NLogLevel, pSettings->NLogPath, 3600, true);
+	logInit(pSettings->LogConfig);
+	initStatistic(output_statistic);
 
+	SsChFactory::init(pSettings->SessCacheConfig);
+	UserDBFactory::init(pSettings->UserDBConfig);
 	//register servlist
-	SvLstChFactory svcf;
-	SvLstCache* svc = svcf.getSvLstCache(pSettings->SvLstCacheConfig);
+	SvLstChFactory::init(pSettings->SvLstCacheConfig);
+	SvLstChFactory* svcf = SvLstChFactory::get();
+	SvLstCache* svc = svcf->newSvLstCache();
 
 	if(pSettings->Daemon){
 		std::cout << "Daemon!\n";
@@ -104,9 +113,6 @@ int main(int argc, const char** argv){
 	}
 	
 
-	initNetLog(pSettings->NLogLevel, pSettings->NLogPath, 3600, true);
-	logInit(pSettings->LogConfig);
-	initStatistic(output_statistic);
 	Server s;
 	s.setEventLoopCount(pSettings->ThreadCount);
 	s.init();
@@ -140,6 +146,9 @@ int main(int argc, const char** argv){
 	s.stopListen(pSettings->ClientListenPort);
 	s.stop();
 	svc->deleteServer(0, sv.id);
-
+	delete svc;
+	SvLstChFactory::free();
+	UserDBFactory::free();
+	SsChFactory::free();
 	return 0;
 }

@@ -4,6 +4,17 @@
 
 namespace gim{
 
+UserDB* DefUserDBFactory::newUserDB(){
+	DefUserDB* c = new DefUserDB();
+
+	if(c->init(m_conf) >= 0){
+		return c;
+	}
+
+	delete c;
+	return NULL;
+}
+
 DefUserDB::~DefUserDB(){
 	if(m_dbg)
 		delete m_dbg;

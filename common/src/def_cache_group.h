@@ -5,6 +5,15 @@
 
 namespace gim{
 
+class DefCacheGroupFactory: public CacheGroupFactory{
+public:
+	DefCacheGroupFactory(const Json::Value& conf):
+		m_conf(conf){}
+	virtual ~DefCacheGroupFactory(){}
+	virtual CacheGroup* newCacheGroup();
+private:
+	Json::Value m_conf;
+};
 
 class RedisCG;
 

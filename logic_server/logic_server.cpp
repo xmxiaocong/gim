@@ -8,14 +8,14 @@ static int deleteDispatcher(void* obj){
 	return 0;
 }
 
-int LogicServer::initDispatcher(const Json::Value& v){	
+int LogicServer::initDispatcher(){	
 	
 	for(int i = 0; i< m_thread_cnt; ++i){
 
 		EventLoop& l = m_cliset.getEventLoop(i);
 		Dispatcher* pDBC = new Dispatcher(&l);
 
-		if(pDBC->init(v) < 0){
+		if(pDBC->init(m_shf) < 0){
 			delete pDBC;
 			return -1;
 		}
@@ -37,6 +37,7 @@ LogicServer::LogicServer()
 
 
 LogicServer::~LogicServer(){
+	freeServerListCache();
 }
 
 
@@ -51,8 +52,8 @@ int LogicServer::stopListen(int port){
 }
 
 int LogicServer::initServerListCache(const Json::Value& v){
-	SvLstChFactory slf;
-	m_cache = slf.getSvLstCache(v);
+	m_svchfct = SvLstChFactory::create(v);
+	m_cache = m_svchfct->newSvLstCache();
 
 	if(!m_cache){
 		return -1;
@@ -62,6 +63,30 @@ int LogicServer::initServerListCache(const Json::Value& v){
 	m_cache->watchServerList(0);
 
 	return 0;
+}
+
+int LogicServer::initSessCacheFactory(const Json::Value& v){
+	m_shf = SsChFactory::create(v);
+	return 0;
+}
+
+void LogicServer::freeSessCacheFactory(){
+	if(m_shf){
+		delete m_shf;
+		m_shf = NULL;
+	}
+}
+
+void LogicServer::freeServerListCache(){
+	if(m_cache){
+		delete m_cache;
+		m_cache = NULL;
+	}
+
+	if(m_svchfct){
+		delete m_svchfct;
+		m_svchfct = NULL;
+	}
 }
 
 //if has new connect server, connect it
@@ -173,7 +198,9 @@ int LogicServer::init(int threadcnt, const Json::Value& svlstconf,
 	if(ret < 0)
 		return ret;	
 
-	ret = initDispatcher(sschconf);
+	initSessCacheFactory(sschconf);
+	
+	ret = initDispatcher();
 
 	return ret;
 }

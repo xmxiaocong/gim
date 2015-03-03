@@ -48,8 +48,18 @@ public:
 private:
 };
 
+class CacheGroupFactory{
+public:
+        virtual ~CacheGroupFactory(){};
+        virtual CacheGroup* newCacheGroup() = 0;
+	static int init(const Json::Value& config);
+	static void free();
+	static CacheGroupFactory* get();
+	static CacheGroupFactory* create(const Json::Value& config);
+private:
+	static CacheGroupFactory* g_fac;
+};
 
-CacheGroup* createCacheGroup(const Json::Value& conf);
 
 }
 

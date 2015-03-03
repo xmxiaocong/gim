@@ -59,9 +59,14 @@ private:
 class SvLstChFactory{
 public:
 	virtual ~SvLstChFactory(){};
-	virtual SvLstCache* getSvLstCache(const Json::Value& config);
+	virtual SvLstCache* newSvLstCache() = 0;
+	static int init(const Json::Value& conf);
+	static void free();
+	static SvLstChFactory* get();
+	static SvLstChFactory* create(const Json::Value& conf);
+private:
+	static SvLstChFactory* g_fct;
 };
-
 
 };
 

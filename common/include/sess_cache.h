@@ -24,8 +24,15 @@ public:
 class SsChFactory{
 public:
 	virtual ~SsChFactory(){};
-	virtual SessCache* getSessCache(const Json::Value& config);
+	virtual SessCache* newSessCache() = 0;
+	static int init(const Json::Value& conf);
+	static void free();
+	static SsChFactory* get();
+	static SsChFactory* create(const Json::Value& conf);
+private:
+	static SsChFactory* g_fct;
 };
+
 
 }
 

@@ -5,6 +5,17 @@
 
 namespace gim{
 
+CacheGroup* DefCacheGroupFactory::newCacheGroup(){
+	DefCacheGroup* c = new DefCacheGroup();
+
+	if(c->init(m_conf) >= 0){
+		return c;
+	}
+	
+	delete c;
+	return NULL;
+}
+
 #define getDBHandle	if(!m_cg){ return -1;} \
 			DBHandle h = m_cg->getHndl(key);\
 			if(!h){return -2;}

@@ -6,6 +6,20 @@
 
 namespace gim{
 
+class DefSsChFactory: public SsChFactory{
+public:
+	DefSsChFactory(const Json::Value& conf)
+		:m_conf(conf){
+	}
+
+	~DefSsChFactory(){}
+
+	virtual SessCache* newSessCache();
+	
+private:
+	Json::Value m_conf;
+};
+
 class DefSessCache: public SessCache{
 public:
 	enum{

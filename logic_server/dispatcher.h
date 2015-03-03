@@ -26,9 +26,8 @@ public:
 		m_evlp(l), m_sesscache(NULL){
 	}
 
-	int init(const Json::Value& v){
-		SsChFactory shf;
-		m_sesscache = shf.getSessCache(v);
+	int init(SsChFactory* shf){
+		m_sesscache = shf->newSessCache();
 		
 		if(!m_sesscache){
 			return -1;

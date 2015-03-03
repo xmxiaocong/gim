@@ -3,6 +3,18 @@
 
 namespace gim{
 
+
+SvLstCache* DefSvLstChFactory::newSvLstCache(){
+	DefSvLstCache* c = new DefSvLstCache();
+
+	if(c->init(m_conf) >= 0){
+		return c;
+	}
+
+	delete c;
+	return NULL;
+}
+
 int DefSvLstCache::init(const Json::Value& config){
 
 	int ret = 0;

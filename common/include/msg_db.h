@@ -67,9 +67,16 @@ public:
 
 class MsgDBFactory {
 public:
-	virtual MsgDB *newMsgDB(const Json::Value &config);
 	virtual ~MsgDBFactory(){};
+	virtual MsgDB *newMsgDB() = 0;
+	static int init(const Json::Value &conf);
+	static void free();
+	static MsgDBFactory* get();
+	static MsgDBFactory* create(const Json::Value &conf);
+private:
+	static MsgDBFactory* g_fct;
 };
+
 
 };
 #endif /*__MSG_INTERFACE_H__ */

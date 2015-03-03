@@ -12,11 +12,11 @@ CacheConn::CacheConn(){
 int CacheConn::init(){
 	Settings *pSettings = Singleton<Settings>::instance();
 
-	SsChFactory ssf;
-	m_cache = ssf.getSessCache(pSettings->SessCacheConfig);
+	SsChFactory* ssf = SsChFactory::get();
+	m_cache = ssf->newSessCache();
 
-	UserDBFactory udbf;
-	m_userdb = udbf.getUserDB(pSettings->UserDBConfig); 
+	UserDBFactory* udbf = UserDBFactory::get();
+	m_userdb = udbf->newUserDB(); 
 
 	return 0;
 }

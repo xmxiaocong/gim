@@ -3,7 +3,24 @@
 
 namespace gim{
 
-CacheGroup* createCacheGroup(const Json::Value& config){
+
+CacheGroupFactory* CacheGroupFactory::g_fac = NULL;
+
+int CacheGroupFactory::init(const Json::Value& config){
+	g_fac = create(config);
+	return 0;
+}
+
+void CacheGroupFactory::free(){
+	delete g_fac;
+	g_fac = NULL;
+}
+
+CacheGroupFactory* CacheGroupFactory::get(){
+	return g_fac;
+}
+
+CacheGroupFactory* CacheGroupFactory::create(const Json::Value& config){
 	const Json::Value& type = config["Type"];
 	
 	if(!type.isString()){
@@ -13,13 +30,9 @@ CacheGroup* createCacheGroup(const Json::Value& config){
 	const Json::Value& conf = config["Config"];
 
 	if(type.asString() == "DefCacheGroup"){
-		DefCacheGroup* c = new DefCacheGroup();
+		CacheGroupFactory* c = new DefCacheGroupFactory(conf);
 
-		if(c->init(conf) >= 0){
-			return c;
-		}
-		
-		delete c;	
+		return c;
 	}
 
 	return NULL;

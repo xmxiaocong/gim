@@ -13,8 +13,8 @@ int DBConn::init(){
 	Settings *pSettings = Singleton<Settings>::instance();
 
 
-	MsgDBFactory mdf;
-	m_msgdb = mdf.newMsgDB(pSettings->MsgDBConfig); 
+	MsgDBFactory* mdf = MsgDBFactory::get();
+	m_msgdb = mdf->newMsgDB(); 
 
 	return 0;
 }

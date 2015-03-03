@@ -3,7 +3,23 @@
 
 namespace gim{
 
-SessCache* SsChFactory::getSessCache(const Json::Value& config){
+SsChFactory* SsChFactory::g_fct = NULL;
+
+int SsChFactory::init(const Json::Value& conf){
+	g_fct = create(conf);
+	return 0;
+}
+
+void SsChFactory::free(){
+	delete g_fct;
+	g_fct = NULL;
+}
+
+SsChFactory* SsChFactory::get(){
+	return g_fct;
+}
+
+SsChFactory* SsChFactory::create(const Json::Value& config){
 	const Json::Value& type = config["Type"];
 	
 	if(!type.isString()){
@@ -13,13 +29,8 @@ SessCache* SsChFactory::getSessCache(const Json::Value& config){
 	const Json::Value& conf = config["Config"];
 
 	if(type.asString() == "DefSessCache"){
-		DefSessCache* c = new DefSessCache();
-
-		if(c->init(conf) >= 0){
-			return c;
-		}
-		
-		delete c;	
+		SsChFactory* c = new DefSsChFactory(conf);
+		return c;
 	}
 
 	return NULL;

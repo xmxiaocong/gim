@@ -3,7 +3,23 @@
 
 namespace gim{
 
-SvLstCache* SvLstChFactory::getSvLstCache(const Json::Value& config){
+SvLstChFactory* SvLstChFactory::g_fct = NULL;
+
+int SvLstChFactory::init(const Json::Value& conf){
+	g_fct = create(conf);
+	return 0;
+}
+
+void SvLstChFactory::free(){
+	delete g_fct;
+	g_fct = NULL;
+}
+
+SvLstChFactory* SvLstChFactory::get(){
+	return g_fct;
+}
+
+SvLstChFactory* SvLstChFactory::create(const Json::Value& config){
 
 	const Json::Value& type = config["Type"];
 	
@@ -14,13 +30,8 @@ SvLstCache* SvLstChFactory::getSvLstCache(const Json::Value& config){
 	const Json::Value& conf = config["Config"];
 
 	if(type.asString() == "DefSvLstCache"){
-		DefSvLstCache* c = new DefSvLstCache();
-
-		if(c->init(conf) >= 0){
-			return c;
-		}
-		
-		delete c;	
+		DefSvLstChFactory* c = new DefSvLstChFactory(conf);
+		return c;
 	}
 
 	return NULL;

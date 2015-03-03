@@ -22,8 +22,17 @@ public:
 class UserDBFactory{
 public:
 	virtual ~UserDBFactory(){};
-	virtual UserDB* getUserDB(const Json::Value& config);
+	virtual UserDB* newUserDB() = 0;
+	
+	static int init(const Json::Value& conf);
+	static void free();
+	static UserDBFactory* get();
+	static UserDBFactory* create(const Json::Value& conf);
+private:
+	static UserDBFactory* g_fct;
 };
+
+UserDBFactory* newUserDBFactory(const Json::Value& config);
 
 }
 

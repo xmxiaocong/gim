@@ -4,6 +4,12 @@
 
 namespace gim {
 
+
+MsgDB* RedisMIFactory::newMsgDB(){
+	RedisMI* c = new RedisMI(m_conf);
+	return c;
+}
+
 RedisMI::RedisMI(const Json::Value &config)
 {
 	m_cfg = config;

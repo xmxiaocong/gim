@@ -22,7 +22,6 @@ int main(int argc, const char** argv){
 		
 
 	const char* config = argv[1];
-	SsChFactory sf;
 
 	Json::Reader reader;
 	Json::Value root;
@@ -35,8 +34,9 @@ int main(int argc, const char** argv){
 	}
 
 	Json::Value& svconf = root["SessionCache"];
+	SsChFactory* sf = SsChFactory::create(svconf);
 
-	SessCache* c = sf.getSessCache(svconf);
+	SessCache* c = sf->newSessCache();
 
 	string cmd = argv[2];	
 	string cid = argv[3];

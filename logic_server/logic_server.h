@@ -83,8 +83,10 @@ private:
 	int allThreadConnectServer(const Serv& s);
 
 	int initServerListCache(const Json::Value& v);
-
-	int initDispatcher(const Json::Value& v);
+	void freeServerListCache();
+	int initSessCacheFactory(const Json::Value& v);
+	void freeSessCacheFactory();
+	int initDispatcher();
 
 	int m_thread_cnt;	
 	int m_keepalive_span;
@@ -94,7 +96,9 @@ private:
 	SvConFactory* m_confac;
 	Server m_cliset;
 	vector<Serv> m_servlist;
+	SvLstChFactory* m_svchfct;
 	SvLstCache* m_cache;
+	SsChFactory* m_shf;
 	string m_logname;
 };
 

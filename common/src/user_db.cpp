@@ -3,7 +3,23 @@
 
 namespace gim{
 
-UserDB* UserDBFactory::getUserDB(const Json::Value& config){
+UserDBFactory* UserDBFactory::g_fct = NULL;
+
+int UserDBFactory::init(const Json::Value& conf){
+	g_fct = create(conf);
+	return 0;
+}
+
+void UserDBFactory::free(){
+	delete g_fct;
+	g_fct = NULL;
+}
+
+UserDBFactory* UserDBFactory::get(){
+	return g_fct;
+}
+
+UserDBFactory* UserDBFactory::create(const Json::Value& config){
 	const Json::Value& type = config["Type"];
 	
 	if(!type.isString()){
@@ -13,13 +29,9 @@ UserDB* UserDBFactory::getUserDB(const Json::Value& config){
 	const Json::Value& conf = config["Config"];
 
 	if(type.asString() == "DefaultType"){
-		DefUserDB* c = new DefUserDB();
-
-		if(c->init(conf) >= 0){
-			return c;
-		}
+		DefUserDBFactory* c = new DefUserDBFactory(config);
+		return c;
 		
-		delete c;
 	}
 
 	return NULL;

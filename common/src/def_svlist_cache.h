@@ -7,6 +7,20 @@
 
 namespace gim{
 
+class DefSvLstChFactory: public SvLstChFactory{
+public:
+	DefSvLstChFactory(const Json::Value& conf):
+		m_conf(conf){
+	}
+
+	virtual ~DefSvLstChFactory(){}
+
+	SvLstCache* newSvLstCache();
+
+private:
+	Json::Value m_conf;
+};
+
 class DefSvLstCache:public SvLstCache{
 public:
 	virtual ~DefSvLstCache(){};
