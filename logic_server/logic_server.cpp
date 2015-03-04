@@ -89,24 +89,51 @@ void LogicServer::freeServerListCache(){
 	}
 }
 
+void serverListAdds(const vector<Serv>& a, const vector<Serv>& b,
+	vector<Serv>& adds){
+	for(size_t i = 0; i < b.size(); ++i){
+		size_t j = 0;
+		for(; j < a.size(); ++j){
+			if(b[i].id == a[j].id)
+				break;
+		}
+		if(j >= a.size()){
+			adds.push_back(b[i]);
+		}
+	}
+}
+
+void serverListDiff(const vector<Serv>& a, const vector<Serv>& b, 
+	vector<Serv>& adds, vector<Serv>& dels){
+	serverListAdds(a, b, adds);
+	serverListAdds(b, a, dels);
+}
+
+void serverListDels(vector<Serv>& a, const Serv& b){
+	for(vector<Serv>::iterator i = a.begin(); i < a.end(); ++i){
+		if(i->id == b.id){
+			a.erase(i);
+			break;
+		}
+	}
+}
+
 //if has new connect server, connect it
 int LogicServer::onListChange(int type, vector<Serv> &slist){
 
-	for(size_t i = 0; i < slist.size(); ++i){
-		size_t j = 0;
+	vector<Serv> adds;
+	vector<Serv> dels;
+	
+	serverListDiff(m_servlist, slist, adds, dels);
 
-		//find if server is new
-		for(; j < m_servlist.size(); ++j){
-			if(slist[i].id == m_servlist[j].id)
-				break;
-		}
-
-		if(j >= m_servlist.size()){
-			allThreadConnectServer(slist[i]);
-			m_servlist.push_back(slist[i]);
-		}
-
+	for(size_t i = 0; i < adds.size(); ++i){
+		allThreadConnectServer(slist[i]);
+		m_servlist.push_back(adds[i]);
 	}		
+
+	for(size_t j = 0; j < dels.size(); ++j){
+		serverListDels(m_servlist, dels[j]);	
+	}
 
 	return 0;
 }

@@ -128,6 +128,7 @@ int32 SrvCon::handleRegRequest(const head& h,
 	int32 ret = 0;
 	SvRegRequest regreq;
 	std::string sessid;
+	std::string vid;
 
 	Settings* pSettings = Singleton<Settings>::instance();
 
@@ -144,8 +145,8 @@ int32 SrvCon::handleRegRequest(const head& h,
 	if(ret >= 0){
 		m_status = STATUS_REG;
 	}
-
-	decorationName(pSettings->Id, getId(), itostr(m_svid), m_sessid);
+	vid = "__sv_" + itostr(m_type) + "_" + itostr(m_svid);
+	decorationName(pSettings->Id, getId(), vid, m_sessid);
 
 exit:
 	SvRegResponse regrsp;

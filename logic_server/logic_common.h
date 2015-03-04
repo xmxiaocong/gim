@@ -34,7 +34,15 @@ namespace gim{
 		const std::string& payload,
 		const std::string& callback,
 		std::string& req);
-	
+
+	int32 decorationName(int32 svid, int32 conid,
+		const std::string& n, std::string& dn);
+
+	int32 getDecorationInfo(const std::string& dn, int32& svid,
+		int32& conid, std::string& n);	
+
+	int32 getSvTypeFromSessid(const std::string& ssid, int32& svtype);
+
 
 	#define ALogTrace(a) logTrace(a) << "[" << __FUNCTION__\
 		<< "] addr[" << getIp() << ":"\
