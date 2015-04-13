@@ -209,8 +209,10 @@ int32	Connection::startTimer(int32 id, int32 timeout){
 	}
 
 	tm = getTimer(id);
-	if(tm && tm->status() == ConnectionTimer::STATUS_START){
-		thr->delTimer(tm);
+	if(tm){
+		if(tm->status() == ConnectionTimer::STATUS_START){
+			thr->delTimer(tm);
+		}
 	}else{
 		tm = new ConnectionTimer(this, id, timeout);	
 		m_timers[id] = tm;
@@ -231,8 +233,10 @@ int32	Connection::stopTimer(int32 id){
 		return -1;
 	}
 	tm = getTimer(id);
-	if(tm && tm->status() == ConnectionTimer::STATUS_START){
-		thr->delTimer(tm);
+	if(tm){
+		if(tm->status() == ConnectionTimer::STATUS_START){
+			thr->delTimer(tm);
+		}
 		tm->setStatus(ConnectionTimer::STATUS_STOP);
 	}
 	return	0;
