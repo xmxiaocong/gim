@@ -9,13 +9,6 @@ namespace ef{
 	class Connection;
 	class EventLoop;
 
-	class TimerHandler{
-	public:
-		int32 handleTimer(EventLoop* l,int32 timer_id){
-			return 0;
-		}
-	};
-
 	struct time_tv{
 	time_tv(long sec = 0,long usec = 0)
 		:m_sec(sec), m_usec(usec){
@@ -33,6 +26,20 @@ namespace ef{
 		return tv;
 	}
 
+	bool operator < (const time_tv& t) const {
+		if (m_sec < t.m_sec) {
+			return true;
+		} else if (m_sec > t.m_sec) {
+			return false;
+		}
+		return m_usec < m_sec;
+	}
+
+	bool operator== (const time_tv& t) const {
+		return m_sec == t.m_sec && m_usec == t.m_usec;
+	}
+
+
 	long m_sec;
 	long m_usec;
 
@@ -40,33 +47,57 @@ namespace ef{
 
 	class Timer{
 	public:
-		Timer(Connection *con = NULL, int32 id = 0, 
-				time_tv timouttime = time_tv(), TimerHandler* handler = NULL);
+		Timer(time_tv timouttime = time_tv());
+
+		void setTimeoutTime(const time_tv& t){
+			m_timeouttime = t;
+		}
 
 		virtual ~Timer();
 
-		virtual int32 timeout(EventLoop* l);
+		virtual int32 timeout(EventLoop* l){
+			return 0;
+		}
 
 		time_tv getTimeoutTime(){
 			return m_timeouttime;
 		}
 
-		Connection* getConnection(){
-			return m_con;
-		}
 
-		int32 getId(){
-			return m_id;
+		bool operator < (const Timer& t) const {
+			return m_timeouttime < t.m_timeouttime;
 		}
 
 	private:
-		Connection *m_con;
-		TimerHandler *m_handler;
-		int32  m_id;
 		time_tv  m_timeouttime;
 	};
 
+	class ConnectionTimer: public Timer{
+	public:
+		static const int32 STATUS_INIT = 0;
+		static const int32 STATUS_START = 1;
+		static const int32 STATUS_STOP = 2;
 
+		ConnectionTimer(Connection* con, int32 id, int32 timeout_ms);
+
+		virtual ~ConnectionTimer(){
+		}
+
+		virtual int32 timeout(EventLoop* l);
+
+		int32 status() const{
+			return m_status;
+		} 
+		
+		void setStatus(int32 status){
+			m_status = status;
+		}
+
+	private:
+		Connection* m_con;
+		int32 m_id;
+		int32 m_status;	
+	};
 
 };
 

@@ -2,6 +2,7 @@
 #define EF_NET_THREAD_H
 
 #include <map>
+#include <set>
 #include <list>
 #include <string>
 #include "ef_common.h"
@@ -34,6 +35,8 @@ namespace ef{
 		int32 asynCloseConnection(int32 id);
 		int32 asynCloseAllConnections();
 		int32 asynSendMessage(int32 id, const std::string &msg);
+		int32 asynAddTimer(Timer* t);
+		int32 asynDelTimer(Timer* t);
 		int32 addAsynOperator(NetOperator* op = NULL);
 
 		int32 init();
@@ -64,17 +67,13 @@ namespace ef{
 		}
 
 		//the function below is not thread safe	
-		int32 addTimer(Timer tm);
-		int32 delTimer(Timer tm);
+		int32 addTimer(Timer* tm);
+		int32 delTimer(Timer* tm);
 		int32 addConnection(int32 id, Connection *con);
 		int32 delConnection(int32 id);
 		int32 closeConnection(int32 id);
 		Connection* getConnection(int32 id);
 		int32 sendMessage(int32 id, const std::string &msg);
-		int32 startEventLoopTimer(int32 id, 
-				int32 timeout, 
-				TimerHandler* handler);
-		int32 stopEventLoopTimer(int32 id);
 		int32 closeAllConnections();
 		size_t ConnectionsCount();
 	private:
@@ -83,43 +82,15 @@ namespace ef{
 		int32 delAllConnections();
 		int32 delAllOp();
 
-		int32 findDelEventLoopTimer(int32 id, Timer& tm);
-		int32 processTimer(time_tv &diff);
-		int32 processOp();
-
-
-		struct TimerKey{
-			time_tv tv;
-			int32 con_id;
-			int32 id;
-
-		};
+		int32 processTimers(time_tv &diff);
+		int32 processOps();
 
 		struct less
 		{ // functor for operator<
 			bool operator()
-				(const TimerKey& _Left, const TimerKey& _Right) const
+				(const Timer* _Left, const Timer* _Right) const
 			{
-				// apply operator < to operands
-				if(_Left.tv.m_sec < _Right.tv.m_sec){
-					return true;
-				}else if(_Left.tv.m_sec > _Right.tv.m_sec){
-					return false;
-				}
-
-				if(_Left.tv.m_usec < _Right.tv.m_usec){
-					return true;
-				}else if(_Left.tv.m_usec > _Right.tv.m_usec){
-					return false;
-				}
-
-				if(_Left.con_id < _Right.con_id){
-					return true;
-				}else if(_Left.con_id > _Right.con_id){
-					return false;
-				}
-
-				return _Left.id < _Right.id;
+				return *_Left < *_Right;
 			}
 		};
 
@@ -139,13 +110,10 @@ namespace ef{
 		SOCKET m_ctlfd1;
 
 		typedef std::map<int32, Connection*> con_map;
-		con_map  m_con_map;
+		con_map m_con_map;
 
-		typedef std::map<TimerKey, Timer, less> timer_map;
+		typedef std::set<Timer*, less> timer_map;
 		timer_map m_timer_map;
-
-		typedef std::map<int32, Timer> thread_timer_map;
-		thread_timer_map m_timers;
 
 		MUTEX m_opcs;
 

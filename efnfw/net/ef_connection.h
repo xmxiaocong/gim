@@ -1,7 +1,7 @@
 #ifndef __EF_CONNECTION_H__
 #define __EF_CONNECTION_H__
 
-#include <list>
+#include <map>
 #include <string>
 #include "ef_device.h"
 #include "base/ef_loop_buf.h"
@@ -10,7 +10,7 @@ namespace ef{
 
 	class EventLoop;
 	class Message;
-	class Timer;
+	class ConnectionTimer;
 
 	class Connection:public Device{
 	public:
@@ -84,8 +84,8 @@ namespace ef{
 
 
 	private:
-		friend class Timer;
-		int32 findDelTimer(int32 id, Timer &tm);
+		friend class ConnectionTimer;
+		ConnectionTimer* getTimer(int32 id);
 		int32 clearTimer();
 		int32 doSend();
 		int32 send_(const char* buf, int32 len);
@@ -94,7 +94,7 @@ namespace ef{
 		int32  m_id;
 
 		LoopBuf m_buf;
-		std::list<Timer> m_timers;
+		std::map<int32, ConnectionTimer*> m_timers;
 		LoopBuf m_send_buf;
 
 		int32 m_flag;

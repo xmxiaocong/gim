@@ -23,9 +23,10 @@ Connection::~Connection(){
 int32	Connection::clearTimer(){
 
 	if(m_evlp){
-		std::list<Timer>::iterator itor = m_timers.begin();
+		std::map<int32, ConnectionTimer*>::iterator itor = m_timers.begin();
 		for(;itor != m_timers.end(); ++itor){
-			m_evlp->delTimer(*itor);
+			m_evlp->delTimer((itor->second));
+			delete itor->second;
 		}
 		m_timers.clear();
 	}
@@ -189,21 +190,17 @@ int32	Connection::handleWrite(EventLoop* l){
 }
 
 
-int32	Connection::findDelTimer(int32 id, Timer &tm){
-	std::list<Timer>::iterator itor = m_timers.begin();
-	for(; itor != m_timers.end(); ++itor){
-		if(itor->getId() == id){
-			tm = *itor;
-			m_timers.erase(itor);
-			return	0;
-		}
+ConnectionTimer* Connection::getTimer(int32 id){
+	std::map<int32, ConnectionTimer*>::iterator itor = m_timers.find(id);
+	if(itor != m_timers.end()){
+		return itor->second;
 	}
-	return	-1;
+	return	NULL;
 }
 
 int32	Connection::startTimer(int32 id, int32 timeout){
 	int32	ret = 0;
-	Timer	tm;
+	ConnectionTimer* tm = NULL;
 	EventLoop* thr = getEventLoop();
 
 	if(!thr){
@@ -211,32 +208,32 @@ int32	Connection::startTimer(int32 id, int32 timeout){
 		return -1;
 	}
 
-	ret = findDelTimer(id, tm);
-	if(ret == 0){
+	tm = getTimer(id);
+	if(tm && tm->status() == ConnectionTimer::STATUS_START){
 		thr->delTimer(tm);
+	}else{
+		tm = new ConnectionTimer(this, id, timeout);	
+		m_timers[id] = tm;
 	}
 
-	timeval	tv;
-	gettimeofday(&tv, NULL);
-	tv.tv_sec += timeout / 1000;
-	tv.tv_usec += timeout % 1000 * 1000;
-	Timer	tm1(this, id, tv);
-	thr->addTimer(tm1);
-	m_timers.push_back(tm1);
+	tm->setStatus(ConnectionTimer::STATUS_START);
+	thr->addTimer(tm);
+	
 	return	0;
 }
 
 int32	Connection::stopTimer(int32 id){
 	int32	ret = 0;
-	Timer	tm;
+	ConnectionTimer* tm = NULL;
 	EventLoop* thr = getEventLoop();
 	if(!thr){	
 		assert(thr);
 		return -1;
 	}
-	ret = findDelTimer(id, tm);
-	if(ret == 0){
+	tm = getTimer(id);
+	if(tm && tm->status() == ConnectionTimer::STATUS_START){
 		thr->delTimer(tm);
+		tm->setStatus(ConnectionTimer::STATUS_STOP);
 	}
 	return	0;
 }

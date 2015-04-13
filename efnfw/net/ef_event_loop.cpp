@@ -22,9 +22,6 @@ namespace ef{
 		m_obj(NULL),m_clean(NULL)
 	{
 		mutexInit(&m_opcs);
-#ifdef THREAD_SAFE
-		mutexInit(&m_tmcs);
-#endif
 	}
 
 	EventLoop::~EventLoop(){
@@ -71,10 +68,6 @@ namespace ef{
 		ev.events = EPOLLIN;
 		ev.data.fd = m_ctlfd;
 		ret = epoll_ctl(m_epl, EPOLL_CTL_ADD, m_ctlfd, &ev);
-		//struct epoll_event ev1;
-		//ev1.events = EPOLLIN;
-		//ev1.data.fd = m_ctlfd;
-		//ret = epoll_ctl(m_epl, EPOLL_CTL_ADD, m_ctlfd1, &ev1);
 
 		if(ret < 0){
 			sock_close(m_ctlfd);
@@ -216,16 +209,13 @@ namespace ef{
 		time_tv tv;
 		while(1){
 			//process Op and timer at first
-			processOp();
-			processTimer(tv);
+			processOps();
+			int32 t = processTimers(tv);
 			if(m_status != STATUS_RUNNING&& !ConnectionsCount()){
 				m_status = STATUS_CLOSED;
 				break;
 			}
-			if(tv.m_sec > 0 || (tv.m_sec == 0 && tv.m_usec > 0 )){
-				//std::cout << "EventLoop:" << std::hex << this
-				//	<< ", tv:" << tv.m_sec * 1000 + tv.m_usec / 1000
-				//	<< std::endl;
+			if(t > 0){
 				nfds = epoll_wait(m_epl,events, events_on_loop, 
 						tv.m_sec * 1000 + tv.m_usec / 1000);
 			}else{
@@ -281,7 +271,7 @@ namespace ef{
 		return 0;
 	}
 
-	int32 EventLoop::processOp(){
+	int32 EventLoop::processOps(){
 		NetOperator *op = NULL;
 		char buf[1024];
 		int32 loop = sizeof(buf);
@@ -353,9 +343,8 @@ namespace ef{
 		return ret;
 	}
 
-	int32 EventLoop::processTimer(time_tv &diff){
+	int32 EventLoop::processTimers(time_tv &diff){
 		timeval t;
-		int32 ret = 0;
 		gettimeofday(&t, NULL);
 		time_tv tv(t);
 		int32 max_timer_one_loop 
@@ -363,27 +352,26 @@ namespace ef{
 			MAX_PROC_TIMER_CNT : NetSettings::procTimerCnt;
 		timer_map::iterator itor = m_timer_map.begin();
 		int32 i = 0;
+		int32 ret = 0;
 		diff.m_sec = 0;
 		diff.m_usec = 0;
 		while(itor != m_timer_map.end() && i < max_timer_one_loop){
-			time_tv tv1 = (*itor).first.tv;
+			time_tv tv1 = (*itor)->getTimeoutTime();
 			if(tv_cmp(tv, tv1) < 0){
 				diff = tv_diff(tv1, tv);
+				ret = 0;
 				break;
 			}
 			timer_map::value_type t = (*itor);
 #if DETAIL_NET_LOG
 			int32 s = m_timer_map.size();
 			NLogTrace << "EventLoop:" << std::hex 
-				<< this << ", con:" << t.second.getConnection()
-				<< std::dec
+				<< this << std::dec
 				<< ", timeout, key.tv:" << t.first.tv.m_sec
 				<< ":" << t.first.tv.m_usec
-				<< ", key.id:" << t.first.id
-				<< ", key.con_id:" << t.first.con_id
 				<< ", map.size:" << s;
 #endif/*DETAIL_NET_LOG*/
-			t.second.timeout(this);
+			t->timeout(this);
 			m_timer_map.erase(itor);
 			itor = m_timer_map.begin();
 			++i;
@@ -513,80 +501,31 @@ namespace ef{
 		return	ret;  
 	}
 
-	int32 EventLoop::addTimer(Timer tm){
-		TimerKey key;
-		Connection *con = tm.getConnection();
-		std::string addr;
-		int32 port;
+	int32 EventLoop::addTimer(Timer* tm){
 
-		key.tv = tm.getTimeoutTime();
-		if(con){
-			con->getAddr(addr,port); 
-			key.con_id = con->getId();
-		}else{
-			key.con_id = 0;
-		}
-		key.id = tm.getId();
-		int32 s = 0;
-		timer_map::iterator itor = m_timer_map.find(key);
-		if(itor != m_timer_map.end()){
-			Connection *c = itor->second.getConnection();
-			NLogError << "EventLoop:" << std::hex << this 
-				<< ", con:" << std::hex << con 
-				<< std::dec
-				<< ", dumplicate timer:" << tm.getId()
-				<< ", key.tv:" << key.tv.m_sec << ":"
-				<< key.tv.m_usec << ", key.id:"
-				<< tm.getId() << ", key.con_id:" << key.con_id
-				<< ", timer.con:" << c << ", timer.con_id:"
-				<< c->getId() << ", timer.fd:" << c->getFd();
-				
-		}
-		m_timer_map[key] = tm;
-		s = m_timer_map.size();
+		m_timer_map.insert(tm);
 
 #if DETAIL_NET_LOG
+		int32 s = 0;
+		s = m_timer_map.size();
 		NLogTrace << "EventLoop:" << std::hex << this 
-				<< ", con:" << std::hex << con 
-				<< std::dec
-				<< ", id:" <<  (con ? con->getId() : 0) 
-				<< ", fd:," << (con ? con->getFd() : -1)
-				<< " " << (con ? (addr) : "0")
-				<< ":" << (con ? port : -1)
-				<< ", add timer:" << tm.getId()
-				<< ", key.tv:" << key.tv.m_sec << ":"
-				<< key.tv.m_usec << ", key.id:"
-				<< tm.getId() << ", key.con_id:" << key.con_id
-				<< ", map.size:" << s;
+				<< ", add timer:" << tm << std::dec 
+				<< ", key.tv:" << tm->getTimeoutTime().m_sec << ":"
+				<< tm->getTimeoutTime().m_usec << ", map.size:" << s;
 #endif
 		return 0;
 	}
 
-	int32 EventLoop::delTimer(Timer tm){
-		TimerKey key;
-		Connection *con = tm.getConnection();
-		std::string addr;
-		int32 port;
-		int32 s = 0;
+	int32 EventLoop::delTimer(Timer* tm){
 
-		con->getAddr(addr,port); 
-		key.con_id = con->getId();
-		key.id = tm.getId();
-		key.tv = tm.getTimeoutTime();
-		m_timer_map.erase(key);
-		s = m_timer_map.size();
+		m_timer_map.erase(tm);
 #if DETAIL_NET_LOG
+		int32 s = 0;
+		s = m_timer_map.size();
 		NLogTrace << "EventLoop:" << std::hex << this 
-				<< ", con:" << std::hex << con << std::dec
-				<< ", id:" <<  (con ? con->getId() : 0) 
-				<< ", fd:," << (con ? con->getFd() : -1)
-				<< " " << (con ? (addr) : "0")
-				<< ":" << (con ? port : -1)
-				<< " del timer:" << tm.getId()
-				<< ", key.tv:" << key.tv.m_sec << ":"
-				<< key.tv.m_usec << ", key.id:"
-				<< tm.getId() << ", key.con_id:" << key.con_id
-				<< ", map.size:" << s;
+				<< " del timer:" << tm << std::dec 
+				<< ", key.tv:" << tm->getTimeoutTime().m_sec << ":"
+				<< tm->getTimeoutTime().m_usec << ", map.size:" << s;
 #endif
 		return 0;
 	}
@@ -659,46 +598,5 @@ namespace ef{
 		}
 		return 0;
 	}
-
-	int32 EventLoop::findDelEventLoopTimer(int32 id, Timer& tm){
-		thread_timer_map::iterator itor = m_timers.find(id);
-		if(itor != m_timers.end()){
-			tm = itor->second;
-			m_timers.erase(itor);
-			return  0;
-		}
-		return  -1;
-
-	}
-
-	int32 EventLoop::startEventLoopTimer(int32 id, 
-			int32 timeout, 
-			TimerHandler* handler){
-		int32   ret = 0; 
-		Timer   tm; 
-		ret = findDelEventLoopTimer(id, tm); 
-		if(ret == 0){ 
-			delTimer(tm); 
-		} 
-
-		timeval tv;
-		gettimeofday(&tv, NULL);
-		tv.tv_sec += timeout / 1000;
-		tv.tv_usec += timeout % 1000 * 1000;
-		Timer   tm1(NULL, id, tv, handler);
-		m_timers[id] = tm1;
-		return addTimer(tm1);
-	}
-
-	int32 EventLoop::stopEventLoopTimer(int32 id){
-		int32   ret = 0;
-		Timer   tm;
-		ret = findDelEventLoopTimer(id, tm);
-		if(ret == 0){
-			delTimer(tm);
-		}
-		return  0;
-	}
-
 }
 
