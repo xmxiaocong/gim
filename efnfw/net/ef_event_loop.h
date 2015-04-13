@@ -116,6 +116,7 @@ namespace ef{
 		timer_map m_timer_map;
 
 		MUTEX m_opcs;
+		volatile int32 m_ops_flag;
 
 		LoopBuf m_ops;
 		int32 m_cur_id;

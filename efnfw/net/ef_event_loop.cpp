@@ -18,6 +18,7 @@ namespace ef{
 		m_epl(INVALID_SOCKET),
 		m_ctlfd(INVALID_SOCKET),
 		m_ctlfd1(INVALID_SOCKET),
+		m_ops_flag(0),
 		m_cur_id(1),m_id(-1),
 		m_obj(NULL),m_clean(NULL)
 	{
@@ -273,8 +274,10 @@ namespace ef{
 
 	int32 EventLoop::processOps(){
 		NetOperator *op = NULL;
-		char buf[1024];
+		char buf[1024 * 16];
 		int32 loop = sizeof(buf);
+		int32 flag =  atomicExchange32(&m_ops_flag, 0);
+		loop = recv(m_ctlfd, buf, sizeof(buf), 0);
 		int32 cnt = 0;
 		while(m_ops.size()){
 			mutexTake(&m_opcs);
@@ -290,9 +293,6 @@ namespace ef{
 			op->process(this);
 			delete op;
 			++cnt;
-		}
-		while(loop >= (int32)sizeof(buf)){
-			loop = recv(m_ctlfd, buf, sizeof(buf), 0);
 		}
 
 		return 0;
@@ -328,17 +328,20 @@ namespace ef{
 			mutexGive(&m_opcs);
 		}
 
-		char ctl;
-		ret = send(m_ctlfd1, &ctl, sizeof(ctl), 0);
-		if(ret < 0){
-			NLogError << "EventLoop:" << std::hex 
-				<< this << ", send ctl msg fail";
-			return -1;
-		}else{
-#if DETAIL_NET_LOG
-			NLogTrace << "EventLoop:" << std::hex 
-				<< this << ", send ctl msg";
-#endif
+		int32 flag = atomicCompareExchange32(&m_ops_flag, 1, 0);
+		if(!flag){ 
+			char ctl;
+			ret = send(m_ctlfd1, &ctl, sizeof(ctl), 0);
+			if(ret < 0){
+				NLogError << "EventLoop:" << std::hex 
+					<< this << ", send ctl msg fail";
+				return -1;
+			}else{
+	#if DETAIL_NET_LOG
+				NLogTrace << "EventLoop:" << std::hex 
+					<< this << ", send ctl msg";
+	#endif
+			}
 		}
 		return ret;
 	}
