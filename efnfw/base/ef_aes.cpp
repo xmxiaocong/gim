@@ -27,14 +27,20 @@ namespace ef{
 			if(ret < 0){
 				return ret;
 			}
-		
-			dst.resize(len + 16 - len % 16);
-			BYTE* encout = (BYTE*)dst.data();
-			ret = padEncrypt(&cnst, &keyist, (BYTE*)src, len, encout);
-			if(ret < 0)
-				return ret;
-			dst.resize(ret);
-			return ret;
+
+                        dst.resize(len + 16 - len % 16);
+                        BYTE* encout = (BYTE*)dst.data();
+                        if(len % 16){
+                                ret = padEncrypt(&cnst, &keyist, (BYTE*)src, len, encout);
+                        }else{
+                                ret = blockEncrypt(&cnst, &keyist, (BYTE*)src, len, encout);
+                        }
+                        if(ret < 0)
+                                return ret;
+                        dst.resize(ret);
+                        dst.append((char*)&len, sizeof(len));
+
+                        return ret + sizeof(len);
 	}
 
 	int32 aesDecrypt(const char* src, size_t len, 
@@ -55,13 +61,27 @@ namespace ef{
 			if(ret < 0){
 				return ret;
 			}
-			dst.resize(len + 16 - len % 16);
-			BYTE* encout = (BYTE*)dst.data();
-			ret = padDecrypt(&cnst, &keyist, (BYTE*)src, len, encout);
-			if(ret < 0)
-				return ret;
-			dst.resize(ret);
-			return ret;
+
+                        size_t orglen = 0;
+                        orglen = *(size_t*)(src + len - sizeof(orglen));
+
+                        if(orglen > len - sizeof(orglen)){
+
+                                return -10;
+                        }
+
+                        dst.resize(len + 16 - len % 16);
+                        BYTE* encout = (BYTE*)dst.data();
+                        if(orglen % 16){
+                                ret = padDecrypt(&cnst, &keyist, (BYTE*)src, len - sizeof(orglen), encout);
+                        }else{
+                                ret = blockDecrypt(&cnst, &keyist, (BYTE*)src, len - sizeof(orglen), encout);
+
+                        }
+                        if(ret < 0)
+                                return ret;
+                        dst.resize(orglen);
+			return orglen;
 	}
 
 
