@@ -1,0 +1,8 @@
+project(ConnectServer)
+set(CMAKE_VERBOSE_MAKEFILE ON)
+add_definitions("-Wall -pg -g")
+include_directories(${PROJECT_SOURCE_DIR}/../logic_server ${PROJECT_SOURCE_DIR}/../common/include ${PROJECT_SOURCE_DIR}/../efnfw)
+link_directories(/usr/local/lib ../common/lib/ ../efnfw/lib ../logic_server/lib) 
+link_libraries(liblogic_server.a libcommon.a libefnfw.a hiredis zookeeper_mt protobuf jsoncpp pthread)
+file(GLOB_RECURSE SRC_LIST src/*.cpp)
+add_executable(bin/ConnectServer ${SRC_LIST})

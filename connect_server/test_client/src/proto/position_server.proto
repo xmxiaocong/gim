@@ -1,0 +1,41 @@
+{
+	"command":"set_position_req",
+	"position":{
+		"line_id":"xiamen_to_zhangzhou",
+		"uid":"user1",
+		"location":{
+			"long":125.23,
+			"lat":26.24
+		}
+	}
+}
+
+{
+        "command":"set_position_resp",
+        "line_id":"xiamen_to_zhangzhou",
+        "uid":"user1",
+        "status":0,
+	"err_str":"SUCCESS"
+}
+
+
+{
+	"command":"get_position_req",
+	"line_id":"xiamen_to_zhangzhou",
+	"uid":"user1",
+	
+}
+
+{
+	"command":"get_position_resp",
+	"status":0,
+	"err_str":"SUCCESS"
+	"position":{
+		"line_id":"xiamen_to_zhangzhou",
+		"uid":"user1",
+		"location":{
+			"long":125.23,
+			"lat":26.24
+		{
+	}
+}

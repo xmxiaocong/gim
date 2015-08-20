@@ -1,0 +1,14 @@
+package gim;
+
+message CommonServiceRequest{
+	optional string cid = 1;
+	optional int32 type = 2;
+	optional string parms = 3;
+}
+
+message CommonServiceResponse{
+	optional string cid = 1;
+	optional int32 type = 2;
+	optional string status = 3;
+	optional string code = 4;
+}

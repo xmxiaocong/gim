@@ -1,0 +1,14 @@
+package gim;
+
+import "pair.proto";
+
+message Sess{
+	optional string id = 1;
+	optional int32 type = 2;
+	optional int64 lasttime = 3;
+	optional string sessid = 4;
+	optional int32 consvid = 5;
+	optional string version = 6;
+	repeated Pair kvs = 7;
+}
+
