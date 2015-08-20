@@ -34,7 +34,7 @@ namespace ef{
 		} else if (m_sec > t.m_sec) {
 			return false;
 		}
-		return m_usec < m_usec;
+		return m_usec < t.m_usec;
 	}
 
 	bool operator== (const time_tv& t) const {
