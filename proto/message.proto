@@ -8,8 +8,8 @@ message Message{
 	optional string from = 4;//who send
 	optional int32 type = 5;
 	optional string sn = 6;
-	optional bytes data  = 7;//message data	
-	optional int64 expire = 8[default = -1];//expire second
+	optional bytes data  = 7;//message data
+	optional int64 expire = 8; //expire time
 }
 
 

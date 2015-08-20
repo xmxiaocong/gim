@@ -3,10 +3,12 @@ package gim;
 import "pair.proto";
 
 message Sess{
-	optional string cid = 1;
-	optional int64 lasttime = 2;
-	optional string sessid = 3;
-	optional int32 svid = 4;
-	repeated Pair kvs = 5;
+	optional string id = 1;
+	optional int32 type = 2;
+	optional int64 lasttime = 3;
+	optional string sessid = 4;
+	optional int32 consvid = 5;
+	optional string version = 6;
+	repeated Pair kvs = 7;
 }
 

@@ -9,20 +9,21 @@ enum{
 	STATUS_OK = 0,
 	INPUT_FORMAT_ERROR = -1,
 	CREATE_SESSION_FAIL = -10,
-	GET_USER_KEY_FAIL = -11,
+	GET_KEY_FAIL = -11,
 	CHECK_TOKEN_FAIL = -12,
 	NO_ENC_UNSUPPORT = -13,
-	INVLID_SESSION_ID = -20,
+	INVALID_SESSION_ID = -20,
 	SESSION_TIMEOUT = -21, 
+	MISS_TO_SESSION_ID = -22, 
 	NO_SERVICE = -30,
-	THIS_SERVICE_EMPTY = -31,
-	SERVICE_EVENTLOOP_NULL = -32,
 	SERVICE_TOO_BUSY = -33,
+	CALL_TIMEOUT = -34,
 	INVALID_SN = -40,
 	SN_TIMEOUT = -41,
 	DECRYPT_FAIL = -50,
-	DB_ERROR = -60,
+	INVALID_TYPE = -60,
 	SERVICE_TYPE_ERROR = -70,
+	ASSESS_FORBIDDEN = -80,
 	INNER_ERROR = -100,
 };
 
@@ -34,20 +35,18 @@ inline const char* getErrStr(int e){
 		return "INPUT_FORMAT_ERROR";
 	case CREATE_SESSION_FAIL:
 		return "CREATE_SESSION_FAIL";
-	case GET_USER_KEY_FAIL:
+	case GET_KEY_FAIL:
 		return "GET_USER_KEY_FAIL";
 	case CHECK_TOKEN_FAIL:
 		return "CHECK_TOKEN_FAIL";
 	case NO_ENC_UNSUPPORT:
 		return "NO_ENC_UNSUPPORT";
-	case INVLID_SESSION_ID:
-		return "INVLID_SESSION_ID";
+	case INVALID_SESSION_ID:
+		return "INVALID_SESSION_ID";
+	case MISS_TO_SESSION_ID:
+		return "MISS_TO_SESSION_ID";
 	case NO_SERVICE:
 		return "NO_SERVICE";
-	case THIS_SERVICE_EMPTY:
-		return "THIS_SERVICE_EMPTY";
-	case SERVICE_EVENTLOOP_NULL:
-		return "SERVICE_EVENTLOOP_NULL";
 	case SESSION_TIMEOUT:
 		return "SESSION_TIMEOUT";
 	case SERVICE_TOO_BUSY:
@@ -56,16 +55,22 @@ inline const char* getErrStr(int e){
 		return "INVALID_SN";
 	case SN_TIMEOUT:
 		return "SN_TIMEOUT";
+	case INVALID_TYPE:
+		return "INVALID_TYPE";
 	case DECRYPT_FAIL:
 		return "DECRYPT_FAIL";
-	case DB_ERROR:
-		return "DB_ERROR";
 	case SERVICE_TYPE_ERROR:
 		return "SERVICE_TYPE_ERROR";
+	case ASSESS_FORBIDDEN:
+		return "ASSESS_FORBIDDEN";
+	case CALL_TIMEOUT:
+		return "CALL_TIMEOUT";
 	case INNER_ERROR:
 		return "INNER_ERROR";
 	}
-	return "";
+	if(e >= 0)
+		return "STATUS_OK";
+	return "UNKNOW_ERROR";
 }
 
 };

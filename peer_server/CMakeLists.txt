@@ -1,8 +1,0 @@
-project(PeerServer)
-set(CMAKE_VERBOSE_MAKEFILE ON)
-add_definitions("-Wall -pg -g")
-include_directories(../efnfw ../common/include ../logic_server)
-link_directories(/usr/local/lib ../logic_server/lib ../common/lib/ ../efnfw/lib) 
-link_libraries(liblogic_server.a libcommon.a libefnfw.a hiredis json protobuf pthread)
-file(GLOB_RECURSE SRC_LIST src/*.cpp)
-add_executable(bin/PeerServer ${SRC_LIST})

@@ -3,19 +3,18 @@ package gim;
 import "pair.proto";
 
 message LoginRequest{
-	required string cid = 1;//cid of client
-	optional int64 time = 2; //client timestamp
+	required string id = 1;//id of user or logic server
+	optional int32 type = 2;//type 0:client, > 0:logic server
 	optional string version = 3;//client version
-	optional int32 enc = 4;//0: raw data, 1:enc
-	optional string token = 5; //use for check
-	repeated Pair kvs = 6;
+	optional string token = 4; //use for check
+	repeated Pair kvs = 5;
 }
 
 
 message LoginResponse{
 	required int32 status = 1;//if 0 success, else fail
 	optional string sessid = 2;//the session id, 
-	optional int64 time = 3;//server timestamp
+	optional int64 server_time = 3;//server timestamp
 } 
 
 message Address{
@@ -28,41 +27,29 @@ message RedirectResponse{
 	repeated Address addrs = 2;
 } 
 
-message SetTimeResponse{
-	required int32 status = 1;//if 0 success, else fail
-	required int64 server_time = 2;
-} 
 
 message ServiceRequest{
-	required string from_sessid = 1;//from sessid
+	optional string from_sessid = 1;//from sessid
 	optional string to_sessid = 2;//to sessid
-	required int32 svtype = 3;// 100:push 200:peer
-	required string sn = 4;//each req has an unique sn
-	optional bytes payload = 5;// payload
-	optional string key = 6;//the keyword to dispatch
-	optional bytes callback = 7;//callback data
+	required int32 from_type = 3;// 100:push 200:peer
+	required int32 to_type = 4;// 100:push 200:peer
+	required string sn = 5;//each req has an unique sn
+	optional bytes payload = 6;// payload
 }
 
 message ServiceResponse{
-	optional string from_sessid = 1; //from sessid
-	required string to_sessid = 2; //to sessid
-	required int32 svtype = 3;
-	required string sn = 4;//each req has an unique sn
-	required int32 status = 5;// 0 success
-	optional bytes payload = 6;
-	optional bytes callback = 7;//callback data
-}
-
-message SvRegRequest{
-	required int32 svtype = 1;
-	required int32 id = 2;
-}
-
-message SvRegResponse{
-	required int32 status = 1;
-	optional string sessid = 2;//the session id,
+	optional string from_sessid = 1;//from sessid
+	optional string to_sessid = 2; //to sessid
+	required int32 from_type = 3;
+	required int32 to_type = 4;
+	required string sn = 5;//each req has an unique sn
+	required int32 status = 6;// 0 success
+	optional bytes payload = 7;
 }
 
 message KickCliRequest{
-	optional bytes reason = 1;
+	optional string sessid = 1;
+	optional string id = 2;
+	optional int32 type = 3;
+	optional bytes reason = 4;
 }
