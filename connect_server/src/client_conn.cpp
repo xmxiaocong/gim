@@ -105,8 +105,6 @@ int CliCon::handleTimer(EventLoop* l, int id){
 				<< "> <status:timeout>";
 			safeClose();
 			return 0;
-		}else{
-			updateSession();
 		}
 		startTimer(CHECK_TIMER, m_conf->AliveMs);
 		break;
